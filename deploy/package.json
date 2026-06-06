@@ -1,0 +1,14 @@
+{
+  "name": "get-shaadi-link",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node dist/server.cjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "@google/genai": "^2.4.0",
+    "dotenv": "^17.2.3"
+  }
+}

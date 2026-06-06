@@ -1,0 +1,6 @@
+{
+  "name": "ShaadiLink",
+  "description": "AI-powered custom wedding invitation websites. Create beautiful, interactive digital wedding cards in minutes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
