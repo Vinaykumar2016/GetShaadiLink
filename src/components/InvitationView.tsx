@@ -516,26 +516,20 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
     offset: ["start end", "end start"]
   });
 
-  // Groom enters from the left on the red carpet to meet the bride
-  const groomX = useTransform(scrollYProgress, [0.15, 0.48], [-90, 45]);
+  // Groom enters from the left on the red carpet to meet the bride under the canopy
+  const groomX = useTransform(scrollYProgress, [0.15, 0.48], [-85, -12]);
   const groomY = useTransform(scrollYProgress, 
     [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.48], 
     [0, -2, 0, -2, 0, -2, 0, 0]
   );
   
-  // Palace doors swing open in 3D perspective
-  const leftDoorRotateY = useTransform(scrollYProgress, [0.35, 0.48], [0, -95]);
-  const rightDoorRotateY = useTransform(scrollYProgress, [0.35, 0.48], [0, 95]);
-  
-  // Bride walks out from behind the palace doors under Phoolon ki Chaadar
-  const brideX = useTransform(scrollYProgress, [0.15, 0.38, 0.48], [0, 0, -35]);
+  // Bride enters from the right to meet the groom under the canopy
+  const brideX = useTransform(scrollYProgress, [0.15, 0.48], [85, 12]);
   const brideY = useTransform(scrollYProgress, 
     [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.48], 
-    [0, -2.5, 0, -2.5, 0, -2.5, 0, 0]
+    [0, -2, 0, -2, 0, -2, 0, 0]
   );
-  const brideOpacity = useTransform(scrollYProgress, [0.35, 0.44], [0.3, 1]);
 
-  const carpetScaleX = useTransform(scrollYProgress, [0.35, 0.48], [0, 1]);
   const heartOpacity = useTransform(scrollYProgress, [0.46, 0.6], [0, 1]);
   const heartScale = useTransform(scrollYProgress, [0.46, 0.6], [0.5, 1]);
   const showerOpacity = useTransform(scrollYProgress, [0.45, 0.65], [0, 1]);
@@ -544,7 +538,6 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
     <div 
       ref={containerRef}
       className="relative w-full max-w-md mx-auto h-64 bg-gradient-to-b from-[#FFF3E0] to-[#FFE0B2] rounded-[32px] border border-amber-600/10 shadow-paper overflow-hidden flex flex-col items-center justify-between p-4"
-      style={{ perspective: "800px" }}
     >
       {/* Hanging marigold toran top */}
       <div className="absolute top-0 inset-x-0 h-4 flex justify-between px-6 z-20 pointer-events-none opacity-80">
@@ -558,25 +551,22 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
       <div className="relative w-72 h-44 mt-6 border-[6px] border-[#D7CCC8] bg-[#FFF9F2] rounded-t-full shadow-inner overflow-hidden flex items-end justify-center">
         <div className="absolute inset-0 border-4 border-dashed border-amber-600/15 rounded-t-full pointer-events-none z-10" />
 
-        {/* Red carpet rolls out from the gateway */}
-        <motion.div 
-          style={{ scaleX: carpetScaleX, transformOrigin: "right center" }}
-          className="absolute bottom-0 left-[18%] right-[18%] h-2 bg-gradient-to-r from-red-700 to-red-655 z-5 rounded-l shadow-inner"
-        />
+        {/* Red carpet rolls out */}
+        <div className="absolute bottom-0 left-[10%] right-[10%] h-2 bg-gradient-to-r from-red-700 via-red-600 to-red-700 z-5 rounded shadow-inner" />
 
         {/* Petal Celebration Shower Layer on meeting */}
         <motion.div 
           style={{ opacity: showerOpacity }} 
           className="absolute inset-0 pointer-events-none z-25 overflow-hidden"
         >
-          {[...Array(8)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <span
               key={i}
               className="absolute text-[8px] animate-fall"
               style={{
-                left: `${20 + i * 8}%`,
-                animationDelay: `${i * 0.3}s`,
-                animationDuration: `${2 + Math.random() * 2}s`,
+                left: `${15 + i * 8}%`,
+                animationDelay: `${i * 0.2}s`,
+                animationDuration: `${2 + Math.random() * 1.5}s`,
                 top: "-15px"
               }}
             >
@@ -585,56 +575,27 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
           ))}
         </motion.div>
 
+        {/* Suspended Floral Canopy (Phoolon ki Chaadar) centered over the meeting point */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+          <PhoolonKiChaadar />
+        </div>
+
         {/* Groom (Walking in from left to center-left) */}
         <motion.div 
           style={{ x: groomX, y: groomY }} 
-          className="absolute bottom-0 left-8 z-15 w-16 h-28 flex flex-col items-center justify-end pb-1"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 z-15 w-16 h-28 flex flex-col items-center justify-end pb-1"
         >
           <DetailedGroomSilhouette className="text-[#5D4037]" />
           <span className="text-[7.5px] font-bold text-amber-950 bg-white/80 px-1 py-0.5 rounded shadow-sm translate-y-[-2px]">{groomName}</span>
         </motion.div>
 
-        {/* Palace Gates Arch & 3D Swinging Doors (z-index 10) */}
-        <div className="absolute bottom-0 right-4 w-24 h-32 flex justify-center items-end overflow-visible z-10" style={{ transformStyle: "preserve-3d" }}>
-          {/* Detailed Palace Gateway stone archway */}
-          <svg viewBox="0 0 60 80" className="absolute inset-0 w-full h-full text-[#D7CCC8] fill-none stroke-[#8A3A1A]/30 stroke-[1.2] pointer-events-none z-12">
-            <path d="M10,80 L10,30 C10,12 25,6 30,6 C35,6 50,12 50,30 L50,80" />
-            <circle cx="30" cy="6" r="1.5" fill="#FFE082" />
-          </svg>
-
-          {/* Left Palace Door */}
-          <motion.div 
-            style={{ rotateY: leftDoorRotateY, transformOrigin: "left center" }}
-            className="absolute left-[10px] bottom-0 w-10 h-24 bg-[#5D4037] border-l-2 border-r border-[#8A3A1A] z-11 flex flex-col justify-between py-4 px-1 shadow-md rounded-l"
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FFE082] shadow-inner mx-auto" />
-            <span className="text-[6px] text-[#FFE082] opacity-35 mx-auto font-serif">囍</span>
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FFE082] shadow-inner mx-auto" />
-          </motion.div>
-
-          {/* Right Palace Door */}
-          <motion.div 
-            style={{ rotateY: rightDoorRotateY, transformOrigin: "right center" }}
-            className="absolute right-[10px] bottom-0 w-10 h-24 bg-[#5D4037] border-r-2 border-l border-[#8A3A1A] z-11 flex flex-col justify-between py-4 px-1 shadow-md rounded-r"
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FFE082] shadow-inner mx-auto" />
-            <span className="text-[6px] text-[#FFE082] opacity-35 mx-auto font-serif">囍</span>
-            <div className="w-1.5 h-1.5 rounded-full bg-[#FFE082] shadow-inner mx-auto" />
-          </motion.div>
-        </div>
-
-        {/* Bride waiting at gate (Moves out once gates open, walking left under canopy) */}
+        {/* Bride (Walking in from right to center-right) */}
         <motion.div 
-          style={{ x: brideX, y: brideY, opacity: brideOpacity }} 
-          className="absolute bottom-0 right-8 z-9 w-16 h-28 flex flex-col items-center justify-end pb-1 overflow-visible"
+          style={{ x: brideX, y: brideY }} 
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 z-15 w-16 h-28 flex flex-col items-center justify-end pb-1"
         >
-          {/* Phoolon ki Chaadar (Floral Canopy) positioned above the bride's head */}
-          <div className="absolute top-[-30px] w-24 h-10 z-20 pointer-events-none flex items-center justify-center">
-            <PhoolonKiChaadar />
-          </div>
-
           <DetailedBrideSilhouette className="text-rose-700" />
-          <span className="text-[7.5px] font-bold text-amber-950 bg-white/80 px-1 py-0.5 rounded shadow-sm">{brideName}</span>
+          <span className="text-[7.5px] font-bold text-amber-950 bg-white/80 px-1 py-0.5 rounded shadow-sm translate-y-[-2px]">{brideName}</span>
         </motion.div>
 
         {/* Meeting blessings */}
@@ -1556,6 +1517,24 @@ function PopoutPhotoFrame({ photo, themeType, themeAccent }: { photo: string; th
   );
 }
 
+const getWishNotice = (lang: string) => {
+  switch (lang) {
+    case "hi":
+      return "⚠️ नोट: आपकी शुभकामना और नाम इस आमंत्रण दीवार पर सभी मेहमानों के देखने के लिए सार्वजनिक रूप से प्रदर्शित किए जाएंगे।";
+    case "kn":
+      return "⚠️ ಸೂಚನೆ: ನಿಮ್ಮ ಶುಭಾಶಯ ಮತ್ತು ಹೆಸರನ್ನು ಎಲ್ಲ ಅತಿಥಿಗಳು ನೋಡಲು ಈ ಆಮಂತ್ರಣ ಪತ್ರದ ಗೋಡೆಯ ಮೇಲೆ ಸಾರ್ವಜನಿಕವಾಗಿ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ.";
+    case "te":
+      return "⚠️ గమనిక: మీ శుభాకాంಕ್ಷలు మరియు పేరు అందరు అతిథులు చూడటానికి ఈ ఆహ్వాన గోడపై బహిరంగంగా ప్రదర్శించబడతాయి.";
+    case "ta":
+      return "⚠️ குறிப்பு: உங்கள் வாழ்த்து மற்றும் பெயர் அனைத்து விருந்தினர்களும் பார்க்கும் வகையில் இந்த அழைப்பிதழ் சுவரில் பகிரங்கமாக காட்டப்படும்.";
+    case "ml":
+      return "⚠️ കുറിപ്പ്: നിങ്ങളുടെ ആശംസയും പേരും എല്ലാ അതിഥികൾക്കും കാണാനായി ഈ ക്ഷണക്കത്ത് ചുവരിൽ പരസ്യമായി പ്രദർശിപ്പിക്കും.";
+    case "en":
+    default:
+      return "⚠️ Note: Your wish and name will be displayed publicly on this invitation wall for all guests to see.";
+  }
+};
+
 export default function InvitationView({
   data,
   isDemoMode,
@@ -1568,6 +1547,81 @@ export default function InvitationView({
   const [envelopeStarted, setEnvelopeStarted] = useState(false);
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
   const [envelopeFinished, setEnvelopeFinished] = useState(false);
+  
+  const [paymentId, setPaymentId] = useState(data.razorpayPaymentId || "");
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayNow = async () => {
+    setIsProcessingPayment(true);
+    try {
+      const isScriptLoaded = await loadRazorpayScript();
+      if (!isScriptLoaded) {
+        throw new Error("Failed to load Razorpay Checkout SDK. Please check your internet connection.");
+      }
+
+      const options = {
+        key: "rzp_test_SyMbmY3vUX0U4U",
+        amount: 99900, // Amount in paise
+        currency: "INR",
+        name: "GetShaadiLink",
+        description: "Premium Wedding Invitation Card",
+        prefill: {
+          email: data.ownerEmail || "",
+        },
+        theme: {
+          color: "#8A3A1A",
+        },
+        handler: async function (response: any) {
+          try {
+            const res = await fetch(`/api/invitations/${data.slug}/update`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                password: data.editPassword,
+                razorpayPaymentId: response.razorpay_payment_id,
+              }),
+            });
+            const updateResult = await res.json();
+            if (!res.ok) {
+              throw new Error(updateResult.error || "Failed to update payment status.");
+            }
+            setPaymentId(response.razorpay_payment_id);
+          } catch (err: any) {
+            alert(err.message || "Failed to update payment status on the server.");
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      alert(err.message || "Payment gateway error.");
+      setIsProcessingPayment(false);
+    }
+  };
+
+  const isPaid = !!paymentId || isDemoMode;
   
   const { scrollY } = useScroll();
   const bgOpacity = useTransform(scrollY, [0, 450], [0.65, 0.02]);
@@ -2542,7 +2596,7 @@ export default function InvitationView({
 
         {/* Personality Tags box */}
         <div className="flex flex-wrap gap-2.5 justify-center py-2 mt-6 border border-brand-rust/10 bg-brand-rust/5 rounded-2xl p-4 max-w-md mx-auto">
-          {["HOPELESS ROMANTICS", "CHAI ADDICTS", "JODHPUR DREAMERS", "FOREVER & ALWAYS"].map((tag) => (
+          {["HOPELESS ROMANTICS", "SOUL MATES", "BEST FRIENDS", "FOREVER & ALWAYS"].map((tag) => (
             <span key={tag} className="text-[9.5px] font-marcellus font-bold tracking-wider px-2.5 py-1 bg-white border border-[#8A3A1A]/10 text-brand-rust rounded-full shadow-sm hover:scale-105 transition-transform duration-200">
               {tag}
             </span>
@@ -2673,6 +2727,10 @@ export default function InvitationView({
               />
             </div>
 
+            <p className="text-[9.5px] text-amber-800 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl leading-relaxed font-cormorant font-semibold select-none">
+              {getWishNotice(data.lang || "en")}
+            </p>
+
             {/* UPI QR generator with custom user-input shagun amount */}
             {data.upiId && (
               <div className="pt-2 border-t border-brand-rust/10">
@@ -2759,34 +2817,56 @@ export default function InvitationView({
           <p className="text-[10px] uppercase tracking-[3px] text-brand-rust/35 mt-1 mb-8 font-marcellus">
             ಶುಭಾಶಯಗಳೊಂದಿಗೆ 🙏
           </p>
-          <p className="text-[10px] tracking-widest text-brand-rust/30 font-marcellus">
-            Beautiful wedding websites crafted with ❤️ by{" "}
-            <a href="/" className="underline hover:text-brand-rust/50 font-bold">
-              GetShaadilink.in
-            </a>
-          </p>
+          {isPaid && (
+            <p className="text-[10px] tracking-widest text-brand-rust/30 font-marcellus">
+              Beautiful wedding websites crafted with ❤️ by{" "}
+              <a href="/" className="underline hover:text-brand-rust/50 font-bold">
+                GetShaadilink.in
+              </a>
+            </p>
+          )}
         </footer>
 
       </main>
 
-      {/* Floating Action Drawer Panel at bottom */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF6F0]/95 border-t border-brand-rust/10 backdrop-blur-md flex justify-around items-center h-16 max-w-2xl mx-auto shadow-lg select-none">
-        <button
-          onClick={shareOnWhatsApp}
-          className="flex items-center gap-1.5 py-2.5 px-5 rounded-full bg-emerald-700 hover:bg-emerald-600 font-bold text-[10px] tracking-wider uppercase text-white shadow active:scale-95 transition-transform duration-100 cursor-pointer font-marcellus"
-        >
-          <Send className="w-3.5 h-3.5" />
-          <span>{t("whatsappInvite")}</span>
-        </button>
+      {/* Floating Action Drawer Panel or Payment Bar at bottom */}
+      {!isPaid ? (
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF6F0] border-t border-brand-rust/20 backdrop-blur-md flex flex-col sm:flex-row justify-between items-center px-6 py-3 sm:py-0 sm:h-16 max-w-2xl mx-auto shadow-lg select-none gap-2">
+          <p className="text-[11px] font-marcellus font-bold text-brand-rust tracking-wider text-center sm:text-left">
+            Your invitation is ready! Pay ₹999 to make it live and shareable.
+          </p>
+          <button
+            onClick={handlePayNow}
+            disabled={isProcessingPayment}
+            className="flex items-center gap-1.5 py-2 px-5 rounded-full bg-brand-rust hover:bg-brand-rust/90 font-bold text-[10px] tracking-wider uppercase text-white shadow active:scale-95 transition-transform duration-100 cursor-pointer font-marcellus disabled:opacity-50"
+          >
+            {isProcessingPayment ? (
+              <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Sparkles className="w-3.5 h-3.5 text-brand-gold animate-pulse" />
+            )}
+            <span>{isProcessingPayment ? "Processing..." : "Pay Now"}</span>
+          </button>
+        </div>
+      ) : (
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-[#FAF6F0]/95 border-t border-brand-rust/10 backdrop-blur-md flex justify-around items-center h-16 max-w-2xl mx-auto shadow-lg select-none">
+          <button
+            onClick={shareOnWhatsApp}
+            className="flex items-center gap-1.5 py-2.5 px-5 rounded-full bg-emerald-700 hover:bg-emerald-600 font-bold text-[10px] tracking-wider uppercase text-white shadow active:scale-95 transition-transform duration-100 cursor-pointer font-marcellus"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>{t("whatsappInvite")}</span>
+          </button>
 
-        <button
-          onClick={copyInvitationLink}
-          className="flex items-center gap-1.5 py-2.5 px-5 rounded-full hover:bg-brand-rust/5 font-bold text-[10px] tracking-wider uppercase text-brand-rust border border-brand-rust/15 active:scale-95 transition-transform duration-100 cursor-pointer font-marcellus"
-        >
-          {copied ? <Sparkles className="w-3.5 h-3.5 text-brand-gold" /> : <Copy className="w-3.5 h-3.5" />}
-          <span>{copied ? t("copied") : t("copyLink")}</span>
-        </button>
-      </div>
+          <button
+            onClick={copyInvitationLink}
+            className="flex items-center gap-1.5 py-2.5 px-5 rounded-full hover:bg-brand-rust/5 font-bold text-[10px] tracking-wider uppercase text-brand-rust border border-brand-rust/15 active:scale-95 transition-transform duration-100 cursor-pointer font-marcellus"
+          >
+            {copied ? <Sparkles className="w-3.5 h-3.5 text-brand-gold" /> : <Copy className="w-3.5 h-3.5" />}
+            <span>{copied ? t("copied") : t("copyLink")}</span>
+          </button>
+        </div>
+      )}
 
     </div>
   );

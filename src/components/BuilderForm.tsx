@@ -313,61 +313,11 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
       onSuccess(payload.slug);
     };
 
-    if (initialData) {
-      // Edit mode: save immediately without payment trigger
-      try {
-        await executeSave();
-        setIsCompiling(false);
-      } catch (err: any) {
-        setErrorMessage(err.message || "An unexpected error occurred. Please try again.");
-        setIsCompiling(false);
-      }
-      return;
-    }
-
-    // New card creation: trigger Razorpay checkout modal
     try {
-      const isScriptLoaded = await loadRazorpayScript();
-      if (!isScriptLoaded) {
-        throw new Error("Failed to load Razorpay payment gateway. Please check your internet connection.");
-      }
-
-      const options = {
-        key: "rzp_test_SyMbmY3vUX0U4U",
-        amount: 99900, // Amount in paise (₹999)
-        currency: "INR",
-        name: "GetShaadiLink",
-        description: "Premium Wedding Invitation Card",
-        prefill: {
-          email: ownerEmail.trim().toLowerCase(),
-        },
-        theme: {
-          color: "#8A3A1A", // Match the Brand Rust theme color
-        },
-        handler: async function (response: any) {
-          try {
-            await executeSave(response.razorpay_payment_id);
-            setIsCompiling(false);
-          } catch (err: any) {
-            setErrorMessage(err.message || "Payment succeeded but card generation failed.");
-            setIsCompiling(false);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setIsCompiling(false);
-          }
-        }
-      };
-
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        setErrorMessage(response.error.description || "Payment failed. Please try again.");
-        setIsCompiling(false);
-      });
-      rzp.open();
+      await executeSave();
+      setIsCompiling(false);
     } catch (err: any) {
-      setErrorMessage(err.message || "An error occurred with the payment gateway.");
+      setErrorMessage(err.message || "An unexpected error occurred. Please try again.");
       setIsCompiling(false);
     }
   };
@@ -695,12 +645,12 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     <p className="text-[10px] text-brand-rust/50 mb-3">Choose the interactive screen guests see first.</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {[
-                        { code: "elephant", label: "🐘 Jharokha Balcony View" },
-                        { code: "thread", label: "🧵 Sacred Kalyana Knot" },
-                        { code: "diya", label: "🪔 Midnight Royal Affair" },
-                        { code: "lotus", label: "🪷 Ivory Arch Collection" },
-                        { code: "jaipur", label: "🏰 Jaipur Palace Edit" },
-                        { code: "garland", label: "🌸 Marigold Toran Gateway" },
+                        { code: "elephant", label: "🐘 Royal Elephant" },
+                        { code: "thread", label: "🧵 Sacred Knot" },
+                        { code: "diya", label: "🪔 Midnight Diya" },
+                        { code: "lotus", label: "🪷 Temple Lotus" },
+                        { code: "jaipur", label: "🏰 Royal Palace" },
+                        { code: "garland", label: "🌸 Marigold Garland" },
                       ].map((item) => (
                         <button
                           key={item.code}

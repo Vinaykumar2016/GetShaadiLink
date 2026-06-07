@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "motion/react";
 export default function App() {
   // Simple state-based router based on location path
   const [slug, setSlug] = useState<string | null>(null);
+  const [activePolicyModal, setActivePolicyModal] = useState<"pricing" | "terms" | "privacy" | "refund" | null>(null);
   const [invitationData, setInvitationData] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
   const [successSlug, setSuccessSlug] = useState<string | null>(null);
@@ -699,12 +700,12 @@ export default function App() {
     }
 
     const mockThemeColors = {
-      elephant: { name: "Jharokha Balcony View", primary: "#963E1C", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🐘" },
-      thread: { name: "Sacred Kalyana Knot", primary: "#8B0000", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🧵" },
-      diya: { name: "Midnight Royal Affair", primary: "#E65100", secondary: "#C5A880", accent: "#F59E0B", bg: "#FAF6F0", heroEmoji: "🪔" },
-      lotus: { name: "Ivory Arch Collection", primary: "#D81B60", secondary: "#C5A880", accent: "#FF80AB", bg: "#FAF6F0", heroEmoji: "🪷" },
-      jaipur: { name: "Jaipur Palace Edit", primary: "#8B3A1C", secondary: "#C5A880", accent: "#FFE082", bg: "#FAF6F0", heroEmoji: "🏰" },
-      garland: { name: "Marigold Toran Gateway", primary: "#FFA500", secondary: "#C5A880", accent: "#10B981", bg: "#FAF6F0", heroEmoji: "🌸" },
+      elephant: { name: "Royal Elephant", primary: "#963E1C", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🐘" },
+      thread: { name: "Sacred Knot", primary: "#8B0000", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🧵" },
+      diya: { name: "Midnight Diya", primary: "#E65100", secondary: "#C5A880", accent: "#F59E0B", bg: "#FAF6F0", heroEmoji: "🪔" },
+      lotus: { name: "Temple Lotus", primary: "#D81B60", secondary: "#C5A880", accent: "#FF80AB", bg: "#FAF6F0", heroEmoji: "🪷" },
+      jaipur: { name: "Royal Palace", primary: "#8B3A1C", secondary: "#C5A880", accent: "#FFE082", bg: "#FAF6F0", heroEmoji: "🏰" },
+      garland: { name: "Marigold Garland", primary: "#FFA500", secondary: "#C5A880", accent: "#10B981", bg: "#FAF6F0", heroEmoji: "🌸" },
     };
 
     const targetTheme = mockThemeColors[themeStyle] || mockThemeColors.elephant;
@@ -714,12 +715,12 @@ export default function App() {
       bride: "Aditi",
       groom: "Karan",
       niceDate: "December 11, 2026",
-      city: "Jodhpur",
-      vname: "Umaid Bhawan Palace",
-      vaddr: "Circuit House Rd, Cantt Area, Jodhpur, Rajasthan 342006",
-      storyEnglish: "We first met at a small tea stall during a rainy afternoon, sharing a single umbrella. What began as an accidental meeting soon blossomed into a beautiful journey of shared dreams, long road trips, and countless cups of tea. Today, we are taking our most beautiful step forward, together.",
-      storyRegional: "We first met at a small tea stall during a rainy afternoon, sharing a single umbrella. What began as an accidental meeting soon blossomed into a beautiful journey of shared dreams, long road trips, and countless cups of tea. Today, we are taking our most beautiful step forward, together.",
-      tagline: "Two souls, one chai stall, a lifetime of mornings",
+      city: "Udaipur",
+      vname: "Royal Palace Resort",
+      vaddr: "Lake Palace Road, Udaipur, Rajasthan 313001",
+      storyEnglish: "We first met on a beautiful afternoon, sharing a quiet moment and a smile. What began as an accidental meeting soon blossomed into a wonderful journey of shared dreams, laughter, and support. Today, we are taking our most beautiful step forward, together.",
+      storyRegional: "We first met on a beautiful afternoon, sharing a quiet moment and a smile. What began as an accidental meeting soon blossomed into a wonderful journey of shared dreams, laughter, and support. Today, we are taking our most beautiful step forward, together.",
+      tagline: "Two souls, one beautiful journey, a lifetime of love",
       lang: "en",
       langNative: "English",
       events: [
@@ -802,12 +803,12 @@ export default function App() {
   }
   // Simulator themes config for Hero Interactive mockup
   const heroSimulatorConfig = {
-    jaipur: { name: "Karan & Aditi", photo: "/samples/couple1.jpg", tag: "Jaipur Palace Arches", detail: "Traditional arches with soft sunset glow.", style: "bg-rose-100/70 text-amber-900 border-amber-700/20" },
-    diya: { name: "Kabir & Riya", photo: "/samples/couple2.jpg", tag: "Midnight Royal Affair", detail: "Celestial stars and floating orange sky lanterns.", style: "bg-indigo-950/80 text-amber-200 border-indigo-700/30" },
-    lotus: { name: "Dev & Ishika", photo: "/samples/couple1.jpg", tag: "Ivory Lotus Arch", detail: "Blooming lotuses and falling pink rose petals.", style: "bg-orange-50/50 text-[#8A3A1A] border-[#8A3A1A]/10" },
-    elephant: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Jharokha Peacocks", detail: "Sandstone carvings with marigold curtains.", style: "bg-amber-50/65 text-[#8A3A1A] border-amber-800/10" },
-    thread: { name: "Vikram & Pooja", photo: "/samples/couple1.jpg", tag: "Sacred Kalyana Knot", detail: "Cotton tassels with swinging golden bells.", style: "bg-yellow-50/60 text-[#8B0000] border-[#8B0000]/10" },
-    garland: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Marigold Toran Gateway", detail: "Orange-yellow flowers and mango leaves.", style: "bg-emerald-50/60 text-[#FFA500] border-emerald-800/10" },
+    jaipur: { name: "Karan & Aditi", photo: "/samples/couple1.jpg", tag: "Royal Palace", detail: "Traditional arches with soft sunset glow.", style: "bg-rose-100/70 text-amber-900 border-amber-700/20" },
+    diya: { name: "Kabir & Riya", photo: "/samples/couple2.jpg", tag: "Midnight Diya", detail: "Celestial stars and floating orange sky lanterns.", style: "bg-indigo-950/80 text-amber-200 border-indigo-700/30" },
+    lotus: { name: "Dev & Ishika", photo: "/samples/couple1.jpg", tag: "Temple Lotus", detail: "Blooming lotuses and falling pink rose petals.", style: "bg-orange-50/50 text-[#8A3A1A] border-[#8A3A1A]/10" },
+    elephant: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Royal Elephant", detail: "Sandstone carvings with marigold curtains.", style: "bg-amber-50/65 text-[#8A3A1A] border-amber-800/10" },
+    thread: { name: "Vikram & Pooja", photo: "/samples/couple1.jpg", tag: "Sacred Knot", detail: "Cotton tassels with swinging golden bells.", style: "bg-yellow-50/60 text-[#8B0000] border-[#8B0000]/10" },
+    garland: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Marigold Garland", detail: "Orange-yellow flowers and mango leaves.", style: "bg-emerald-50/60 text-[#FFA500] border-emerald-800/10" },
   };
   const activeSim = heroSimulatorConfig[heroActiveTheme as keyof typeof heroSimulatorConfig] || heroSimulatorConfig.jaipur;
 
@@ -823,37 +824,19 @@ export default function App() {
       {/* Success generated modal popup */}
       {successSlug && (
         <div className="fixed inset-0 z-[700] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#120E2B]/95 rounded-[28px] border border-white/10 p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden backdrop-blur-md">
+          <div className="w-full max-w-sm bg-[#120E2B]/95 rounded-[28px] border border-white/10 p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden backdrop-blur-md">
             <span className="text-5xl block mb-4 animate-bounce">🎊</span>
-            <h3 className="font-marcellus text-3xl font-bold text-amber-400 mb-2">Congratulations!</h3>
-            <p className="text-xs text-stone-300/80 max-w-sm mx-auto mb-6 font-cormorant">
-              Your stunning, payment-verified wedding invitation website is officially active and ready to share!
+            <h3 className="font-marcellus text-2xl font-bold text-amber-400 mb-2">Invitation is Ready!</h3>
+            <p className="text-xs text-stone-300/80 max-w-xs mx-auto mb-6 font-cormorant">
+              Your wedding invitation preview is ready. View it for free and activate it to make it shareable with your guests!
             </p>
 
-            <div className="flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-2xl mb-6 font-mono text-xs text-stone-200 select-all overflow-hidden">
-              <span className="truncate flex-1 text-left">{`${window.location.origin}/${successSlug}`}</span>
-              <button
-                type="button"
-                onClick={copyCreatedLink}
-                className="w-9 h-9 rounded-xl flex items-center justify-center border border-white/10 hover:bg-white/5 text-amber-400 shrink-0 active:scale-95 transition-transform cursor-pointer"
-                title="Copy wedding invitation URL link"
-              >
-                {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-              <button
-                onClick={shareCreatedLink}
-                className="py-3 px-6 rounded-full bg-emerald-700 hover:bg-emerald-600 font-bold text-xs tracking-wider uppercase text-white shadow-md active:scale-95 transition-transform duration-100 cursor-pointer font-marcellus"
-              >
-                📲 Share on WhatsApp
-              </button>
+            <div className="mb-6">
               <a
                 href={`/${successSlug}`}
-                className="py-3 px-6 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-bold text-xs tracking-wider uppercase text-stone-950 flex items-center justify-center gap-2 select-none active:scale-95 transition-transform font-marcellus"
+                className="w-full py-3 px-6 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-bold text-xs tracking-wider uppercase text-stone-950 flex items-center justify-center gap-2 select-none active:scale-95 transition-transform font-marcellus text-center"
               >
-                <span>View Live Invitation</span>
+                <span>View Invitation Preview</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
             </div>
@@ -886,7 +869,7 @@ export default function App() {
               🔑 Manage Card
             </button>
             <span className="text-[9px] tracking-widest font-marcellus text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3.5 py-2 rounded-full select-none font-bold">
-              ₹999 OFFER PRICE
+              FREE TO BUILD &amp; PREVIEW
             </span>
           </div>
         </div>
@@ -1031,38 +1014,38 @@ export default function App() {
             <div className="lg:col-span-7 text-left space-y-6">
               <div className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full border border-amber-400/20 bg-amber-400/10 text-amber-300 text-[10.5px] tracking-wider uppercase font-marcellus font-semibold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Premium Wedding Invitation Link Builder</span>
+                <span>PREMIUM DIGITAL WEDDING INVITATIONS</span>
               </div>
 
               <h1 className="font-marcellus font-medium text-5xl sm:text-6xl lg:text-7xl leading-tight text-white">
-                Share Your Love
+                Create & Preview
                 <span className="block mt-1 font-cursive text-amber-400 font-normal normal-case text-6xl sm:text-7xl lg:text-8xl">
                   Bespoke & Beautiful
                 </span>
-                On the Web
+                Invitations for Free
               </h1>
 
               <p className="text-sm sm:text-base text-stone-300/80 tracking-wide leading-relaxed max-w-xl font-cormorant">
-                Create a luxury mobile-first wedding scrapbook. Enclose your details in animated traditional covers. Share instant invites with custom background instrumentals, live blessings registry wall, and a secure Shagun UPI scanner. 
+                Design a gorgeous, premium mobile-first wedding website for your big day. Enclose your details in elegant traditional covers, play instrumental background melodies, enable a live blessings guestbook wall, and collect shagun gifts. Preview your full invitation for free, and pay ₹999 once to activate your live link. Includes lifetime hosting with unlimited edits—change themes, update details, or add Google Drive links anytime, as many times as you want!
               </p>
 
               {/* Quick Feature highlights */}
               <div className="grid grid-cols-2 gap-4 max-w-md pt-2 select-none">
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">No AI branding on cards</span>
+                  <span className="text-xs font-semibold">100% Free to Build & Preview</span>
                 </div>
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">Dynamic RSVP stats dashboard</span>
+                  <span className="text-xs font-semibold">Interactive Cover Animations</span>
                 </div>
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">Custom flute & sitar melody</span>
+                  <span className="text-xs font-semibold">Polished Dual-Language Stories</span>
                 </div>
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">Instant shareable path link</span>
+                  <span className="text-xs font-semibold">No Ads or ShaadiLink Branding</span>
                 </div>
               </div>
 
@@ -1074,12 +1057,12 @@ export default function App() {
                   }}
                   className="py-3.5 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-marcellus text-xs tracking-[2px] uppercase font-bold hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/15 transition-all cursor-pointer border border-amber-300/30 text-center"
                 >
-                  Create Your Invitation
+                  Create Your Free Card
                 </button>
                 <button 
                   onClick={() => {
                     playClickSound();
-                    handleLaunchDemo(heroActiveTheme);
+                    handleLaunchDemo("elephant");
                   }}
                   className="py-3.5 px-8 rounded-full bg-white/5 hover:bg-white/10 text-white font-marcellus text-xs tracking-[2px] uppercase font-bold active:scale-95 transition-all cursor-pointer border border-white/10 text-center flex items-center justify-center gap-1.5"
                 >
@@ -1169,7 +1152,7 @@ export default function App() {
                 Everything Included For ₹999
               </h3>
               <p className="text-xs text-stone-400 max-w-sm mx-auto font-cormorant leading-relaxed">
-                Unlock a premium interactive experience for your guests with zero subscription renewals.
+                Unlock a premium interactive experience for your guests with a one-time payment. Edit details, change themes, or add Google Drive links anytime for free.
               </p>
             </div>
 
@@ -1180,7 +1163,7 @@ export default function App() {
                 { title: "Dynamic RSVP Manager", icon: "📝", desc: "Guests confirm their attendance. Track attendance totals instantly in your owner dashboard." },
                 { title: "UPI Shagun Gift System", icon: "🎁", desc: "Receive monetary blessings direct to your account. Guests enter custom amounts to generate secure UPI QR codes." },
                 { title: "Blessings registry ledger", icon: "📜", desc: "A live wedding guestbook wall where guests submit love notes that post dynamically." },
-                { title: "Passcode Protected Edits", icon: "🔑", desc: "Update timings, parents details, and photos dynamically after generation. Unlimited edits." }
+                { title: "One-Time Pay, Lifetime Edits", icon: "🔑", desc: "Pay once. Update timings, parent details, change cover templates, or add drive links at any time for free." }
               ].map((item, idx) => (
                 <div key={idx} className="p-6 bg-white/5 border border-white/10 hover:border-amber-400/40 rounded-[24px] shadow transition-all duration-300 flex flex-col gap-3 group backdrop-blur-md">
                   <div className="w-10 h-10 rounded-2xl bg-amber-400/10 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform">
@@ -1207,9 +1190,9 @@ export default function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
-                  { step: "01", title: "Input Details", desc: "Select cover layout, parents names, events timeline and share your raw love story." },
-                  { step: "02", title: "AI Narrative Engine", desc: "Our system refines your story into a beautiful emotional script in English and selected script." },
-                  { step: "03", title: "Razorpay ₹999", desc: "Make a secure test sandbox checkout. Your path-customized getshaadilink.in/slug goes live instantly." }
+                  { step: "01", title: "Design for Free", desc: "Enter your wedding details, upload gallery photos, and write down your raw love story." },
+                  { step: "02", title: "Preview Invitation", desc: "Instantly view your complete, interactive invitation page with polished stories, countdowns, and music." },
+                  { step: "03", title: "One-Time Activation", desc: "Pay ₹999 once. Unlock your live link, share on WhatsApp, and edit your theme, drive link, or details anytime for free." }
                 ].map((item, idx) => (
                   <div key={idx} className="flex flex-col gap-2.5 relative">
                     <span className="font-marcellus text-4xl text-amber-400/40 font-bold leading-none">{item.step}</span>
@@ -1259,10 +1242,130 @@ export default function App() {
           ShaadiLink
         </p>
         <p className="text-[10px] text-stone-500 mt-1 tracking-widest font-semibold font-marcellus">Premium Interactive Digital Wedding Invitations</p>
+        
+        {/* Policy Links */}
+        <div className="flex flex-wrap justify-center gap-4 text-[9.5px] tracking-wider font-semibold uppercase text-stone-500 mt-6 font-marcellus select-none">
+          <button onClick={() => { playClickSound(); setActivePolicyModal("pricing"); }} className="hover:text-amber-400 transition-colors cursor-pointer">Pricing Details</button>
+          <span>•</span>
+          <button onClick={() => { playClickSound(); setActivePolicyModal("terms"); }} className="hover:text-amber-400 transition-colors cursor-pointer">Terms & Conditions</button>
+          <span>•</span>
+          <button onClick={() => { playClickSound(); setActivePolicyModal("privacy"); }} className="hover:text-amber-400 transition-colors cursor-pointer">Privacy Policy</button>
+          <span>•</span>
+          <button onClick={() => { playClickSound(); setActivePolicyModal("refund"); }} className="hover:text-amber-400 transition-colors cursor-pointer">Refund/Cancellation</button>
+        </div>
+
         <p className="text-[9px] text-stone-600 mt-8 tracking-widest uppercase font-semibold">
           © 2026 ShaadiLink · GetShaadilink.in · Made with ❤️ in Karnataka 🇮🇳
         </p>
       </footer>
+
+      {/* Policy Modals */}
+      <AnimatePresence>
+        {activePolicyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-2xl bg-[#0F0B26] border border-white/10 rounded-[32px] p-6 sm:p-8 relative text-[#FAF6F0] shadow-2xl max-h-[85vh] overflow-y-auto"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => { playClickSound(); setActivePolicyModal(null); }}
+                className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer font-bold text-xs"
+              >
+                ✕
+              </button>
+
+              {activePolicyModal === "pricing" && (
+                <div className="space-y-4 text-left">
+                  <h3 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400 border-b border-white/10 pb-3">Clear & Simple Pricing</h3>
+                  <div className="p-6 rounded-2xl bg-amber-400/5 border border-amber-400/20 text-center space-y-2">
+                    <span className="text-stone-400 text-xs font-semibold uppercase tracking-widest font-marcellus">Premium Lifetime Pass</span>
+                    <h4 className="text-4xl font-extrabold text-white">₹999 <span className="text-sm font-normal text-stone-400">one-time payment</span></h4>
+                    <p className="text-xs text-stone-300 max-w-md mx-auto font-cormorant leading-relaxed">
+                      Absolutely zero monthly subscriptions, zero hosting renewal fees, and zero hidden charges. Pay once, use forever.
+                    </p>
+                  </div>
+                  <div className="space-y-3 pt-2">
+                    <h4 className="font-marcellus text-sm font-bold text-white uppercase tracking-wider">What's Included:</h4>
+                    <ul className="text-xs space-y-2 text-stone-300 font-cormorant leading-relaxed list-disc list-inside">
+                      <li><strong className="text-amber-400">Unlimited Lifetime Edits:</strong> Update venue details, timings, parents' names, change themes, or modify photographs dynamically from your dashboard anytime, as many times as you like.</li>
+                      <li><strong className="text-amber-400">Google Drive Integration:</strong> Connect a Google Drive or Dropbox link directly to share high-resolution pre-wedding/wedding photo albums.</li>
+                      <li><strong className="text-amber-400">Interactive Cover Animations:</strong> Select and switch between any of our six premium cover themes anytime for free.</li>
+                      <li><strong className="text-amber-400">Live Blessings Wall:</strong> Moderate and showcase heartfelt greetings from guests, with dashboard moderation to delete unwanted posts.</li>
+                      <li><strong className="text-amber-400">Direct UPI Shagun Transfer:</strong> Collect monetary gift blessings directly to your personal UPI ID via secure QR code.</li>
+                      <li><strong className="text-amber-400">Responsive Mobile-First Page:</strong> A custom URL path (e.g. shadilink.in/yourname) optimized for WhatsApp sharing.</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {activePolicyModal === "terms" && (
+                <div className="space-y-4 text-left font-cormorant leading-relaxed text-stone-300 text-sm">
+                  <h3 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400 border-b border-white/10 pb-3 font-sans">Terms & Conditions</h3>
+                  <p className="text-xs text-stone-400 font-sans">Last updated: June 2026</p>
+                  <p>Welcome to <strong>ShaadiLink</strong> (getshaadilink.in). By creating, publishing, or visiting a digital wedding invitation on our platform, you agree to comply with and be bound by the following terms:</p>
+                  
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">1. Use of Service</h4>
+                  <p>ShaadiLink provides tools to build and host custom mobile-friendly wedding web pages. You represent that the information, names, images, and text uploaded are correct and that you possess the necessary rights/permissions for all media used.</p>
+                  
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">2. Account Passcode & Content Management</h4>
+                  <p>A passcode is generated during invitation creation to secure dashboard edits. You are solely responsible for keeping this passcode confidential. ShaadiLink reserves the right to remove any content that is abusive, defamatory, copyright-infringing, or unlawful.</p>
+
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">3. Platform Availability</h4>
+                  <p>While we guarantee lifetime hosting for paid invitations, server availability is subject to hosting maintenance. We take periodic backups, but suggest you keep copies of your media files.</p>
+                </div>
+              )}
+
+              {activePolicyModal === "privacy" && (
+                <div className="space-y-4 text-left font-cormorant leading-relaxed text-stone-300 text-sm">
+                  <h3 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400 border-b border-white/10 pb-3 font-sans">Privacy Policy</h3>
+                  <p className="text-xs text-stone-400 font-sans">Last updated: June 2026</p>
+                  <p>We respect your privacy. Here is how we handle your personal data:</p>
+                  
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">1. Information We Collect</h4>
+                  <p>When creating a ShaadiLink invitation, we collect your provided names, dates, parent details, stories, venue locations, UPI IDs, and photos. This information is stored securely on our servers to render your public invitation page.</p>
+
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">2. Public Guestbook Blessings</h4>
+                  <p>Guests submitting a blessing wish (name, note, and optional shagun amount) acknowledge that their message is posted publicly on the invitation wall for other visitors to see. Owner/Dashboard accounts can delete any blessings anytime.</p>
+
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">3. Peer-to-Peer Transactions</h4>
+                  <p>All UPI shagun transfers occur directly between the guest's UPI app and your personal banking QR. ShaadiLink does not process, touch, track, or store financial credentials or transaction details.</p>
+                </div>
+              )}
+
+              {activePolicyModal === "refund" && (
+                <div className="space-y-4 text-left font-cormorant leading-relaxed text-stone-300 text-sm">
+                  <h3 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400 border-b border-white/10 pb-3 font-sans">Refund & Cancellation Policy</h3>
+                  <p className="text-xs text-stone-400 font-sans">Last updated: June 2026</p>
+                  
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">1. Free Previews</h4>
+                  <p>We believe in 100% transparency. You can fully customize, edit, and preview your complete invitation page, interactive cover animations, music, and story sections for free without entering any payment credentials. You only choose to pay when you want to publish the live link.</p>
+
+                  <h4 className="font-marcellus text-xs font-bold text-white uppercase tracking-wider font-sans mt-4">2. Refund Conditions</h4>
+                  <p>Since services are rendered immediately upon payment (your live link is generated and share features are unlocked), we do not offer general refunds. However, in the event of double-charges or server-side technical failures that prevent link activation, we will issue a full refund. Please contact our support within 7 days of payment.</p>
+                </div>
+              )}
+
+              {/* Close Bottom Button */}
+              <div className="pt-4 border-t border-white/10 text-right mt-6">
+                <button
+                  onClick={() => { playClickSound(); setActivePolicyModal(null); }}
+                  className="px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

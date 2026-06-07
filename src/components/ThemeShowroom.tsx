@@ -11,7 +11,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
   const themes = [
     {
       id: "jaipur",
-      name: "Jaipur Palace Edit",
+      name: "Royal Palace",
       tagline: "Soft pastels and palace architecture, made for royalty.",
       originalPrice: "1,999",
       offerPrice: "999",
@@ -51,7 +51,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Our Story</div>
             <div className="inv-sec-h-mock" style={{ color: "#8A3A1A" }}>How it began...</div>
             <div className="inv-story-txt-mock" style={{ color: "rgba(138,58,26,0.7)" }}>
-              They met in the royal pink city during a winter festival. A shared love for culture and tea bloomed into a promise of a lifetime.
+              They met during a beautiful winter evening. What began as a simple friendship soon bloomed into a deep, everlasting love.
             </div>
           </div>
 
@@ -121,7 +121,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
     },
     {
       id: "diya",
-      name: "Midnight Royal Affair",
+      name: "Midnight Diya",
       tagline: "A grand night celebration with deep tones and regal lights.",
       originalPrice: "1,999",
       offerPrice: "999",
@@ -157,7 +157,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
             <div className="inv-sec-tag-mock" style={{ color: "#FFD700", opacity: 0.8 }}>Our Story</div>
             <div className="inv-sec-h-mock" style={{ color: "#F0EBE0" }}>How it began...</div>
             <div className="inv-story-txt-mock" style={{ color: "rgba(240,235,224,0.5)" }}>
-              A chance meeting at a quiet bookstore in Mumbai. Five years of late night drives and road trips later, they decided to start their forever.
+              A beautiful journey that started with a simple, unexpected meeting. Years of shared dreams, laughter, and support later, they decided to start their forever.
             </div>
           </div>
 
@@ -227,7 +227,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
     },
     {
       id: "lotus",
-      name: "Ivory Arch Collection",
+      name: "Temple Lotus",
       tagline: "Minimal, refined, and quietly luxurious temple gates.",
       originalPrice: "1,999",
       offerPrice: "999",
@@ -333,7 +333,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
     },
     {
       id: "elephant",
-      name: "Jharokha Balcony View",
+      name: "Royal Elephant",
       tagline: "Carved sandstone windows, lush marigolds, and peacocks.",
       originalPrice: "1,999",
       offerPrice: "999",
@@ -439,7 +439,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
     },
     {
       id: "thread",
-      name: "Sacred Kalyana Knot",
+      name: "Sacred Knot",
       tagline: "Classic red and yellow cotton tassels with swinging bells.",
       originalPrice: "1,999",
       offerPrice: "999",
@@ -545,7 +545,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
     },
     {
       id: "garland",
-      name: "Marigold Toran Gateway",
+      name: "Marigold Garland",
       tagline: "Lush orange-yellow flowers, mango leaves, and paper diyas.",
       originalPrice: "1,999",
       offerPrice: "999",

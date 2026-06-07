@@ -211,7 +211,7 @@ app.post("/api/invitations/:slug/update", (req, res) => {
       ownerEmail: fields.ownerEmail !== undefined ? fields.ownerEmail.trim().toLowerCase() : data.ownerEmail,
       openingTheme: fields.openingTheme !== undefined ? fields.openingTheme : data.openingTheme,
       views: data.views || 0,
-      guestbookNotes: data.guestbookNotes || [],
+      guestbookNotes: fields.guestbookNotes !== undefined ? fields.guestbookNotes : (data.guestbookNotes || []),
     };
 
     fs.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
@@ -346,10 +346,10 @@ Couple's raw story: "${rawStory}"
 Random seed for design variant: ${seed}
 
 Instructions:
-1. Write storyEnglish: An elegant, warm, 3-4 sentence romantic story on how they met and came to this wedding day. Ensure high literary appeal.
-2. Write storyRegional: If regional language is English, write an alternative poetic version. Otherwise, translate and adapt storyEnglish beautifully into script of target language (${targetLangName}).
+1. Write storyEnglish: Write a warm, polished, and interesting romantic version of the couple's raw story in 3-4 sentences. Retain all context and details from the user's raw story (like names, specific timeline details, or locations), but refine the flow and style to make it sound simple, premium, and engaging.
+2. Write storyRegional: Translate the polished storyEnglish version into the script of the target regional language (${targetLangName}) (e.g. if target is Kannada write in Kannada script, if Hindi write in Devanagari script). Ensure the translation is natural and warm. If the target regional language is English, write a highly poetic alternative English version of the story.
 3. Create tagline: A short romantic heading (8-12 words).
-4. Translate e1n, e2n, e3n into ${targetLangName} script for eventRegional strings.
+4. Translate e1n, e2n, e3n into ${targetLangName} script for eventRegional strings (event1Regional, event2Regional, event3Regional).
 5. Create a gorgeous, warm Indian wedding palette for the UI:
    - primary: deep celebratory hex (e.g., silk magenta #9B1B6A, ruby #BA1A4B, crimson)
    - secondary: royal gold lustre hex (e.g., #D4A843, #E6C252)
@@ -358,7 +358,7 @@ Instructions:
    - heroEmoji: selection of romantic flower or accessory emoji (e.g., 🌸, 🌺, 💍, 🪔)`;
 
         const geminiRes = await ai.models.generateContent({
-          model: "gemini-3.5-flash",
+          model: "gemini-2.5-flash",
           contents: promptText,
           config: {
             responseMimeType: "application/json",
@@ -407,14 +407,60 @@ Instructions:
     }
 
     if (!parsedAiResult) {
-      // Local fallback generation
+      // Local fallback generation with basic translation and polishing
+      const polishedEnglish = `The journey of ${bride} and ${groom} is a beautiful testament to love and partnership. ` +
+        (rawStory.length > 5 ? rawStory : `We met, fell in love, and decided to share our lives forever.`) +
+        ` Guided by trust and shared dreams, we are taking our next beautiful step together on ${niceDate} in ${city}.`;
+
+      let polishedRegional = polishedEnglish;
+      let ev1Reg = e1n || "Haldi Ceremony";
+      let ev2Reg = e2n || "Sangeet Night";
+      let ev3Reg = e3n || "Wedding Ceremony";
+
+      if (lang === "hi") {
+        polishedRegional = `${bride} और ${groom} का यह सफर प्यार और साझेदारी की एक सुंदर कहानी है। ` +
+          (rawStory.length > 5 ? `हमारा सफर: "${rawStory}"। ` : `हम मिले, हमें प्यार हुआ, और हमने हमेशा के लिए एक होने का फैसला किया। `) +
+          `विश्वास और सपनों के साथ, हम ${niceDate} को ${city} में अपने जीवन के इस नए सफर की शुरुआत कर रहे हैं।`;
+        ev1Reg = e1n === "Haldi Ceremony" ? "हल्दी रस्म" : e1n;
+        ev2Reg = e2n === "Sangeet Night" ? "संगीत संध्या" : e2n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "शुभ विवाह" : e3n;
+      } else if (lang === "kn") {
+        polishedRegional = `${bride} ಮತ್ತು ${groom} ರವರ ಈ ಪಯಣವು ಪ್ರೀತಿ ಮತ್ತು ಒಡನಾಟದ ಸುಂದರ ಕಥೆಯಾಗಿದೆ. ` +
+          (rawStory.length > 5 ? `ನಮ್ಮ ಕಥೆ: "${rawStory}"। ` : `ನಾವು ಭೇಟಿಯಾದೆವು, ಪ್ರೀತಿಯಲ್ಲಿ ಬಿದ್ದೆವು ಮತ್ತು ನಮ್ಮ ಜೀವನವನ್ನು ಎಂದೆಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಲು ನಿರ್ಧರಿಸಿದೆವು. `) +
+          `ನಂಬಿಕೆ ಮತ್ತು ಹಂಚಿಕೊಂಡ ಕನಸುಗಳೊಂದಿಗೆ, ನಾವು ${niceDate} ರಂದು ${city} ನಲ್ಲಿ ನಮ್ಮ ಜೀವನದ ಹೊಸ ಹೆಜ್ಜೆಯನ್ನು ಇಡುತ್ತಿದ್ದೇವೆ.`;
+        ev1Reg = e1n === "Haldi Ceremony" ? "ಹಳದಿ ಶಾಸ್ತ್ರ" : e1n;
+        ev2Reg = e2n === "Sangeet Night" ? "ಸಂಗೀತ ಸಂಜೆ" : e2n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "ಶುಭ ವಿವಾಹ" : e3n;
+      } else if (lang === "ta") {
+        polishedRegional = `${bride} மற்றும் ${groom} இன் இந்த பயணம் காதல் மற்றும் துணையின் அழகான கதையாகும். ` +
+          (rawStory.length > 5 ? `எங்கள் கதை: "${rawStory}"। ` : `நாங்கள் சந்தித்தோம், காதலித்தோம், எங்கள் வாழ்க்கையை என்றென்றும் பகிர்ந்து கொள்ள முடிவு செய்தோம். `) +
+          `நம்பிக்கை மற்றும் பகிரப்பட்ட கனவுகளுடன், நாம் ${niceDate} அன்று ${city} இல் எங்கள் புதிய வாழ்க்கையைத் தொடங்குகிறோம்.`;
+        ev1Reg = e1n === "Haldi Ceremony" ? "நலங்கு / மஞ்சள் நீராட்டு" : e1n;
+        ev2Reg = e2n === "Sangeet Night" ? "சங்கீத் விழா" : e2n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "திருமணம் / சுപ முகூர்த்தம்" : e3n;
+      } else if (lang === "te") {
+        polishedRegional = `${bride} మరియు ${groom} ల ఈ ప్రయాణం ప్రేమ మరియు బంధానికి ఒక అందమైన నిదర్శనం. ` +
+          (rawStory.length > 5 ? `మా కథ: "${rawStory}"। ` : `మేము కలుసుకున్నాము, ప్రేమలో పడ్డాము మరియు మా జీవితాలను ఎప్పటికీ పంచుకోవాలని నిర్ణయించుకున్నాము. `) +
+          `నమ్మకం మరియు కలలతో, మేము ${niceDate} న ${city} లో మా జీవిత కొత్త అధ్యాయాన్ని ప్రారంభిస్తున్నాము.`;
+        ev1Reg = e1n === "Haldi Ceremony" ? "హల్దీ వేడుక" : e1n;
+        ev2Reg = e2n === "Sangeet Night" ? "സംഗీത് సంధ్యా" : e2n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "శుభ కళ్యాణం" : e3n;
+      } else if (lang === "ml") {
+        polishedRegional = `${bride} യുടെയും ${groom} ന്റെയും ഈ യാത്ര സ്നേഹത്തിന്റെയും കൂട്ടുകെട്ടിന്റെയും മനോഹരമായ കഥയാണ്. ` +
+          (rawStory.length > 5 ? `ഞങ്ങളുടെ കഥ: "${rawStory}"। ` : `ഞങ്ങൾ കണ്ടുമുട്ടി, പ്രണയത്തിലായി, ഞങ്ങളുടെ ജീവിതം എന്നെന്നേക്കുമായി പങ്കിടാൻ തീരുമാനിച്ചു. `) +
+          `വിശ്വാസത്തോടെയും സ്വപ്നങ്ങളോടെയും, ഞങ്ങൾ ${niceDate}-ൽ ${city}-ൽ ഞങ്ങളുടെ പുതിയ ജീവിതം ആരംഭിക്കുന്നു.`;
+        ev1Reg = e1n === "Haldi Ceremony" ? "ഹൽദി ചടങ്ങ്" : e1n;
+        ev2Reg = e2n === "Sangeet Night" ? "സംഗീത് സന്ധ്യ" : e2n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "മംഗല്യ ചടങ്ങ്" : e3n;
+      }
+
       parsedAiResult = {
-        storyEnglish: rawStory,
-        storyRegional: rawStory,
+        storyEnglish: polishedEnglish,
+        storyRegional: polishedRegional,
         tagline: `${bride} & ${groom}'s Sacred Wedding Celebration`,
-        event1Regional: e1n || "हल्दी रस्म",
-        event2Regional: e2n || "संगीत संध्या",
-        event3Regional: e3n || "शुभ विवाह",
+        event1Regional: ev1Reg,
+        event2Regional: ev2Reg,
+        event3Regional: ev3Reg,
         theme: {
           name: "Standard Saffron",
           primary: "#8A3A1A",

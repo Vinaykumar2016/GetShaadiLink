@@ -45,5 +45,6 @@ export interface Invitation {
   ownerEmail?: string;
   views?: number;
   openingTheme?: "elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland";
+  razorpayPaymentId?: string | null;
 }
 
