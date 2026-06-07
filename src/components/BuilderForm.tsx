@@ -695,12 +695,12 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     <p className="text-[10px] text-brand-rust/50 mb-3">Choose the interactive screen guests see first.</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {[
-                        { code: "elephant", label: "🐘 Royal Elephant" },
-                        { code: "thread", label: "🧵 Sacred Thread" },
-                        { code: "diya", label: "🪔 Earthen Diya" },
-                        { code: "lotus", label: "🪷 Blooming Lotus" },
-                        { code: "jaipur", label: "🏰 Jaipur Palace" },
-                        { code: "garland", label: "🌸 Marigold Toran" },
+                        { code: "elephant", label: "🐘 Jharokha Balcony View" },
+                        { code: "thread", label: "🧵 Sacred Kalyana Knot" },
+                        { code: "diya", label: "🪔 Midnight Royal Affair" },
+                        { code: "lotus", label: "🪷 Ivory Arch Collection" },
+                        { code: "jaipur", label: "🏰 Jaipur Palace Edit" },
+                        { code: "garland", label: "🌸 Marigold Toran Gateway" },
                       ].map((item) => (
                         <button
                           key={item.code}

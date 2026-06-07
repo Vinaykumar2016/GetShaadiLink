@@ -699,11 +699,11 @@ export default function App() {
     }
 
     const mockThemeColors = {
-      elephant: { name: "Royal Elephant Heritage", primary: "#963E1C", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🐘" },
+      elephant: { name: "Jharokha Balcony View", primary: "#963E1C", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🐘" },
       thread: { name: "Sacred Kalyana Knot", primary: "#8B0000", secondary: "#C5A880", accent: "#E6C252", bg: "#FAF6F0", heroEmoji: "🧵" },
-      diya: { name: "Earthen Mandala Diya", primary: "#E65100", secondary: "#C5A880", accent: "#F59E0B", bg: "#FAF6F0", heroEmoji: "🪔" },
-      lotus: { name: "Golden Lotus Bloom", primary: "#D81B60", secondary: "#C5A880", accent: "#FF80AB", bg: "#FAF6F0", heroEmoji: "🪷" },
-      jaipur: { name: "Jaipur Palace Doors", primary: "#8B3A1C", secondary: "#C5A880", accent: "#FFE082", bg: "#FAF6F0", heroEmoji: "🏰" },
+      diya: { name: "Midnight Royal Affair", primary: "#E65100", secondary: "#C5A880", accent: "#F59E0B", bg: "#FAF6F0", heroEmoji: "🪔" },
+      lotus: { name: "Ivory Arch Collection", primary: "#D81B60", secondary: "#C5A880", accent: "#FF80AB", bg: "#FAF6F0", heroEmoji: "🪷" },
+      jaipur: { name: "Jaipur Palace Edit", primary: "#8B3A1C", secondary: "#C5A880", accent: "#FFE082", bg: "#FAF6F0", heroEmoji: "🏰" },
       garland: { name: "Marigold Toran Gateway", primary: "#FFA500", secondary: "#C5A880", accent: "#10B981", bg: "#FAF6F0", heroEmoji: "🌸" },
     };
 
