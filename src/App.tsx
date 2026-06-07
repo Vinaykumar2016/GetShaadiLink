@@ -34,7 +34,7 @@ export default function App() {
   // Theme Showcase showroom selections
   const [preselectedFormTheme, setPreselectedFormTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland" | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [stats, setStats] = useState<{ totalGenerated: number; rating: number }>({ totalGenerated: 2847, rating: 4.9 });
+  const [stats, setStats] = useState<{ totalGenerated: number; rating: number }>({ totalGenerated: 0, rating: 4.9 });
 
   // Hero interactive simulator selected theme
   const [heroActiveTheme, setHeroActiveTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland">("jaipur");

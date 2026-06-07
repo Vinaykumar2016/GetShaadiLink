@@ -72,13 +72,12 @@ app.get("/api/stats", (req, res) => {
   try {
     const files = import_fs.default.readdirSync(INVITATIONS_DIR);
     const jsonFilesCount = files.filter((f) => f.endsWith(".json")).length;
-    const totalGenerated = 2840 + jsonFilesCount;
     res.json({
-      totalGenerated,
+      totalGenerated: jsonFilesCount,
       rating: 4.9
     });
   } catch (error) {
-    res.json({ totalGenerated: 2840, rating: 4.9 });
+    res.json({ totalGenerated: 0, rating: 4.9 });
   }
 });
 app.get("/api/invitations/:slug", (req, res) => {
