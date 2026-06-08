@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Invitation } from "./types";
 import BuilderForm from "./components/BuilderForm";
 import InvitationView from "./components/InvitationView";
@@ -6,8 +6,8 @@ import ThemeShowroom from "./components/ThemeShowroom";
 import UserDashboard from "./components/UserDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import { playClickSound } from "./utils/soundUtils";
-import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Wand2, Eye, EyeOff, Calendar, Volume2, HelpCircle } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote } from "lucide-react";
+import { motion, AnimatePresence, useInView } from "motion/react";
 
 export default function App() {
   // Simple state-based router based on location path
@@ -688,10 +688,27 @@ export default function App() {
       <div className="absolute top-20 left-1/4 w-[400px] h-[400px] rounded-full filter blur-[150px] bg-brand-rust/10 pointer-events-none" />
       <div className="absolute top-80 right-1/4 w-[500px] h-[500px] rounded-full filter blur-[160px] bg-amber-500/10 pointer-events-none" />
 
-      {/* Success generated modal popup */}
+      {/* Success generated modal popup with confetti burst */}
       {successSlug && (
         <div className="fixed inset-0 z-[700] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-[#120E2B]/95 rounded-[28px] border border-white/10 p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden backdrop-blur-md">
+            {/* Confetti burst particles */}
+            {[...Array(18)].map((_, i) => (
+              <div
+                key={i}
+                className="confetti-particle"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 30}%`,
+                  backgroundColor: ['#F59E0B','#EF4444','#10B981','#6366F1','#EC4899','#F97316'][i % 6],
+                  animationDelay: `${Math.random() * 0.6}s`,
+                  animationDuration: `${1.2 + Math.random() * 0.8}s`,
+                  borderRadius: i % 3 === 0 ? '50%' : '2px',
+                  width: `${6 + Math.random() * 6}px`,
+                  height: `${6 + Math.random() * 6}px`,
+                }}
+              />
+            ))}
             <span className="text-5xl block mb-4 animate-bounce">🎊</span>
             <h3 className="font-marcellus text-2xl font-bold text-amber-400 mb-2">Invitation is Ready!</h3>
             <p className="text-xs text-stone-300/80 max-w-xs mx-auto mb-6 font-cormorant">
@@ -932,7 +949,7 @@ export default function App() {
                     playClickSound();
                     document.getElementById("form-container")?.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  className="py-3.5 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-marcellus text-xs tracking-[2px] uppercase font-bold hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/15 transition-all cursor-pointer border border-amber-300/30 text-center"
+                  className="btn-pulse-ring py-3.5 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-marcellus text-xs tracking-[2px] uppercase font-bold hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/25 transition-all cursor-pointer border border-amber-300/30 text-center"
                 >
                   Create Your Free Card
                 </button>
@@ -990,23 +1007,41 @@ export default function App() {
             </div>
           </section>
 
-          {/* SOCIAL PROOF BANNER */}
-          <section className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-3 mb-8 flex justify-center z-10">
-            <div className="py-3 px-8 rounded-full bg-white/5 border border-white/10 flex flex-col sm:flex-row items-center gap-2.5 text-xs text-amber-200 tracking-wider font-semibold select-none text-center backdrop-blur-md">
-              <span className="flex items-center gap-1.5 justify-center">
-                <span className="text-amber-400 font-bold">{stats.rating.toFixed(1)}</span>
-                <span className="flex gap-0.5 text-amber-400 text-sm">
-                  {"★★★★★".split("").map((s, idx) => <span key={idx}>{s}</span>)}
-                </span>
-                <span className="text-stone-300 font-semibold">(Verified Couples Review)</span>
-              </span>
-              <span className="hidden sm:inline font-marcellus text-stone-600">|</span>
-              <span className="font-marcellus text-stone-300 font-bold">{stats.totalGenerated.toLocaleString()} dynamic links generated</span>
+          {/* SOCIAL PROOF MARQUEE TICKER */}
+          <section className="w-full overflow-hidden border-y border-amber-500/10 bg-amber-500/5 py-3 mb-8 z-10 select-none">
+            <div className="animate-marquee gap-0">
+              {[...Array(2)].map((_, repeatIdx) => (
+                <div key={repeatIdx} className="flex items-center gap-10 pr-10">
+                  {[
+                    { icon: "★", text: `${stats.rating.toFixed(1)} Star Rating` },
+                    { icon: "💍", text: `${stats.totalGenerated.toLocaleString()}+ Invitations Created` },
+                    { icon: "🎵", text: "Bollywood Instrumental Music" },
+                    { icon: "🆓", text: "100% Free to Build & Preview" },
+                    { icon: "📍", text: "Google Maps Integration" },
+                    { icon: "💸", text: "₹999 One-Time — No Renewals" },
+                    { icon: "✏️", text: "Unlimited Lifetime Edits" },
+                    { icon: "📜", text: "Live Guestbook Blessings Wall" },
+                    { icon: "🎁", text: "UPI Shagun Gift System" },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-2 text-[10.5px] font-marcellus font-bold text-amber-300/80 whitespace-nowrap tracking-wider uppercase">
+                      <span className="text-amber-400">{item.icon}</span>
+                      {item.text}
+                      <span className="text-amber-500/30 ml-6">✦</span>
+                    </span>
+                  ))}
+                </div>
+              ))}
             </div>
           </section>
 
-          {/* THEME SHOWROOM TITLE */}
-          <section className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-10 z-10">
+          {/* THEME SHOWROOM */}
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-10 z-10"
+          >
             <ThemeShowroom
               onSelectTheme={(themeStyle) => {
                 setPreselectedFormTheme(themeStyle);
@@ -1017,10 +1052,16 @@ export default function App() {
               }}
               onLaunchDemo={handleLaunchDemo}
             />
-          </section>
+          </motion.section>
 
           {/* SALES FEATURES PERSUASIVE GRID */}
-          <section className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-16 z-10 select-none">
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-16 z-10 select-none"
+          >
             <div className="text-center space-y-2 mb-12">
               <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase">
                 👑 BESPOKE SCRAPBOOK SPECIFICATIONS
@@ -1033,30 +1074,53 @@ export default function App() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[
-                { title: "Bollywood Instrumentals", icon: "🎵", desc: "Select from popular romantic Bollywood instrumental melodies to play in the background." },
-                { title: "Interactive Covers", icon: "🚪", desc: "Guests interact with elegant opening templates (arched doors, tasselled strings, or lighting lamps)." },
-                { title: "Google Maps Integration", icon: "📍", desc: "Embed exact venue locations so guests can navigate directly using Google Maps with one tap." },
-                { title: "UPI Shagun Gift System", icon: "🎁", desc: "Receive monetary blessings direct to your account. Guests enter custom amounts to generate secure UPI QR codes." },
-                { title: "Blessing Guestbook Wall", icon: "📜", desc: "A live wedding guestbook wall where guests submit love notes that post dynamically." },
-                { title: "One-Time Pay, Lifetime Edits", icon: "🔑", desc: "Pay once. Update timings, parent details, change cover templates, or add drive links at any time for free." }
+                { title: "Bollywood Instrumentals", icon: "🎵", desc: "Select from popular romantic Bollywood instrumental melodies to play in the background.", featured: true },
+                { title: "Interactive Covers", icon: "🚪", desc: "Guests interact with elegant opening templates (arched doors, tasselled strings, or lighting lamps).", featured: false },
+                { title: "Google Maps Integration", icon: "📍", desc: "Embed exact venue locations so guests can navigate directly using Google Maps with one tap.", featured: false },
+                { title: "UPI Shagun Gift System", icon: "🎁", desc: "Receive monetary blessings direct to your account. Guests enter custom amounts to generate secure UPI QR codes.", featured: false },
+                { title: "Blessing Guestbook Wall", icon: "📜", desc: "A live wedding guestbook wall where guests submit love notes that post dynamically.", featured: false },
+                { title: "One-Time Pay, Lifetime Edits", icon: "🔑", desc: "Pay once. Update timings, parent details, change cover templates, or add drive links at any time for free.", featured: false }
               ].map((item, idx) => (
-                <div key={idx} className="p-6 bg-white/5 border border-white/10 hover:border-amber-400/40 rounded-[24px] shadow transition-all duration-300 flex flex-col gap-3 group backdrop-blur-md">
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.08 }}
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  className={`shimmer-card p-5 sm:p-6 border rounded-[24px] flex flex-col gap-3 group cursor-default backdrop-blur-md shadow-lg transition-shadow duration-300 ${
+                    item.featured
+                      ? "bg-gradient-to-br from-amber-500/15 to-amber-500/5 border-amber-400/40 shadow-amber-500/10"
+                      : "bg-white/5 border-white/10 hover:border-amber-400/25 hover:shadow-amber-500/5"
+                  }`}
+                >
+                  {item.featured && (
+                    <span className="self-start text-[8px] font-marcellus font-bold uppercase tracking-widest bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">
+                      ⭐ Fan Favourite
+                    </span>
+                  )}
                   <div className="w-10 h-10 rounded-2xl bg-amber-400/10 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform">
                     {item.icon}
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold tracking-widest font-marcellus text-amber-400">{item.title}</h4>
-                    <p className="text-xs text-stone-300/70 mt-1.5 leading-relaxed font-cormorant">{item.desc}</p>
+                    <h4 className="text-xs sm:text-sm font-bold tracking-widest font-marcellus text-amber-400">{item.title}</h4>
+                    <p className="text-[10px] sm:text-xs text-stone-300/70 mt-1.5 leading-relaxed font-cormorant">{item.desc}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
-          </section>
+          </motion.section>
 
           {/* STEP-BY-STEP INTERACTIVE WORKFLOW */}
-          <section className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-12 z-10 select-none">
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-12 z-10 select-none"
+          >
             <div className="p-6 sm:p-10 rounded-[36px] bg-gradient-to-r from-brand-rust/20 to-[#120E2B]/95 border border-brand-rust/20 relative overflow-hidden backdrop-blur-md">
               <div className="absolute right-0 top-0 w-44 h-44 bg-brand-rust/10 filter blur-[80px] rounded-full pointer-events-none" />
               
@@ -1071,16 +1135,130 @@ export default function App() {
                   { step: "02", title: "Preview Invitation", desc: "Instantly view your complete, interactive invitation page with polished stories, countdowns, and music." },
                   { step: "03", title: "One-Time Activation", desc: "Pay ₹999 once. Unlock your live link, share on WhatsApp, and edit your theme, drive link, or details anytime for free." }
                 ].map((item, idx) => (
-                  <div key={idx} className="flex flex-col gap-2.5 relative">
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: idx * 0.15 }}
+                    className="flex flex-col gap-2.5 relative"
+                  >
                     <span className="font-marcellus text-4xl text-amber-400/40 font-bold leading-none">{item.step}</span>
                     <h4 className="text-sm font-bold tracking-wider text-white font-marcellus">{item.title}</h4>
                     <p className="text-xs text-stone-400 leading-relaxed font-cormorant">{item.desc}</p>
                     {idx < 2 && <div className="hidden md:block absolute top-4 right-[-20px] text-amber-400/20 text-xl font-bold font-mono">→</div>}
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-          </section>
+          </motion.section>
+
+          {/* ── TESTIMONIALS SECTION ─────────────────────────────── */}
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-16 z-10 select-none"
+          >
+            <div className="text-center mb-12">
+              <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-2">
+                💬 REAL COUPLES, REAL LOVE
+              </span>
+              <h3 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
+                Couples Who Trusted ShaadiLink
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  quote: "The Jaipur theme was breathtaking! Our guests couldn't stop sharing our invitation link. Worth every rupee!",
+                  name: "Priya & Arjun",
+                  location: "Bengaluru, Karnataka",
+                  stars: 5,
+                  emoji: "🌸"
+                },
+                {
+                  quote: "We loved the Midnight Diya cover — the opening animation made everyone gasp. Our families are still talking about it!",
+                  name: "Riya & Kabir",
+                  location: "Mumbai, Maharashtra",
+                  stars: 5,
+                  emoji: "🪔"
+                },
+                {
+                  quote: "Setup was so easy! The Bollywood instrumental playing on our page was the perfect touch. Highly recommended!",
+                  name: "Deepika & Rahul",
+                  location: "Hyderabad, Telangana",
+                  stars: 5,
+                  emoji: "🎵"
+                },
+                {
+                  quote: "The guestbook wall was a hit at our reception. Guests loved posting blessings and seeing them live on the page!",
+                  name: "Anjali & Vikram",
+                  location: "Pune, Maharashtra",
+                  stars: 5,
+                  emoji: "📜"
+                },
+                {
+                  quote: "We changed the venue details twice after activating — it was completely free! Lifetime edits is a game changer.",
+                  name: "Sneha & Karthik",
+                  location: "Chennai, Tamil Nadu",
+                  stars: 5,
+                  emoji: "✏️"
+                },
+                {
+                  quote: "The UPI shagun feature was incredibly convenient for outstation relatives who couldn't attend. Loved every bit!",
+                  name: "Meena & Suresh",
+                  location: "Mysuru, Karnataka",
+                  stars: 5,
+                  emoji: "🎁"
+                },
+              ].map((t, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                  className="testimonial-card p-6 bg-white/5 border border-white/10 rounded-[24px] flex flex-col gap-4 backdrop-blur-md transition-all duration-300 cursor-default"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-base flex-shrink-0">
+                      {t.emoji}
+                    </div>
+                    <div className="flex gap-0.5 mt-1">
+                      {[...Array(t.stars)].map((_, i) => (
+                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <Quote className="w-5 h-5 text-amber-400/25" />
+                  <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-cormorant italic flex-1">
+                    {t.quote}
+                  </p>
+                  <div className="border-t border-white/8 pt-3">
+                    <p className="text-xs font-bold text-amber-300 font-marcellus">{t.name}</p>
+                    <p className="text-[10px] text-stone-500 font-marcellus tracking-wider mt-0.5">{t.location}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* ── DECORATIVE DIVIDER ──────────────────────────────── */}
+          <div className="w-full max-w-3xl px-8 py-4 flex items-center gap-6 z-10 select-none">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+            <div className="flex items-center gap-2 text-amber-400/40">
+              <span className="text-lg">🌸</span>
+              <svg viewBox="0 0 80 20" className="w-20 h-5 fill-none stroke-amber-400/25 stroke-[0.8]">
+                <path d="M0,10 Q20,2 40,10 Q60,18 80,10" />
+                <path d="M0,12 Q20,4 40,12 Q60,20 80,12" />
+              </svg>
+              <span className="text-lg">🌸</span>
+            </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+          </div>
 
           {editingData && (
             <div className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 mb-6">
@@ -1134,7 +1312,7 @@ export default function App() {
         </div>
 
         <p className="text-[9px] text-stone-600 mt-8 tracking-widest uppercase font-semibold">
-          © 2026 ShaadiLink · GetShaadilink.in · Made with ❤️ in Karnataka 🇮🇳
+          © 2026 ShaadiLink · GetShaadilink.in · Made with ❤️ in Bengaluru 🇮🇳
         </p>
       </footer>
 

@@ -367,5 +367,85 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ── Marquee ticker animation ────────────────────────────────── */
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  display: flex;
+  animation: marquee-scroll 28s linear infinite;
+  width: max-content;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
 
+/* ── Shimmer light-sweep on feature/theme cards ──────────────── */
+@keyframes shimmer-sweep {
+  0%   { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(250%)  skewX(-15deg); }
+}
+.shimmer-card {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  transform: translateX(-100%) skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+}
+.shimmer-card:hover::after {
+  animation: shimmer-sweep 0.65s ease-out forwards;
+}
+
+/* ── Confetti burst particles ────────────────────────────────── */
+@keyframes confetti-fall {
+  0%   { transform: translateY(-10px) rotate(0deg)   scale(1);   opacity: 1; }
+  100% { transform: translateY(180px) rotate(720deg) scale(0.5); opacity: 0; }
+}
+.confetti-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall 1.4s ease-in forwards;
+}
+
+/* ── Pulsing glow ring on primary CTA button ─────────────────── */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0   rgba(245, 158, 11, 0.55); }
+  70%  { box-shadow: 0 0 0 14px rgba(245, 158, 11, 0);   }
+  100% { box-shadow: 0 0 0 0   rgba(245, 158, 11, 0);   }
+}
+.btn-pulse-ring {
+  animation: pulse-ring 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Count-up number reveal ──────────────────────────────────── */
+@keyframes count-up-reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+.animate-count-up {
+  animation: count-up-reveal 0.5s ease-out forwards;
+}
+
+/* ── Testimonial card subtle glow on hover ───────────────────── */
+.testimonial-card:hover {
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25),
+              0 8px 32px rgba(245, 158, 11, 0.08);
+}
+
+/* ── Decorative divider wave line ────────────────────────────── */
+.section-divider {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  pointer-events: none;
+}
 

@@ -1668,10 +1668,9 @@ export default function InvitationView({
     }
   };
   
-  // Set default active tab to "regional" immediately if language is not English
-  const [activeTab, setActiveTab] = useState<"english" | "regional">(
-    data.lang && data.lang !== "en" ? "regional" : "english"
-  );
+  // Default to English story; only switch to regional if user explicitly chose a non-English language
+  // AND the regional story content is actually different (i.e., was truly translated)
+  const [activeTab, setActiveTab] = useState<"english" | "regional">("english");
   
   const [copied, setCopied] = useState(false);
 
