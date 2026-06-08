@@ -5,7 +5,7 @@ import InvitationView from "./components/InvitationView";
 import ThemeShowroom from "./components/ThemeShowroom";
 import UserDashboard from "./components/UserDashboard";
 import { playClickSound } from "./utils/soundUtils";
-import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Wand2, Eye, Calendar, Volume2, HelpCircle } from "lucide-react";
+import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Wand2, Eye, EyeOff, Calendar, Volume2, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export default function App() {
@@ -21,6 +21,7 @@ export default function App() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginSlug, setLoginSlug] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [editingData, setEditingData] = useState<Invitation | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -970,13 +971,22 @@ export default function App() {
 
                   <div className="flex flex-col text-left gap-1">
                     <label className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Secret Passcode / Password</label>
-                    <input
-                      type="password"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      placeholder="Enter passcode"
-                      className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs font-mono placeholder:text-stone-600"
-                    />
+                    <div className="relative w-full">
+                      <input
+                        type={showLoginPassword ? "text" : "password"}
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        placeholder="Enter passcode"
+                        className="w-full pl-4 pr-11 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs font-mono placeholder:text-stone-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => { playClickSound(); setShowLoginPassword(!showLoginPassword); }}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white transition-colors cursor-pointer select-none"
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
 
                   <button
@@ -1085,7 +1095,7 @@ export default function App() {
                 </div>
 
                 {/* Bezel screen preview contents with AnimatePresence */}
-                <div className="absolute inset-0 transition-all duration-500 bg-[#FAF6F0]">
+                <div className="absolute inset-0 rounded-[38px] overflow-hidden transition-all duration-500 bg-[#FAF6F0]">
                   <AnimatePresence mode="wait">
                     {renderSimSlide()}
                   </AnimatePresence>

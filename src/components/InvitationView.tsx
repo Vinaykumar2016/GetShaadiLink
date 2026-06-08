@@ -1772,26 +1772,59 @@ export default function InvitationView({
     };
     window.addEventListener("resize", handleResize);
 
+    const themeType = data.openingTheme || "elephant";
+
     // Dynamic Petal class definition
     class Petal {
       x = Math.random() * width;
-      y = Math.random() * -height - 20;
+      // If diya, lanterns rise from bottom
+      y = themeType === "diya" ? (Math.random() * height + height + 20) : (Math.random() * -height - 20);
       size = Math.random() * 8 + 5;
-      speedY = Math.random() * 1.5 + 0.8;
+      speedY = themeType === "diya" 
+        ? -(Math.random() * 1.0 + 0.5) // rise up
+        : (Math.random() * 1.5 + 0.8); // fall down
       speedX = Math.random() * 0.8 - 0.4;
       rotation = Math.random() * 360;
       rotationSpeed = Math.random() * 2 - 1;
-      // Orange/Yellow marigolds or pink roses
-      color = Math.random() > 0.4 ? `rgba(${Math.floor(Math.random() * 30) + 225}, ${Math.floor(Math.random() * 40) + 120}, 20, 0.7)` : `rgba(244, 63, 94, 0.6)`;
+      
+      // Determine color and particle style based on theme
+      color = (() => {
+        if (themeType === "diya") {
+          // Warm gold/amber glowing lanterns
+          return Math.random() > 0.5 ? "rgba(251, 191, 36, 0.75)" : "rgba(249, 115, 22, 0.7)";
+        } else if (themeType === "lotus") {
+          // Pure pink/rose lotus shades
+          return Math.random() > 0.4 ? "rgba(244, 143, 177, 0.7)" : "rgba(236, 72, 153, 0.6)";
+        } else if (themeType === "jaipur") {
+          // Shiny gold leaf sparkles
+          return Math.random() > 0.3 ? "rgba(212, 175, 55, 0.7)" : "rgba(253, 224, 71, 0.8)";
+        } else if (themeType === "thread") {
+          // Red-yellow details + rose petals
+          const rand = Math.random();
+          return rand < 0.4 ? "rgba(239, 68, 68, 0.7)" : (rand < 0.7 ? "rgba(234, 179, 8, 0.7)" : "rgba(244, 63, 94, 0.6)");
+        } else {
+          // Elephant/Garland: Marigold orange & yellow
+          return Math.random() > 0.5 ? "rgba(249, 115, 22, 0.7)" : "rgba(234, 179, 8, 0.7)";
+        }
+      })();
 
       update() {
         this.y += this.speedY;
         this.x += this.speedX;
         this.rotation += this.rotationSpeed;
 
-        if (this.y > height) {
-          this.y = -20;
-          this.x = Math.random() * width;
+        if (themeType === "diya") {
+          // Reset lantern when it floats off the top
+          if (this.y < -20) {
+            this.y = height + 20;
+            this.x = Math.random() * width;
+          }
+        } else {
+          // Reset petal when it falls off the bottom
+          if (this.y > height) {
+            this.y = -20;
+            this.x = Math.random() * width;
+          }
         }
       }
 
@@ -1799,14 +1832,53 @@ export default function InvitationView({
         if (!ctx) return;
         ctx.save();
         ctx.translate(this.x, this.y);
-        ctx.rotate((this.rotation * Math.PI) / 180);
-        ctx.fillStyle = this.color;
-        // Drawing petal shape
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(-this.size, -this.size/2, -this.size, this.size, 0, this.size);
-        ctx.bezierCurveTo(this.size, this.size, this.size, -this.size/2, 0, 0);
-        ctx.fill();
+        
+        if (themeType === "jaipur") {
+          // Draw a small 4-point sparkle star for gold dust
+          ctx.rotate((this.rotation * Math.PI) / 180);
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.moveTo(0, -this.size);
+          ctx.quadraticCurveTo(0, 0, this.size, 0);
+          ctx.quadraticCurveTo(0, 0, 0, this.size);
+          ctx.quadraticCurveTo(0, 0, -this.size, 0);
+          ctx.quadraticCurveTo(0, 0, 0, -this.size);
+          ctx.fill();
+        } else if (themeType === "diya") {
+          // Draw a small sky lantern shape (rounded rectangle with a burning glow at the base)
+          ctx.fillStyle = this.color;
+          ctx.shadowColor = "rgba(251, 191, 36, 0.5)";
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          // Custom path for a rounded top lantern
+          ctx.moveTo(-this.size/2 + 2, -this.size);
+          ctx.lineTo(this.size/2 - 2, -this.size);
+          ctx.quadraticCurveTo(this.size/2, -this.size, this.size/2, -this.size + 2);
+          ctx.lineTo(this.size/2, this.size * 0.3);
+          ctx.quadraticCurveTo(this.size/2, this.size * 0.5, this.size/2 - 2, this.size * 0.5);
+          ctx.lineTo(-this.size/2 + 2, this.size * 0.5);
+          ctx.quadraticCurveTo(-this.size/2, this.size * 0.5, -this.size/2, this.size * 0.3);
+          ctx.lineTo(-this.size/2, -this.size + 2);
+          ctx.quadraticCurveTo(-this.size/2, -this.size, -this.size/2 + 2, -this.size);
+          ctx.fill();
+          
+          // Flame at the bottom center of lantern
+          ctx.fillStyle = "rgba(255, 236, 179, 0.9)";
+          ctx.shadowBlur = 2;
+          ctx.beginPath();
+          ctx.arc(0, this.size * 0.3, this.size * 0.15, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // Standard petal shape
+          ctx.rotate((this.rotation * Math.PI) / 180);
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.bezierCurveTo(-this.size, -this.size/2, -this.size, this.size, 0, this.size);
+          ctx.bezierCurveTo(this.size, this.size, this.size, -this.size/2, 0, 0);
+          ctx.fill();
+        }
+        
         ctx.restore();
       }
     }
@@ -1832,7 +1904,7 @@ export default function InvitationView({
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [data.openingTheme]);
 
   // Set up live countdown calculation
   useEffect(() => {
@@ -2315,7 +2387,12 @@ export default function InvitationView({
           title={musicPlaying ? "Pause music" : "Play classical background music"}
         >
           {musicPlaying ? (
-            <Volume2 className="w-4.5 h-4.5 animate-pulse text-brand-gold" />
+            <div className="flex items-end gap-[2px] h-[18px] w-[18px] justify-center pb-[2px]" style={{ transform: "rotate(0deg)" }}>
+              <div className="w-[3px] bg-brand-gold rounded-full animate-equalizer-bar-1" />
+              <div className="w-[3px] bg-brand-gold rounded-full animate-equalizer-bar-2" />
+              <div className="w-[3px] bg-brand-gold rounded-full animate-equalizer-bar-3" />
+              <div className="w-[3px] bg-brand-gold rounded-full animate-equalizer-bar-4" />
+            </div>
           ) : (
             <VolumeX className="w-4.5 h-4.5 text-white/50" />
           )}
@@ -2758,18 +2835,39 @@ export default function InvitationView({
                 </div>
 
                 {showQrForShagun && shagunAmount && (
-                  <div className="p-4 rounded-2xl bg-brand-rust/5 border border-brand-rust/10 flex flex-col items-center text-center mt-3 mb-2">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                        `upi://pay?pa=${data.upiId}&pn=${data.bride}%20And%20${data.groom}&am=${shagunAmount}&cu=INR&tn=Shagun%20from%20${encodeURIComponent(noteName || "Guest")}`
-                      )}`}
-                      alt="Honorary UPI QR"
-                      className="w-32 h-32 object-contain rounded-lg bg-white p-2 mb-2 shadow"
-                    />
-                    <p className="text-[10px] text-brand-rust font-semibold mb-0.5">{t("secureQr")} ₹{shagunAmount}</p>
-                    <p className="text-[10px] text-brand-rust/50 max-w-xs leading-normal font-cormorant">
-                      {t("scanUsing")}
-                    </p>
+                  <div className="p-6 rounded-[24px] bg-[#120E2B] border-2 border-brand-gold/60 flex flex-col items-center text-center mt-4 mb-2 shadow-paper relative overflow-hidden">
+                    {/* Corner gold borders */}
+                    <div className="absolute inset-1 border border-brand-gold/30 rounded-[20px] pointer-events-none" />
+                    <div className="absolute inset-1.5 border border-brand-gold/10 border-dashed rounded-[18px] pointer-events-none" />
+                    
+                    {/* Title Banner */}
+                    <span className="text-[8.5px] font-marcellus tracking-[3px] text-brand-gold uppercase block mb-3 font-bold z-10">
+                      ✨ Scan to send Shagun ✨
+                    </span>
+
+                    {/* QR Code */}
+                    <div className="relative p-2.5 bg-white rounded-xl border-4 border-brand-gold/50 shadow-inner z-10">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                          `upi://pay?pa=${data.upiId}&pn=${data.bride}%20And%20${data.groom}&am=${shagunAmount}&cu=INR&tn=Shagun%20from%20${encodeURIComponent(noteName || "Guest")}`
+                        )}`}
+                        alt="Honorary UPI QR"
+                        className="w-28 h-28 object-contain rounded-sm"
+                      />
+                    </div>
+                    
+                    {/* Amount & Instructions */}
+                    <div className="mt-3.5 z-10 space-y-1.5 w-full">
+                      <p className="text-[11px] font-marcellus font-extrabold text-white tracking-wider">
+                        Amount: ₹{shagunAmount}
+                      </p>
+                      <p className="text-[9px] text-brand-gold font-medium font-marcellus tracking-wider">
+                        To: {data.bride} &amp; {data.groom}
+                      </p>
+                      <p className="text-[8.5px] text-stone-400 max-w-xs leading-relaxed font-cormorant pt-1.5 border-t border-white/10 mx-auto">
+                        {t("scanUsing")}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

@@ -19,6 +19,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
       bgBezel: "bg-cover bg-center relative",
       contentMock: (
         <>
+          {/* 0. COVER SECTION */}
+          <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FFD5B4 0%, #FFB3A7 100%)" }}>
+            <div className="absolute inset-1.5 border border-amber-600/35 rounded-[22px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+              <span className="text-3xl mb-2">🕌</span>
+              <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Royal Palace</span>
+              <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Karan &amp; Aditi</span>
+              <div className="mt-4 px-3 py-1 rounded-full bg-[#8A3A1A] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
+            </div>
+          </div>
+
           {/* 1. HERO SECTION */}
           <div 
             className="inv-hero-mock" 
@@ -129,6 +140,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
       bgBezel: "bg-cover bg-center relative",
       contentMock: (
         <>
+          {/* 0. COVER SECTION */}
+          <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #0A0413 0%, #170C2A 100%)" }}>
+            <div className="absolute inset-1.5 border border-amber-400/20 rounded-[22px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+              <span className="text-3xl mb-2 animate-pulse-glow">🪔</span>
+              <span className="font-marcellus text-[9px] text-amber-400 font-bold tracking-[2.5px] uppercase">Midnight Diya</span>
+              <span className="font-cursive text-xl text-white mt-2 block whitespace-nowrap">Kabir &amp; Riya</span>
+              <div className="mt-4 px-3 py-1 rounded-full bg-amber-500 text-stone-950 text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
+            </div>
+          </div>
+
           {/* 1. HERO SECTION */}
           <div 
             className="inv-hero-mock" 
@@ -235,6 +257,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
       bgBezel: "bg-cover bg-center relative",
       contentMock: (
         <>
+          {/* 0. COVER SECTION */}
+          <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FAF8F5 0%, #F4EFE6 100%)" }}>
+            <div className="absolute inset-1.5 border border-brand-rust/15 rounded-[22px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+              <span className="text-3xl mb-2">🪷</span>
+              <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Temple Lotus</span>
+              <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Dev &amp; Ishika</span>
+              <div className="mt-4 px-3 py-1 rounded-full bg-[#8A3A1A] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
+            </div>
+          </div>
+
           {/* 1. HERO SECTION */}
           <div 
             className="inv-hero-mock" 
@@ -341,6 +374,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
       bgBezel: "bg-cover bg-center relative",
       contentMock: (
         <>
+          {/* 0. COVER SECTION */}
+          <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FAF6F0 0%, #F5EFEB 100%)" }}>
+            <div className="absolute inset-1.5 border border-amber-900/20 rounded-[22px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+              <span className="text-3xl mb-2 animate-bounce">🐘</span>
+              <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Royal Elephant</span>
+              <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Arjun &amp; Priyanka</span>
+              <div className="mt-4 px-3 py-1 rounded-full bg-[#8A3A1A] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
+            </div>
+          </div>
+
           {/* 1. HERO SECTION */}
           <div 
             className="inv-hero-mock" 
@@ -447,6 +491,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
       bgBezel: "bg-cover bg-center relative",
       contentMock: (
         <>
+          {/* 0. COVER SECTION */}
+          <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FFF5F2 0%, #FFE6DB 100%)" }}>
+            <div className="absolute inset-1.5 border border-red-700/15 rounded-[22px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+              <span className="text-3xl mb-2 animate-sway-bell block origin-top">🔔</span>
+              <span className="font-marcellus text-[9px] text-[#991B1B] font-bold tracking-[2.5px] uppercase">Sacred Knot</span>
+              <span className="font-cursive text-xl text-[#991B1B] mt-2 block whitespace-nowrap">Vikram &amp; Pooja</span>
+              <div className="mt-4 px-3 py-1 rounded-full bg-[#991B1B] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
+            </div>
+          </div>
+
           {/* 1. HERO SECTION */}
           <div 
             className="inv-hero-mock" 
@@ -553,6 +608,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
       bgBezel: "bg-cover bg-center relative",
       contentMock: (
         <>
+          {/* 0. COVER SECTION */}
+          <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #E8F5E9 0%, #FAF6F0 100%)" }}>
+            <div className="absolute inset-1.5 border border-emerald-800/15 rounded-[22px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
+              <span className="text-3xl mb-2">🌼</span>
+              <span className="font-marcellus text-[9px] text-[#065F46] font-bold tracking-[2.5px] uppercase">Marigold Garland</span>
+              <span className="font-cursive text-xl text-[#065F46] mt-2 block whitespace-nowrap">Siddharth &amp; Neha</span>
+              <div className="mt-4 px-3 py-1 rounded-full bg-[#065F46] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
+            </div>
+          </div>
+
           {/* 1. HERO SECTION */}
           <div 
             className="inv-hero-mock" 

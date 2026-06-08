@@ -475,7 +475,40 @@ async function startServer() {
     const distPath = import_path.default.join(process.cwd(), "dist");
     app.use(import_express.default.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(import_path.default.join(distPath, "index.html"));
+      const slug = req.path.replace(/^\//, "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+      const indexPath = import_path.default.join(distPath, "index.html");
+      if (!import_fs.default.existsSync(indexPath)) {
+        res.status(404).send("Build index.html not found.");
+        return;
+      }
+      let html = import_fs.default.readFileSync(indexPath, "utf-8");
+      if (slug) {
+        const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
+        if (import_fs.default.existsSync(filePath)) {
+          try {
+            const rawData = import_fs.default.readFileSync(filePath, "utf-8");
+            const data = JSON.parse(rawData);
+            const title = `${data.bride} & ${data.groom}'s Wedding Invitation | GetShaadiLink`;
+            const description = `Join us to celebrate our wedding at ${data.vname}, ${data.city} on ${data.niceDate}. Click to view details and RSVP.`;
+            const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
+            html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
+            const metaTags = `
+              <meta property="og:title" content="${title}" />
+              <meta property="og:description" content="${description}" />
+              <meta property="og:image" content="${ogImage}" />
+              <meta property="og:url" content="${req.protocol}://${req.get("host")}/${slug}" />
+              <meta property="og:type" content="website" />
+              <meta name="twitter:title" content="${title}" />
+              <meta name="twitter:description" content="${description}" />
+              <meta name="twitter:image" content="${ogImage}" />
+            `;
+            html = html.replace("</head>", `${metaTags}</head>`);
+          } catch (err) {
+            console.error("Error injecting metadata:", err);
+          }
+        }
+      }
+      res.send(html);
     });
   }
   app.listen(PORT, "0.0.0.0", () => {
