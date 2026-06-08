@@ -865,8 +865,9 @@ export default function App() {
       <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-40" />
 
       {/* Ambient background glows */}
-      <div className="absolute top-20 left-1/4 w-[400px] h-[400px] rounded-full filter blur-[150px] bg-brand-rust/5 pointer-events-none" />
-      <div className="absolute top-80 right-1/4 w-[500px] h-[500px] rounded-full filter blur-[160px] bg-amber-500/5 pointer-events-none" />
+      <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full filter blur-[140px] bg-gradient-to-tr from-amber-500/10 via-amber-600/5 to-purple-800/5 pointer-events-none z-0" />
+      <div className="absolute top-20 left-1/4 w-[400px] h-[400px] rounded-full filter blur-[150px] bg-brand-rust/10 pointer-events-none" />
+      <div className="absolute top-80 right-1/4 w-[500px] h-[500px] rounded-full filter blur-[160px] bg-amber-500/10 pointer-events-none" />
 
       {/* Success generated modal popup */}
       {successSlug && (
@@ -896,7 +897,7 @@ export default function App() {
       )}
 
       {/* Top navigation bar */}
-      <nav className="border-b border-white/10 bg-[#060414]/80 sticky top-0 z-50 backdrop-blur-md">
+      <nav className="border-b border-amber-500/15 shadow-[0_4px_30px_rgba(0,0,0,0.5)] bg-[#060414]/85 sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
           <div onClick={() => { playClickSound(); window.location.href = "/"; }} className="cursor-pointer flex items-center gap-2 select-none">
             <Heart className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20 animate-pulse" />
@@ -904,16 +905,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                playClickSound();
-                setContactOpen(true);
-                setContactSuccessMsg("");
-              }}
-              className="text-[10px] font-bold tracking-widest uppercase font-marcellus text-stone-300 hover:text-amber-300 px-3 py-2 cursor-pointer transition-colors active:scale-95"
-            >
-              📞 Contact
-            </button>
             <button
               onClick={() => {
                 playClickSound();
@@ -925,7 +916,7 @@ export default function App() {
             >
               🔑 Manage Card
             </button>
-            <span className="text-[9px] tracking-widest font-marcellus text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3.5 py-2 rounded-full select-none font-bold">
+            <span className="hidden md:inline-block text-[9px] tracking-widest font-marcellus text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3.5 py-2 rounded-full select-none font-bold">
               FREE TO BUILD &amp; PREVIEW
             </span>
           </div>
@@ -1083,9 +1074,9 @@ export default function App() {
                 <span>PREMIUM DIGITAL WEDDING INVITATIONS</span>
               </div>
 
-              <h1 className="font-marcellus font-medium text-5xl sm:text-6xl lg:text-7xl leading-tight text-white">
+              <h1 className="font-marcellus font-medium text-3xl sm:text-5xl lg:text-7xl leading-tight text-white">
                 Create & Preview
-                <span className="block mt-1 font-cursive text-amber-400 font-normal normal-case text-6xl sm:text-7xl lg:text-8xl">
+                <span className="block mt-1 font-cursive text-amber-400 font-normal normal-case text-4xl sm:text-6xl lg:text-8xl">
                   Bespoke & Beautiful
                 </span>
                 Invitations for Free
@@ -1096,7 +1087,7 @@ export default function App() {
               </p>
 
               {/* Quick Feature highlights */}
-              <div className="grid grid-cols-2 gap-4 max-w-md pt-2 select-none">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md pt-2 select-none">
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
                   <span className="text-xs font-semibold">100% Free to Build & Preview</span>
@@ -1143,7 +1134,7 @@ export default function App() {
               <span className="text-[9px] tracking-[3px] uppercase font-bold text-amber-400/50 mb-3 block font-marcellus">Click template tags to preview screens</span>
               
               {/* Bezel frame with shadows */}
-              <div className="relative w-72 sm:w-80 aspect-[9/18.5] rounded-[48px] border-[10px] border-stone-800 bg-[#0F021A] shadow-2xl overflow-hidden flex flex-col justify-between transition-all duration-500 hover:scale-[1.02] border-b-[12px] border-b-stone-850">
+              <div className="relative w-[280px] sm:w-[320px] aspect-[9/18.5] rounded-[48px] border-[10px] border-stone-800 bg-[#0F021A] shadow-2xl overflow-hidden flex flex-col justify-between transition-all duration-500 hover:scale-[1.02] border-b-[12px] border-b-stone-850">
                 {/* Dynamic island */}
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 bg-stone-800 rounded-full z-30 flex items-center justify-between px-3 text-[7px] text-white/40">
                   <span>●</span>
