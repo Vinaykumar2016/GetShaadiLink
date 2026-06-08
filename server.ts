@@ -146,53 +146,6 @@ app.post("/api/reviews/submit", (req, res) => {
   }
 });
 
-// API: Admin — fetch all reviews (pending + approved)
-app.get("/api/admin/reviews", requireAdminAuth, (req, res) => {
-  try {
-    const reviews = readReviews();
-    reviews.sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-    res.json({ success: true, reviews });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch reviews." });
-  }
-});
-
-// API: Admin — approve a review
-app.post("/api/admin/reviews/:id/approve", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-  try {
-    const reviews = readReviews();
-    const review = reviews.find((r: any) => r.id === id);
-    if (!review) {
-      res.status(404).json({ error: "Review not found." });
-      return;
-    }
-    review.status = review.status === "approved" ? "pending" : "approved";
-    writeReviews(reviews);
-    res.json({ success: true, review });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update review." });
-  }
-});
-
-// API: Admin — delete a review
-app.delete("/api/admin/reviews/:id", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-  try {
-    const reviews = readReviews();
-    const idx = reviews.findIndex((r: any) => r.id === id);
-    if (idx === -1) {
-      res.status(404).json({ error: "Review not found." });
-      return;
-    }
-    reviews.splice(idx, 1);
-    writeReviews(reviews);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete review." });
-  }
-});
-
 // API: Fetch an invitation by slug
 app.get("/api/invitations/:slug", (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
@@ -482,6 +435,53 @@ const requireAdminAuth = (req: express.Request, res: express.Response, next: exp
   }
   next();
 };
+
+// API: Admin — fetch all reviews (pending + approved)
+app.get("/api/admin/reviews", requireAdminAuth, (req, res) => {
+  try {
+    const reviews = readReviews();
+    reviews.sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+    res.json({ success: true, reviews });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch reviews." });
+  }
+});
+
+// API: Admin — approve a review
+app.post("/api/admin/reviews/:id/approve", requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  try {
+    const reviews = readReviews();
+    const review = reviews.find((r: any) => r.id === id);
+    if (!review) {
+      res.status(404).json({ error: "Review not found." });
+      return;
+    }
+    review.status = review.status === "approved" ? "pending" : "approved";
+    writeReviews(reviews);
+    res.json({ success: true, review });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update review." });
+  }
+});
+
+// API: Admin — delete a review
+app.delete("/api/admin/reviews/:id", requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  try {
+    const reviews = readReviews();
+    const idx = reviews.findIndex((r: any) => r.id === id);
+    if (idx === -1) {
+      res.status(404).json({ error: "Review not found." });
+      return;
+    }
+    reviews.splice(idx, 1);
+    writeReviews(reviews);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete review." });
+  }
+});
 
 // API: Admin Login
 app.post("/api/admin/login", (req, res) => {
