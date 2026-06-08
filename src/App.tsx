@@ -161,14 +161,14 @@ export default function App() {
               <img 
                 src={activePhoto} 
                 alt="Couple Background" 
-                className="w-full h-full object-cover opacity-80"
+                className="w-full h-full object-cover opacity-70"
               />
               <div 
-                className="absolute inset-0 backdrop-blur-[1px]" 
+                className="absolute inset-0 backdrop-blur-[0.5px]" 
                 style={{ 
                   background: activeStyle.isDark 
-                    ? "linear-gradient(to bottom, rgba(8, 2, 19, 0.9) 0%, rgba(8, 2, 19, 0.65) 60%, rgba(8, 2, 19, 0.95) 100%)"
-                    : "linear-gradient(to bottom, rgba(250, 246, 240, 0.85) 0%, rgba(250, 246, 240, 0.55) 60%, rgba(250, 246, 240, 0.95) 100%)"
+                    ? "rgba(10, 4, 19, 0.45)"
+                    : "rgba(250, 246, 240, 0.35)"
                 }}
               />
             </div>
@@ -916,8 +916,9 @@ export default function App() {
             >
               🔑 Manage Card
             </button>
-            <span className="hidden md:inline-block text-[9px] tracking-widest font-marcellus text-amber-400 bg-amber-400/10 border border-amber-400/20 px-3.5 py-2 rounded-full select-none font-bold">
-              FREE TO BUILD &amp; PREVIEW
+            <span className="text-[7.5px] sm:text-[9px] tracking-wider sm:tracking-widest font-marcellus text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full select-none font-bold">
+              <span className="inline md:hidden">Free Preview</span>
+              <span className="hidden md:inline">FREE TO BUILD &amp; PREVIEW</span>
             </span>
           </div>
         </div>
@@ -1215,11 +1216,11 @@ export default function App() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { title: "Sitar & Bansuri Melodies", icon: "🎵", desc: "Strictly soothing traditional instrumentals and beats with zero vocal interference." },
+                { title: "Bollywood Instrumentals", icon: "🎵", desc: "Select from popular romantic Bollywood instrumental melodies to play in the background." },
                 { title: "Interactive Covers", icon: "🚪", desc: "Guests interact with elegant opening templates (arched doors, tasselled strings, or lighting lamps)." },
-                { title: "Dynamic RSVP Manager", icon: "📝", desc: "Guests confirm their attendance. Track attendance totals instantly in your owner dashboard." },
+                { title: "Google Maps Integration", icon: "📍", desc: "Embed exact venue locations so guests can navigate directly using Google Maps with one tap." },
                 { title: "UPI Shagun Gift System", icon: "🎁", desc: "Receive monetary blessings direct to your account. Guests enter custom amounts to generate secure UPI QR codes." },
-                { title: "Blessings registry ledger", icon: "📜", desc: "A live wedding guestbook wall where guests submit love notes that post dynamically." },
+                { title: "Blessing Guestbook Wall", icon: "📜", desc: "A live wedding guestbook wall where guests submit love notes that post dynamically." },
                 { title: "One-Time Pay, Lifetime Edits", icon: "🔑", desc: "Pay once. Update timings, parent details, change cover templates, or add drive links at any time for free." }
               ].map((item, idx) => (
                 <div key={idx} className="p-6 bg-white/5 border border-white/10 hover:border-amber-400/40 rounded-[24px] shadow transition-all duration-300 flex flex-col gap-3 group backdrop-blur-md">
