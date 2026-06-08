@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -293,6 +294,50 @@ app.post("/api/contact/submit", (req, res) => {
     
     queries.push(newQuery);
     fs.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+
+    // Try to send email notification using SMTP if configured
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = process.env.SMTP_PORT;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    if (smtpHost && smtpPort && smtpUser && smtpPass) {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: parseInt(smtpPort, 10),
+        secure: smtpPort === "465", // true for 465, false for other ports
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      });
+
+      const mailOptions = {
+        from: `"${name.trim()} via GetShaadiLink" <${smtpUser}>`,
+        to: "support@getshaadilink.in",
+        replyTo: email.trim(),
+        subject: `[Support Query] ${subject.trim()}`,
+        text: `You have received a new support query via GetShaadiLink contact form.
+
+Name: ${name.trim()}
+Email: ${email.trim()}
+Subject: ${subject.trim()}
+
+Message:
+${message.trim()}
+
+---
+Date: ${new Date().toLocaleString()}
+Query ID: ${newQuery.id}`,
+      };
+
+      transporter.sendMail(mailOptions).catch((err) => {
+        console.error("Failed to send support email via SMTP:", err);
+      });
+    } else {
+      console.warn("SMTP email variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS) not fully configured. Email was not sent, but query was saved to disk.");
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to save support query:", err);

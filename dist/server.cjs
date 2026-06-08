@@ -27,6 +27,7 @@ var import_path = __toESM(require("path"), 1);
 var import_fs = __toESM(require("fs"), 1);
 var import_genai = require("@google/genai");
 var import_dotenv = __toESM(require("dotenv"), 1);
+var import_nodemailer = __toESM(require("nodemailer"), 1);
 import_dotenv.default.config();
 var app = (0, import_express.default)();
 var PORT = 3e3;
@@ -252,6 +253,45 @@ app.post("/api/contact/submit", (req, res) => {
     };
     queries.push(newQuery);
     import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = process.env.SMTP_PORT;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+    if (smtpHost && smtpPort && smtpUser && smtpPass) {
+      const transporter = import_nodemailer.default.createTransport({
+        host: smtpHost,
+        port: parseInt(smtpPort, 10),
+        secure: smtpPort === "465",
+        // true for 465, false for other ports
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      });
+      const mailOptions = {
+        from: `"${name.trim()} via GetShaadiLink" <${smtpUser}>`,
+        to: "support@getshaadilink.in",
+        replyTo: email.trim(),
+        subject: `[Support Query] ${subject.trim()}`,
+        text: `You have received a new support query via GetShaadiLink contact form.
+
+Name: ${name.trim()}
+Email: ${email.trim()}
+Subject: ${subject.trim()}
+
+Message:
+${message.trim()}
+
+---
+Date: ${(/* @__PURE__ */ new Date()).toLocaleString()}
+Query ID: ${newQuery.id}`
+      };
+      transporter.sendMail(mailOptions).catch((err) => {
+        console.error("Failed to send support email via SMTP:", err);
+      });
+    } else {
+      console.warn("SMTP email variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS) not fully configured. Email was not sent, but query was saved to disk.");
+    }
     res.json({ success: true });
   } catch (err) {
     console.error("Failed to save support query:", err);
