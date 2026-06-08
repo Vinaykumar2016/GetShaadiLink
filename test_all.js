@@ -205,10 +205,57 @@ async function runTests() {
     console.log("✅ TEST 5 PASSED: Invitation details updated using editPassword fallback successfully.\n");
 
     // ----------------------------------------------------
-    // Clean up test file
+    // TEST 6: POST /api/contact/submit
     // ----------------------------------------------------
-    console.log(`Cleaning up test file at ${targetFilePath}...`);
+    console.log("Running Test 6: Submitting contact/support form...");
+    const contactPayload = {
+      name: "Test User",
+      email: "test.user@example.com",
+      subject: "Test Subject",
+      message: "This is a test support message query."
+    };
+
+    const contactRes = await fetch(`${BASE_URL}/api/contact/submit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(contactPayload)
+    });
+
+    const contactResult = await contactRes.json();
+    console.log("Contact Submit Response:", JSON.stringify(contactResult));
+
+    if (!contactRes.ok) {
+      throw new Error(`Contact API failed: ${contactResult.error || "Unknown error"}`);
+    }
+
+    if (!contactResult.success) {
+      throw new Error(`Contact API response did not indicate success`);
+    }
+
+    // Verify support_queries.json file exists and contains the query
+    const queriesPath = path.join(__dirname, "data", "support_queries.json");
+    if (!fs.existsSync(queriesPath)) {
+      throw new Error(`Support queries file not found at: ${queriesPath}`);
+    }
+
+    const queriesContent = JSON.parse(fs.readFileSync(queriesPath, "utf8"));
+    const foundQuery = queriesContent.find(q => q.email === contactPayload.email && q.subject === contactPayload.subject);
+    if (!foundQuery) {
+      throw new Error(`Could not find the submitted contact query in support_queries.json`);
+    }
+    console.log("✅ TEST 6 PASSED: Support form submission succeeded and was written to disk.\n");
+
+    // ----------------------------------------------------
+    // Clean up test files and data
+    // ----------------------------------------------------
+    console.log(`Cleaning up test invitation file at ${targetFilePath}...`);
     fs.unlinkSync(targetFilePath);
+    
+    console.log(`Cleaning up test contact query from ${queriesPath}...`);
+    if (fs.existsSync(queriesPath)) {
+      const remainingQueries = queriesContent.filter(q => q.id !== foundQuery.id);
+      fs.writeFileSync(queriesPath, JSON.stringify(remainingQueries, null, 2), "utf8");
+    }
     console.log("🧹 Cleanup complete.");
 
     console.log("\n==========================================");

@@ -229,6 +229,35 @@ app.post("/api/invitations/:slug/add-note", (req, res) => {
     res.status(500).json({ error: "Failed to register blessing." });
   }
 });
+app.post("/api/contact/submit", (req, res) => {
+  const { name, email, subject, message } = req.body;
+  if (!name || !email || !subject || !message) {
+    res.status(400).json({ error: "Please fill out all fields in the contact form." });
+    return;
+  }
+  try {
+    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
+    let queries = [];
+    if (import_fs.default.existsSync(queriesPath)) {
+      const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
+      queries = JSON.parse(raw);
+    }
+    const newQuery = {
+      id: "query_" + Date.now() + Math.random().toString(36).substr(2, 4),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      subject: subject.trim(),
+      message: message.trim(),
+      date: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    queries.push(newQuery);
+    import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to save support query:", err);
+    res.status(500).json({ error: "Failed to submit your support message." });
+  }
+});
 app.post("/api/invitations/generate", async (req, res) => {
   try {
     const {

@@ -16,6 +16,10 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [successSlug, setSuccessSlug] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
+  const [contactSuccessMsg, setContactSuccessMsg] = useState("");
 
   // Management Login Portal States
   const [loginOpen, setLoginOpen] = useState(false);
@@ -609,6 +613,31 @@ export default function App() {
     fetchInvitation();
   }, [slug]);
 
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    playClickSound();
+    setContactSubmitting(true);
+    setContactSuccessMsg("");
+
+    try {
+      const res = await fetch("/api/contact/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contactForm),
+      });
+
+      const parsed = await res.json();
+      if (!res.ok) throw new Error(parsed.error || "Failed to submit message.");
+
+      setContactSuccessMsg("Your support message has been sent successfully! We will get back to you shortly. ✨");
+      setContactForm({ name: "", email: "", subject: "", message: "" });
+    } catch (err: any) {
+      alert("Error sending message: " + err.message);
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
+
   const handleLoginVerify = async () => {
     setLoginError("");
     setDashboardUserCards([]);
@@ -858,6 +887,16 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                playClickSound();
+                setContactOpen(true);
+                setContactSuccessMsg("");
+              }}
+              className="text-[10px] font-bold tracking-widest uppercase font-marcellus text-stone-300 hover:text-amber-300 px-3 py-2 cursor-pointer transition-colors active:scale-95"
+            >
+              📞 Contact
+            </button>
             <button
               onClick={() => {
                 playClickSound();
@@ -1262,6 +1301,8 @@ export default function App() {
           <button onClick={() => { playClickSound(); setActivePolicyModal("privacy"); }} className="hover:text-amber-400 transition-colors cursor-pointer">Privacy Policy</button>
           <span>•</span>
           <button onClick={() => { playClickSound(); setActivePolicyModal("refund"); }} className="hover:text-amber-400 transition-colors cursor-pointer">Refund/Cancellation</button>
+          <span>•</span>
+          <button onClick={() => { playClickSound(); setContactOpen(true); setContactSuccessMsg(""); }} className="hover:text-amber-400 transition-colors cursor-pointer">Contact Us</button>
         </div>
 
         <p className="text-[9px] text-stone-600 mt-8 tracking-widest uppercase font-semibold">
@@ -1372,6 +1413,118 @@ export default function App() {
                   Close
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Contact Support Modal */}
+      <AnimatePresence>
+        {contactOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[800] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-lg bg-[#0F0B26] border border-white/10 rounded-[32px] p-6 sm:p-8 relative text-[#FAF6F0] shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => { playClickSound(); setContactOpen(false); }}
+                className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer font-bold text-xs"
+              >
+                ✕
+              </button>
+
+              <h3 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400 border-b border-white/10 pb-3 mb-6">✉️ Contact Support</h3>
+              
+              {/* Contact Info Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-xs text-stone-300">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider font-marcellus">Support Email</span>
+                  <a href="mailto:support@getshaadilink.in" className="block text-white font-semibold hover:underline">support@getshaadilink.in</a>
+                </div>
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1">
+                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider font-marcellus">WhatsApp Helpline</span>
+                  <a href="https://wa.me/917026201620" target="_blank" rel="noopener noreferrer" className="block text-white font-semibold hover:underline">+91 7026201620</a>
+                </div>
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 sm:col-span-2">
+                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider font-marcellus">Operating Address</span>
+                  <p className="text-white leading-relaxed font-cormorant font-bold">
+                    S/O Mahantesh Mathad, Padki Puram, Savadatti, Belgaum, Karnataka - 591126
+                  </p>
+                </div>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleContactSubmit} className="space-y-4 text-left">
+                {contactSuccessMsg ? (
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
+                    {contactSuccessMsg}
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Name</label>
+                        <input
+                          type="text"
+                          required
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                          placeholder="Your Name"
+                          className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Email</label>
+                        <input
+                          type="email"
+                          required
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                          placeholder="your@email.com"
+                          className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Subject</label>
+                      <input
+                        type="text"
+                        required
+                        value={contactForm.subject}
+                        onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                        placeholder="What do you need help with?"
+                        className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Message</label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                        placeholder="Write your query here..."
+                        className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs resize-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={contactSubmitting}
+                      className="w-full py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider shadow-md select-none cursor-pointer disabled:opacity-50 active:scale-95 transition-all font-marcellus"
+                    >
+                      {contactSubmitting ? "Sending Query..." : "✉️ Send Message"}
+                    </button>
+                  </>
+                )}
+              </form>
             </motion.div>
           </motion.div>
         )}

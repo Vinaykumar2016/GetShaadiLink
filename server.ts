@@ -266,6 +266,40 @@ app.post("/api/invitations/:slug/add-note", (req, res) => {
   }
 });
 
+// API: Submit a support/contact query
+app.post("/api/contact/submit", (req, res) => {
+  const { name, email, subject, message } = req.body;
+  if (!name || !email || !subject || !message) {
+    res.status(400).json({ error: "Please fill out all fields in the contact form." });
+    return;
+  }
+  
+  try {
+    const queriesPath = path.join(DATA_DIR, "support_queries.json");
+    let queries: any[] = [];
+    if (fs.existsSync(queriesPath)) {
+      const raw = fs.readFileSync(queriesPath, "utf-8");
+      queries = JSON.parse(raw);
+    }
+    
+    const newQuery = {
+      id: "query_" + Date.now() + Math.random().toString(36).substr(2, 4),
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      subject: subject.trim(),
+      message: message.trim(),
+      date: new Date().toISOString(),
+    };
+    
+    queries.push(newQuery);
+    fs.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Failed to save support query:", err);
+    res.status(500).json({ error: "Failed to submit your support message." });
+  }
+});
+
 // API: Generate invitation using Gemini and persist it
 app.post("/api/invitations/generate", async (req, res) => {
   try {
