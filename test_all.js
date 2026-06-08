@@ -246,6 +246,56 @@ async function runTests() {
     console.log("✅ TEST 6 PASSED: Support form submission succeeded and was written to disk.\n");
 
     // ----------------------------------------------------
+    // TEST 7: Admin API Endpoints & Auth
+    // ----------------------------------------------------
+    console.log("Running Test 7: Admin API authentication and operations...");
+    const adminPass = process.env.ADMIN_PASSWORD || "shaadiadmin123";
+
+    // 7a: Login request
+    console.log("7a: Logging in as admin...");
+    const loginRes = await fetch(`${BASE_URL}/api/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: "admin", password: adminPass })
+    });
+    const loginResult = await loginRes.json();
+    if (!loginRes.ok || !loginResult.success || loginResult.token !== adminPass) {
+      throw new Error(`Admin login failed: ${JSON.stringify(loginResult)}`);
+    }
+    console.log("   Admin login succeeded.");
+
+    // 7b: Query stats without token (should fail)
+    console.log("7b: Querying stats without authorization header...");
+    const statsFailRes = await fetch(`${BASE_URL}/api/admin/stats`);
+    if (statsFailRes.status !== 401) {
+      throw new Error(`Expected 401 Unauthorized, got ${statsFailRes.status}`);
+    }
+    console.log("   Auth rejection verified.");
+
+    // 7c: Query stats with token (should succeed)
+    console.log("7c: Querying stats with authorization token...");
+    const statsOkRes = await fetch(`${BASE_URL}/api/admin/stats`, {
+      headers: { "Authorization": `Bearer ${adminPass}` }
+    });
+    const statsResult = await statsOkRes.json();
+    if (!statsOkRes.ok || !statsResult.success || typeof statsResult.stats !== "object") {
+      throw new Error(`Stats fetch failed: ${JSON.stringify(statsResult)}`);
+    }
+    console.log(`   Stats verified: Total Invitations = ${statsResult.stats.totalInvitations}, Views = ${statsResult.stats.totalViews}`);
+
+    // 7d: Query list of support queries
+    console.log("7d: Querying support list...");
+    const queriesListRes = await fetch(`${BASE_URL}/api/admin/queries`, {
+      headers: { "Authorization": `Bearer ${adminPass}` }
+    });
+    const queriesListResult = await queriesListRes.json();
+    if (!queriesListRes.ok || !queriesListResult.success || !Array.isArray(queriesListResult.queries)) {
+      throw new Error(`Queries list fetch failed: ${JSON.stringify(queriesListResult)}`);
+    }
+    console.log(`   Queries list verified: found ${queriesListResult.queries.length} queries.`);
+    console.log("✅ TEST 7 PASSED: Admin Dashboard API verified successfully.\n");
+
+    // ----------------------------------------------------
     // Clean up test files and data
     // ----------------------------------------------------
     console.log(`Cleaning up test invitation file at ${targetFilePath}...`);

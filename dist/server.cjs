@@ -298,6 +298,186 @@ Query ID: ${newQuery.id}`
     res.status(500).json({ error: "Failed to submit your support message." });
   }
 });
+var requireAdminAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Access denied. No authentication token provided." });
+    return;
+  }
+  const token = authHeader.split(" ")[1];
+  const expectedPassword = process.env.ADMIN_PASSWORD || "shaadiadmin123";
+  if (token !== expectedPassword) {
+    res.status(403).json({ error: "Access denied. Invalid authentication token." });
+    return;
+  }
+  next();
+};
+app.post("/api/admin/login", (req, res) => {
+  const { username, password } = req.body;
+  const expectedUsername = process.env.ADMIN_USERNAME || "admin";
+  const expectedPassword = process.env.ADMIN_PASSWORD || "shaadiadmin123";
+  if (username === expectedUsername && password === expectedPassword) {
+    res.json({ success: true, token: expectedPassword });
+  } else {
+    res.status(401).json({ error: "Invalid username or password" });
+  }
+});
+app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
+  try {
+    let totalInvitations = 0;
+    let totalViews = 0;
+    let totalQueries = 0;
+    if (import_fs.default.existsSync(INVITATIONS_DIR)) {
+      const files = import_fs.default.readdirSync(INVITATIONS_DIR);
+      totalInvitations = files.filter((f) => f.endsWith(".json")).length;
+      for (const file of files) {
+        if (file.endsWith(".json")) {
+          try {
+            const raw = import_fs.default.readFileSync(import_path.default.join(INVITATIONS_DIR, file), "utf-8");
+            const data = JSON.parse(raw);
+            totalViews += data.views || 0;
+          } catch (e) {
+          }
+        }
+      }
+    }
+    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
+    if (import_fs.default.existsSync(queriesPath)) {
+      try {
+        const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
+        const queries = JSON.parse(raw);
+        totalQueries = Array.isArray(queries) ? queries.length : 0;
+      } catch (e) {
+      }
+    }
+    res.json({
+      success: true,
+      stats: {
+        totalInvitations,
+        totalViews,
+        totalQueries
+      }
+    });
+  } catch (error) {
+    console.error("Failed to fetch admin stats:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
+  try {
+    const list = [];
+    if (import_fs.default.existsSync(INVITATIONS_DIR)) {
+      const files = import_fs.default.readdirSync(INVITATIONS_DIR);
+      for (const file of files) {
+        if (file.endsWith(".json")) {
+          try {
+            const raw = import_fs.default.readFileSync(import_path.default.join(INVITATIONS_DIR, file), "utf-8");
+            const data = JSON.parse(raw);
+            list.push({
+              slug: data.slug,
+              bride: data.bride,
+              groom: data.groom,
+              wdate: data.wdate,
+              city: data.city,
+              ownerEmail: data.ownerEmail || "",
+              views: data.views || 0,
+              createdDate: data.createdDate || data.date || ""
+            });
+          } catch (e) {
+          }
+        }
+      }
+    }
+    list.sort((a, b) => b.views - a.views);
+    res.json({ success: true, invitations: list });
+  } catch (error) {
+    console.error("Failed to list invitations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.delete("/api/admin/invitations/:slug", requireAdminAuth, (req, res) => {
+  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
+  if (!import_fs.default.existsSync(filePath)) {
+    res.status(404).json({ error: "Invitation not found" });
+    return;
+  }
+  try {
+    import_fs.default.unlinkSync(filePath);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete invitation:", error);
+    res.status(500).json({ error: "Failed to delete invitation" });
+  }
+});
+app.get("/api/admin/queries", requireAdminAuth, (req, res) => {
+  try {
+    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
+    let queries = [];
+    if (import_fs.default.existsSync(queriesPath)) {
+      const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
+      queries = JSON.parse(raw);
+    }
+    if (Array.isArray(queries)) {
+      queries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    res.json({ success: true, queries });
+  } catch (error) {
+    console.error("Failed to list queries:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/api/admin/queries/:id/update", requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  if (!status) {
+    res.status(400).json({ error: "Status field is required" });
+    return;
+  }
+  try {
+    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
+    if (!import_fs.default.existsSync(queriesPath)) {
+      res.status(404).json({ error: "No queries exist" });
+      return;
+    }
+    const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
+    const queries = JSON.parse(raw);
+    const query = queries.find((q) => q.id === id);
+    if (!query) {
+      res.status(404).json({ error: "Query not found" });
+      return;
+    }
+    query.status = status;
+    import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    res.json({ success: true, query });
+  } catch (error) {
+    console.error("Failed to update query status:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.delete("/api/admin/queries/:id", requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  try {
+    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
+    if (!import_fs.default.existsSync(queriesPath)) {
+      res.status(404).json({ error: "No queries exist" });
+      return;
+    }
+    const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
+    const queries = JSON.parse(raw);
+    const index = queries.findIndex((q) => q.id === id);
+    if (index === -1) {
+      res.status(404).json({ error: "Query not found" });
+      return;
+    }
+    queries.splice(index, 1);
+    import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete support query:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 app.post("/api/invitations/generate", async (req, res) => {
   try {
     const {

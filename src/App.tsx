@@ -4,6 +4,7 @@ import BuilderForm from "./components/BuilderForm";
 import InvitationView from "./components/InvitationView";
 import ThemeShowroom from "./components/ThemeShowroom";
 import UserDashboard from "./components/UserDashboard";
+import AdminDashboard from "./components/AdminDashboard";
 import { playClickSound } from "./utils/soundUtils";
 import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Wand2, Eye, EyeOff, Calendar, Volume2, HelpCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -11,6 +12,7 @@ import { motion, AnimatePresence } from "motion/react";
 export default function App() {
   // Simple state-based router based on location path
   const [slug, setSlug] = useState<string | null>(null);
+  const [adminActive, setAdminActive] = useState(false);
   const [activePolicyModal, setActivePolicyModal] = useState<"pricing" | "terms" | "privacy" | "refund" | null>(null);
   const [invitationData, setInvitationData] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -572,9 +574,12 @@ export default function App() {
   useEffect(() => {
     const path = window.location.pathname;
     const cleanSlug = path.split("/").filter(Boolean)[0];
-    const ignoredSlugs = ["index.html", "index", "api", "assets", "favicon.ico", "vite"];
+    const ignoredSlugs = ["index.html", "index", "api", "assets", "favicon.ico", "vite", "admin"];
 
-    if (cleanSlug && !ignoredSlugs.includes(cleanSlug.toLowerCase()) && !cleanSlug.includes(".")) {
+    if (cleanSlug && cleanSlug.toLowerCase() === "admin") {
+      setAdminActive(true);
+      setLoading(false);
+    } else if (cleanSlug && !ignoredSlugs.includes(cleanSlug.toLowerCase()) && !cleanSlug.includes(".")) {
       const slugVal = cleanSlug.toLowerCase();
       setSlug(slugVal);
       if (slugVal === "demo-preview") {
@@ -818,6 +823,18 @@ export default function App() {
           </p>
         </div>
       </div>
+    );
+  }
+
+  // Admin View
+  if (adminActive) {
+    return (
+      <AdminDashboard 
+        onClose={() => {
+          setAdminActive(false);
+          window.history.pushState({}, "", "/");
+        }}
+      />
     );
   }
 
