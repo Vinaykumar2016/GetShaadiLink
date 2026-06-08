@@ -305,7 +305,7 @@ var requireAdminAuth = (req, res, next) => {
     return;
   }
   const token = authHeader.split(" ")[1];
-  const expectedPassword = process.env.ADMIN_PASSWORD || "shaadiadmin123";
+  const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
   if (token !== expectedPassword) {
     res.status(403).json({ error: "Access denied. Invalid authentication token." });
     return;
@@ -314,8 +314,8 @@ var requireAdminAuth = (req, res, next) => {
 };
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
-  const expectedUsername = process.env.ADMIN_USERNAME || "admin";
-  const expectedPassword = process.env.ADMIN_PASSWORD || "shaadiadmin123";
+  const expectedUsername = process.env.ADMIN_USERNAME || "VinayMathad";
+  const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
   if (username === expectedUsername && password === expectedPassword) {
     res.json({ success: true, token: expectedPassword });
   } else {

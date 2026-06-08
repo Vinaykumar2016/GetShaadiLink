@@ -249,14 +249,14 @@ async function runTests() {
     // TEST 7: Admin API Endpoints & Auth
     // ----------------------------------------------------
     console.log("Running Test 7: Admin API authentication and operations...");
-    const adminPass = process.env.ADMIN_PASSWORD || "shaadiadmin123";
+    const adminPass = process.env.ADMIN_PASSWORD || "Vinay@admin";
 
     // 7a: Login request
     console.log("7a: Logging in as admin...");
     const loginRes = await fetch(`${BASE_URL}/api/admin/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: "admin", password: adminPass })
+      body: JSON.stringify({ username: process.env.ADMIN_USERNAME || "VinayMathad", password: adminPass })
     });
     const loginResult = await loginRes.json();
     if (!loginRes.ok || !loginResult.success || loginResult.token !== adminPass) {
