@@ -56,7 +56,7 @@ export default function App() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setSimSlide((prev) => (prev + 1) % 3);
+      setSimSlide((prev) => (prev + 1) % 2);
     }, 4500);
     return () => clearInterval(interval);
   }, []);
@@ -147,189 +147,6 @@ export default function App() {
 
     switch (simSlide) {
       case 0:
-        const activePhoto = heroSimulatorConfig[heroActiveTheme as keyof typeof heroSimulatorConfig]?.photo || "/samples/couple1.jpg";
-        return (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            key="slide0"
-            className="absolute inset-0 flex flex-col justify-between p-4 pt-10 select-none text-center relative overflow-hidden"
-          >
-            {/* Background Couple Photo with Frosted Overlay */}
-            <div className="absolute inset-0 z-0">
-              <img 
-                src={activePhoto} 
-                alt="Couple Background" 
-                className="w-full h-full object-cover opacity-70"
-              />
-              <div 
-                className="absolute inset-0 backdrop-blur-[0.5px]" 
-                style={{ 
-                  background: activeStyle.isDark 
-                    ? "rgba(10, 4, 19, 0.45)"
-                    : "rgba(250, 246, 240, 0.35)"
-                }}
-              />
-            </div>
-
-            <div className="absolute inset-2 border border-dashed rounded-[28px] pointer-events-none opacity-30 z-10" style={{ borderColor: activeStyle.text }} />
-
-            {/* Simulated nav bar */}
-            <div 
-              className="absolute top-8 inset-x-0 z-30 flex justify-around px-4 text-[4.5px] font-bold tracking-widest font-marcellus opacity-85 select-none" 
-              style={{ color: activeStyle.text }}
-            >
-              <span className="border-b-[1px] pb-0.5" style={{ borderColor: activeStyle.text }}>LIVE</span>
-              <span>RSVP</span>
-              <span>STORY</span>
-              <span>REGISTRY</span>
-              <span>TIMELINE</span>
-            </div>
-            
-            <div className="z-10 mt-4">
-              <span className="text-[6px] tracking-[3px] uppercase block font-marcellus opacity-75" style={{ color: activeStyle.text }}>Shubh Vivah</span>
-              <h4 className="text-xl font-cursive font-normal leading-tight mt-1" style={{ color: activeStyle.text }}>
-                {brideName}
-                <span className="block text-[10px] font-serif italic my-0.5 opacity-65">weds</span>
-                {groomName}
-              </h4>
-            </div>
-
-            <div className="flex-1 flex items-center justify-center relative my-1 overflow-visible z-10">
-              {heroActiveTheme === "jaipur" && (
-                <div className="w-full flex items-center justify-center overflow-hidden relative h-20">
-                  <motion.div
-                    animate={{ x: [-3, -35, -3] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute left-6 w-10 h-16 bg-[#8A3A1A] border-r-2 border-amber-500 rounded-l-lg shadow-sm"
-                  />
-                  <motion.div
-                    animate={{ x: [3, 35, 3] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute right-6 w-10 h-16 bg-[#8A3A1A] border-l-2 border-amber-500 rounded-r-lg shadow-sm"
-                  />
-                  <span className="text-lg z-0 drop-shadow-md">🌸</span>
-                </div>
-              )}
-
-              {heroActiveTheme === "diya" && (
-                <div className="flex flex-col items-center relative overflow-visible scale-90">
-                  <svg viewBox="0 0 100 100" className="w-20 h-20 fill-none stroke-amber-400/35 stroke-[0.8] animate-spin-slow absolute">
-                    <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
-                  </svg>
-                  <div className="relative w-16 h-12 flex items-center justify-center overflow-visible">
-                    <svg viewBox="0 0 100 60" className="w-14 h-10 text-amber-800 fill-current absolute bottom-0">
-                      <path d="M10,20 C10,20 20,50 50,50 C80,50 90,20 90,20 C90,20 75,35 50,35 C25,35 10,20 10,20 Z" />
-                    </svg>
-                    <motion.div
-                      animate={{ scale: [1, 1.15, 0.95, 1.05, 1], rotate: [0, 2, -2, 1, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="absolute top-1.5 w-3 h-5 bg-gradient-to-t from-red-600 via-amber-400 to-yellow-100 rounded-t-full shadow-[0_0_10px_orange]"
-                      style={{ transformOrigin: "bottom center" }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {heroActiveTheme === "lotus" && (
-                <div className="relative w-24 h-20 flex items-end justify-center overflow-visible scale-90">
-                  <motion.svg
-                    animate={{ rotate: [-20, 0, -20] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    viewBox="0 0 50 100" className="w-6 h-12 absolute text-pink-500 fill-current drop-shadow"
-                    style={{ transformOrigin: "bottom center", left: "15%" }}
-                  >
-                    <path d="M50,100 C30,90 0,60 0,35 C0,15 25,0 50,25 Z" />
-                  </motion.svg>
-                  <motion.svg
-                    animate={{ rotate: [20, 0, 20] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    viewBox="0 0 50 100" className="w-6 h-12 absolute text-pink-500 fill-current drop-shadow"
-                    style={{ transformOrigin: "bottom center", right: "15%", transform: "scaleX(-1)" }}
-                  >
-                    <path d="M50,100 C30,90 0,60 0,35 C0,15 25,0 50,25 Z" />
-                  </motion.svg>
-                  <svg
-                    viewBox="0 0 60 100" className="w-8 h-14 absolute text-pink-600 fill-current drop-shadow-md"
-                    style={{ transformOrigin: "bottom center" }}
-                  >
-                    <path d="M30,100 C15,85 0,60 0,35 C0,15 15,0 30,20 C45,0 60,15 60,35 C60,60 45,85 30,100 Z" />
-                  </svg>
-                </div>
-              )}
-              {heroActiveTheme === "elephant" && (
-                <div className="w-full flex justify-around px-4 relative items-center z-10 scale-90">
-                  <motion.span
-                    animate={{ x: [-4, 4, -4], rotate: [0, -5, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-2xl"
-                  >
-                    🐘
-                  </motion.span>
-                  <span className="text-base opacity-50 font-bold" style={{ color: activeStyle.text }}>囍</span>
-                  <motion.span
-                    animate={{ x: [4, -4, 4], rotate: [0, 5, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-2xl"
-                    style={{ transform: "scaleX(-1)" }}
-                  >
-                    🐘
-                  </motion.span>
-                </div>
-              )}
-
-              {heroActiveTheme === "thread" && (
-                <div className="flex flex-col items-center relative overflow-visible scale-90">
-                  <div className="absolute top-[-25px] w-24 h-0.5 bg-gradient-to-r from-red-600 via-amber-500 to-red-600 opacity-60" />
-                  <motion.div
-                    animate={{ rotate: [-8, 8, -8] }}
-                    transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
-                    className="flex flex-col items-center origin-top mt-[-10px]"
-                  >
-                    <div className="w-[1px] h-8 bg-red-600" />
-                    <span className="text-2xl drop-shadow-md">🔔</span>
-                  </motion.div>
-                </div>
-              )}
-
-              {heroActiveTheme === "garland" && (
-                <div className="w-full flex flex-col items-center relative overflow-visible scale-90">
-                  <div className="w-32 h-6 flex justify-around items-center border-b border-dashed border-emerald-800/10 mb-2">
-                    <span className="text-[10px] animate-pulse">🌼</span>
-                    <span className="text-[10px] animate-pulse" style={{ animationDelay: "0.5s" }}>🌸</span>
-                    <span className="text-[10px] animate-pulse" style={{ animationDelay: "1s" }}>🌼</span>
-                  </div>
-                  <motion.div 
-                    animate={{ scale: [0.95, 1.05, 0.95] }}
-                    transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                    className="text-2xl flex gap-1 z-10"
-                  >
-                    <span>🌸</span>
-                    <span>🤝</span>
-                    <span>🌸</span>
-                  </motion.div>
-                </div>
-              )}
-            </div>
-
-            <div className="mb-6 z-10 flex flex-col items-center">
-              <span className="text-[7px] uppercase tracking-wider block opacity-80 font-bold" style={{ color: activeStyle.text }}>
-                {dateStr} • {cityStr}
-              </span>
-              <motion.div
-                animate={{ scale: [1, 1.05, 1], shadow: ["0 4px 6px rgba(0,0,0,0.1)", "0 8px 15px rgba(251,191,36,0.3)", "0 4px 6px rgba(0,0,0,0.1)"] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="mt-3 px-4 py-1.5 rounded-full border text-[7.5px] tracking-widest font-marcellus font-bold shadow-md cursor-pointer"
-                style={{ backgroundColor: activeStyle.isDark ? "#FFE082" : "#8A3A1A", color: activeStyle.isDark ? "#060414" : "#FFFFFF", borderColor: activeStyle.accent }}
-              >
-                ✉️ OPEN INVITATION
-              </motion.div>
-            </div>
-          </motion.div>
-        );
-
-      case 1:
         return (
           <motion.div 
             initial={{ opacity: 0 }}
@@ -402,7 +219,7 @@ export default function App() {
           </motion.div>
         );
 
-      case 2:
+      case 1:
         return (
           <motion.div 
             initial={{ opacity: 0 }}
@@ -462,7 +279,7 @@ export default function App() {
 
             <div className="mb-6 text-center select-none">
               <span className="text-[7.5px] font-marcellus tracking-[1.5px] text-stone-400 font-bold uppercase">
-                Add RSVP and Registry Ledger
+                Add Maps and Guestbook Wall
               </span>
             </div>
           </motion.div>
@@ -706,8 +523,10 @@ export default function App() {
       const res = await fetch(`/api/invitations/${cardSlug}?admin=true`);
       if (res.ok) {
         const parsed = await res.json();
-        if (parsed.editPassword === loginPassword) {
+        if (parsed.editPassword && loginPassword && parsed.editPassword.trim() === loginPassword.trim()) {
           setLoggedInCardData(parsed);
+        // Clear password from state after a successful login to avoid reuse issues
+        setLoginPassword('');
           setLoginOpen(false);
           setDashboardUserCards([]);
         } else {
