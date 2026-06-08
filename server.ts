@@ -17,12 +17,16 @@ app.use(express.urlencoded({ limit: "25mb", extended: true }));
 // Data storage directories
 const DATA_DIR = path.join(process.cwd(), "data");
 const INVITATIONS_DIR = path.join(DATA_DIR, "invitations");
+const REVIEWS_FILE = path.join(DATA_DIR, "reviews.json");
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR);
 }
 if (!fs.existsSync(INVITATIONS_DIR)) {
   fs.mkdirSync(INVITATIONS_DIR);
+}
+if (!fs.existsSync(REVIEWS_FILE)) {
+  fs.writeFileSync(REVIEWS_FILE, "[]", "utf-8");
 }
 
 // Lazy load Gemini Client to prevent crashing on launch if the key is missing
@@ -57,17 +61,135 @@ app.get("/api/check-slug/:slug", (req, res) => {
   res.json({ available: !exists });
 });
 
-// API: Fetch live invitation statistics
+// Helper: read reviews from disk
+function readReviews(): any[] {
+  try {
+    if (!fs.existsSync(REVIEWS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(REVIEWS_FILE, "utf-8")) || [];
+  } catch { return []; }
+}
+
+// Helper: write reviews to disk
+function writeReviews(reviews: any[]) {
+  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(reviews, null, 2), "utf-8");
+}
+
+// Helper: compute average rating from approved reviews
+function computeStats() {
+  const approved = readReviews().filter((r: any) => r.status === "approved");
+  const avg = approved.length > 0
+    ? approved.reduce((sum: number, r: any) => sum + (r.stars || 5), 0) / approved.length
+    : 0;
+  return { totalReviews: approved.length, averageRating: Math.round(avg * 10) / 10 };
+}
+
+// API: Fetch live invitation statistics (rating now dynamic)
 app.get("/api/stats", (req, res) => {
   try {
     const files = fs.readdirSync(INVITATIONS_DIR);
     const jsonFilesCount = files.filter((f) => f.endsWith(".json")).length;
+    const { totalReviews, averageRating } = computeStats();
     res.json({
       totalGenerated: jsonFilesCount,
-      rating: 4.9,
+      rating: averageRating > 0 ? averageRating : 4.9,  // fallback until first review
+      totalReviews,
     });
   } catch (error) {
-    res.json({ totalGenerated: 0, rating: 4.9 });
+    res.json({ totalGenerated: 0, rating: 4.9, totalReviews: 0 });
+  }
+});
+
+// API: Public — fetch approved reviews
+app.get("/api/reviews", (req, res) => {
+  try {
+    const approved = readReviews().filter((r: any) => r.status === "approved");
+    // Newest first
+    approved.sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+    res.json({ success: true, reviews: approved });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch reviews." });
+  }
+});
+
+// API: Public — submit a new review (goes to pending)
+app.post("/api/reviews/submit", (req, res) => {
+  const { name, location, stars, text } = req.body;
+  if (!name || !text || !stars) {
+    res.status(400).json({ error: "Please fill in all required fields." });
+    return;
+  }
+  const starsNum = Math.min(5, Math.max(1, parseInt(stars, 10)));
+  if (isNaN(starsNum)) {
+    res.status(400).json({ error: "Invalid star rating." });
+    return;
+  }
+  if (text.trim().length < 20) {
+    res.status(400).json({ error: "Please write at least 20 characters in your review." });
+    return;
+  }
+  try {
+    const reviews = readReviews();
+    const newReview = {
+      id: "rev_" + Date.now() + Math.random().toString(36).substr(2, 5),
+      name: name.trim(),
+      location: (location || "").trim(),
+      stars: starsNum,
+      text: text.trim(),
+      status: "pending",
+      submittedAt: new Date().toISOString(),
+    };
+    reviews.push(newReview);
+    writeReviews(reviews);
+    res.json({ success: true, message: "Thank you! Your review has been submitted and will appear after approval." });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save review." });
+  }
+});
+
+// API: Admin — fetch all reviews (pending + approved)
+app.get("/api/admin/reviews", requireAdminAuth, (req, res) => {
+  try {
+    const reviews = readReviews();
+    reviews.sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+    res.json({ success: true, reviews });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch reviews." });
+  }
+});
+
+// API: Admin — approve a review
+app.post("/api/admin/reviews/:id/approve", requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  try {
+    const reviews = readReviews();
+    const review = reviews.find((r: any) => r.id === id);
+    if (!review) {
+      res.status(404).json({ error: "Review not found." });
+      return;
+    }
+    review.status = review.status === "approved" ? "pending" : "approved";
+    writeReviews(reviews);
+    res.json({ success: true, review });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update review." });
+  }
+});
+
+// API: Admin — delete a review
+app.delete("/api/admin/reviews/:id", requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  try {
+    const reviews = readReviews();
+    const idx = reviews.findIndex((r: any) => r.id === id);
+    if (idx === -1) {
+      res.status(404).json({ error: "Review not found." });
+      return;
+    }
+    reviews.splice(idx, 1);
+    writeReviews(reviews);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete review." });
   }
 });
 

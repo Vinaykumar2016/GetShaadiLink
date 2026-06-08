@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { playClickSound } from "../utils/soundUtils";
-import { LayoutDashboard, Mail, FileText, LogOut, Trash2, CheckCircle, Clock, Eye, ShieldAlert, ArrowLeft, Search } from "lucide-react";
+import { LayoutDashboard, Mail, FileText, LogOut, Trash2, CheckCircle, Clock, Eye, ShieldAlert, ArrowLeft, Search, Star, MessageSquare } from "lucide-react";
 
 interface AdminDashboardProps {
   onClose: () => void;
@@ -12,12 +12,13 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "queries">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "queries" | "reviews">("dashboard");
 
   // Data states
-  const [stats, setStats] = useState({ totalInvitations: 0, totalViews: 0, totalQueries: 0 });
+  const [stats, setStats] = useState({ totalInvitations: 0, totalViews: 0, totalQueries: 0, totalReviews: 0, pendingReviews: 0 });
   const [invitations, setInvitations] = useState<any[]>([]);
   const [queries, setQueries] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
 
@@ -49,6 +50,21 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
       if (qRes.ok) {
         const data = await qRes.json();
         setQueries(data.queries || []);
+      }
+
+      // Fetch Reviews
+      const rRes = await fetch("/api/admin/reviews", {
+        headers: { "Authorization": `Bearer ${authToken}` }
+      });
+      if (rRes.ok) {
+        const data = await rRes.json();
+        const allReviews = data.reviews || [];
+        setReviews(allReviews);
+        setStats(prev => ({
+          ...prev,
+          totalReviews: allReviews.length,
+          pendingReviews: allReviews.filter((r: any) => r.status === "pending").length,
+        }));
       }
     } catch (err) {
       console.error("Failed to load admin dashboard data:", err);
@@ -281,6 +297,21 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
             >
               <Mail className="w-4 h-4" /> Support Queries
             </button>
+            <button
+              onClick={() => { playClickSound(); setActiveTab("reviews"); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "reviews"
+                  ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400 pl-3"
+                  : "text-stone-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Star className="w-4 h-4" /> Reviews
+              {stats.pendingReviews > 0 && (
+                <span className="ml-auto text-[9px] font-bold bg-amber-500 text-stone-950 px-1.5 py-0.5 rounded-full">
+                  {stats.pendingReviews}
+                </span>
+              )}
+            </button>
           </nav>
         </div>
 
@@ -341,6 +372,19 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 <p className="text-4xl font-bold mt-2 font-marcellus text-white">{stats.totalQueries}</p>
                 <div className="w-full h-1 bg-sky-500/20 absolute bottom-0 inset-x-0">
                   <div className="h-full bg-sky-500" style={{ width: `${Math.min(100, stats.totalQueries * 10)}%` }} />
+                </div>
+              </div>
+
+              {/* Stat card 4 - Reviews */}
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg sm:col-span-3 lg:col-span-1">
+                <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">⭐</div>
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Reviews</h3>
+                <p className="text-4xl font-bold mt-2 font-marcellus text-white">{stats.totalReviews}</p>
+                {stats.pendingReviews > 0 && (
+                  <p className="text-[10px] text-amber-400 font-bold mt-1">{stats.pendingReviews} pending approval</p>
+                )}
+                <div className="w-full h-1 bg-amber-500/20 absolute bottom-0 inset-x-0">
+                  <div className="h-full bg-amber-500" style={{ width: `${Math.min(100, stats.totalReviews * 10)}%` }} />
                 </div>
               </div>
 
@@ -614,6 +658,103 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
               </div>
 
             </div>
+          </div>
+        )}
+
+        {/* TAB 4: REVIEWS MANAGER */}
+        {activeTab === "reviews" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400">⭐ Customer Reviews</h2>
+              <p className="text-xs text-stone-400 mt-1">Approve or reject reviews submitted by couples. Only approved reviews show on the landing page.</p>
+            </div>
+
+            {/* Review summary pills */}
+            <div className="flex gap-3 flex-wrap">
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
+                ✓ {reviews.filter(r => r.status === "approved").length} Approved
+              </span>
+              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20">
+                ⏳ {reviews.filter(r => r.status === "pending").length} Pending
+              </span>
+              <span className="text-[10px] font-bold text-stone-400 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+                Total: {reviews.length}
+              </span>
+            </div>
+
+            {reviews.length === 0 ? (
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-10 text-center">
+                <MessageSquare className="w-10 h-10 text-stone-600 mx-auto mb-3" />
+                <p className="text-xs text-stone-500">No reviews submitted yet. Share your site to get your first review!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className={`bg-[#120E2F]/65 border rounded-2xl p-5 flex flex-col sm:flex-row gap-4 items-start justify-between shadow-md ${
+                      review.status === "approved" ? "border-emerald-500/20" : "border-amber-500/20"
+                    }`}
+                  >
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${
+                          review.status === "approved"
+                            ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                            : "text-amber-400 bg-amber-500/10 border-amber-500/20"
+                        }`}>
+                          {review.status === "approved" ? "✓ Approved" : "⏳ Pending"}
+                        </span>
+                        <div className="flex gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${ i < review.stars ? "fill-amber-400 text-amber-400" : "text-stone-600" }`} />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-stone-500 font-mono">{new Date(review.submittedAt).toLocaleDateString("en-IN")}</span>
+                      </div>
+                      <p className="text-xs text-stone-300 leading-relaxed font-cormorant italic">"{review.text}"</p>
+                      <div>
+                        <p className="text-xs font-bold text-white font-marcellus">{review.name}</p>
+                        {review.location && <p className="text-[10px] text-stone-500 font-marcellus mt-0.5">{review.location}</p>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        onClick={async () => {
+                          playClickSound();
+                          const res = await fetch(`/api/admin/reviews/${review.id}/approve`, {
+                            method: "POST",
+                            headers: { "Authorization": `Bearer ${token}` },
+                          });
+                          if (res.ok) { if (token) fetchAllData(token); }
+                        }}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all ${
+                          review.status === "approved"
+                            ? "bg-stone-500/15 border border-stone-500/30 text-stone-400 hover:bg-stone-500/25"
+                            : "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25"
+                        }`}
+                      >
+                        {review.status === "approved" ? "Unpublish" : "✓ Approve"}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm("Delete this review permanently?")) return;
+                          playClickSound();
+                          const res = await fetch(`/api/admin/reviews/${review.id}`, {
+                            method: "DELETE",
+                            headers: { "Authorization": `Bearer ${token}` },
+                          });
+                          if (res.ok) { if (token) fetchAllData(token); }
+                        }}
+                        className="w-9 h-9 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors cursor-pointer flex items-center justify-center border border-rose-500/20"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

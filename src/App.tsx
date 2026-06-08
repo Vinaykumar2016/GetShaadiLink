@@ -41,7 +41,18 @@ export default function App() {
   // Theme Showcase showroom selections
   const [preselectedFormTheme, setPreselectedFormTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland" | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
-  const [stats, setStats] = useState<{ totalGenerated: number; rating: number }>({ totalGenerated: 0, rating: 4.9 });
+  const [stats, setStats] = useState<{ totalGenerated: number; rating: number; totalReviews: number }>({
+    totalGenerated: 0,
+    rating: 4.9,
+    totalReviews: 0,
+  });
+  // Dynamic reviews from API
+  const [liveReviews, setLiveReviews] = useState<any[]>([]);
+  // Review submission modal
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ name: "", location: "", stars: 5, text: "" });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState("");
 
   // Hero interactive simulator selected theme
   const [heroActiveTheme, setHeroActiveTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland">("jaipur");
@@ -306,7 +317,43 @@ export default function App() {
       }
     };
     fetchStats();
+
+    // Also fetch approved reviews
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch("/api/reviews");
+        if (res.ok) {
+          const data = await res.json();
+          setLiveReviews(data.reviews || []);
+        }
+      } catch (err) {
+        console.error("Failed to load reviews", err);
+      }
+    };
+    fetchReviews();
   }, []);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    playClickSound();
+    setReviewSubmitting(true);
+    setReviewSuccess("");
+    try {
+      const res = await fetch("/api/reviews/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reviewForm),
+      });
+      const parsed = await res.json();
+      if (!res.ok) throw new Error(parsed.error || "Submission failed");
+      setReviewSuccess(parsed.message || "Thank you! Your review is awaiting approval.");
+      setReviewForm({ name: "", location: "", stars: 5, text: "" });
+    } catch (err: any) {
+      alert("Error: " + err.message);
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   // Landing page marigold/rose petal animation shower
   useEffect(() => {
@@ -1153,7 +1200,7 @@ export default function App() {
             </div>
           </motion.section>
 
-          {/* ── TESTIMONIALS SECTION ─────────────────────────────── */}
+          {/* ── TESTIMONIALS SECTION (DYNAMIC) ─────────────────── */}
           <motion.section
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1168,82 +1215,76 @@ export default function App() {
               <h3 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
                 Couples Who Trusted ShaadiLink
               </h3>
+              {stats.totalReviews > 0 && (
+                <p className="text-xs text-stone-400 mt-3 font-cormorant">
+                  {stats.totalReviews} verified {stats.totalReviews === 1 ? "review" : "reviews"} · {stats.rating.toFixed(1)} ★ average
+                </p>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                {
-                  quote: "The Jaipur theme was breathtaking! Our guests couldn't stop sharing our invitation link. Worth every rupee!",
-                  name: "Priya & Arjun",
-                  location: "Bengaluru, Karnataka",
-                  stars: 5,
-                  emoji: "🌸"
-                },
-                {
-                  quote: "We loved the Midnight Diya cover — the opening animation made everyone gasp. Our families are still talking about it!",
-                  name: "Riya & Kabir",
-                  location: "Mumbai, Maharashtra",
-                  stars: 5,
-                  emoji: "🪔"
-                },
-                {
-                  quote: "Setup was so easy! The Bollywood instrumental playing on our page was the perfect touch. Highly recommended!",
-                  name: "Deepika & Rahul",
-                  location: "Hyderabad, Telangana",
-                  stars: 5,
-                  emoji: "🎵"
-                },
-                {
-                  quote: "The guestbook wall was a hit at our reception. Guests loved posting blessings and seeing them live on the page!",
-                  name: "Anjali & Vikram",
-                  location: "Pune, Maharashtra",
-                  stars: 5,
-                  emoji: "📜"
-                },
-                {
-                  quote: "We changed the venue details twice after activating — it was completely free! Lifetime edits is a game changer.",
-                  name: "Sneha & Karthik",
-                  location: "Chennai, Tamil Nadu",
-                  stars: 5,
-                  emoji: "✏️"
-                },
-                {
-                  quote: "The UPI shagun feature was incredibly convenient for outstation relatives who couldn't attend. Loved every bit!",
-                  name: "Meena & Suresh",
-                  location: "Mysuru, Karnataka",
-                  stars: 5,
-                  emoji: "🎁"
-                },
-              ].map((t, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.1 }}
-                  className="testimonial-card p-6 bg-white/5 border border-white/10 rounded-[24px] flex flex-col gap-4 backdrop-blur-md transition-all duration-300 cursor-default"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-base flex-shrink-0">
-                      {t.emoji}
-                    </div>
-                    <div className="flex gap-0.5 mt-1">
-                      {[...Array(t.stars)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                  </div>
-                  <Quote className="w-5 h-5 text-amber-400/25" />
-                  <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-cormorant italic flex-1">
-                    {t.quote}
+            {liveReviews.length === 0 ? (
+              <div className="flex flex-col items-center gap-6 py-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-3xl">
+                  💬
+                </div>
+                <div>
+                  <p className="font-marcellus text-lg font-bold text-white">Be the First to Review!</p>
+                  <p className="text-xs text-stone-400 mt-1 max-w-xs font-cormorant">
+                    No reviews yet. If you've used ShaadiLink for your wedding, share your experience!
                   </p>
-                  <div className="border-t border-white/8 pt-3">
-                    <p className="text-xs font-bold text-amber-300 font-marcellus">{t.name}</p>
-                    <p className="text-[10px] text-stone-500 font-marcellus tracking-wider mt-0.5">{t.location}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                </div>
+                <button
+                  onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
+                  className="py-3 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all"
+                >
+                  ✍️ Write a Review
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {liveReviews.map((t: any, idx: number) => (
+                    <motion.div
+                      key={t.id}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: (idx % 6) * 0.1 }}
+                      className="testimonial-card p-6 bg-white/5 border border-white/10 rounded-[24px] flex flex-col gap-4 backdrop-blur-md transition-all duration-300 cursor-default"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-sm font-bold text-amber-400 font-marcellus flex-shrink-0">
+                          {t.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex gap-0.5 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < t.stars ? "fill-amber-400 text-amber-400" : "text-stone-600"}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <Quote className="w-5 h-5 text-amber-400/25" />
+                      <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-cormorant italic flex-1">
+                        {t.text}
+                      </p>
+                      <div className="border-t border-white/8 pt-3">
+                        <p className="text-xs font-bold text-amber-300 font-marcellus">{t.name}</p>
+                        {t.location && <p className="text-[10px] text-stone-500 font-marcellus tracking-wider mt-0.5">{t.location}</p>}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Write a review CTA */}
+                <div className="text-center mt-10">
+                  <button
+                    onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
+                    className="py-3 px-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 hover:border-amber-400/30 text-white font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all"
+                  >
+                    ✍️ Write a Review
+                  </button>
+                </div>
+              </>
+            )}
           </motion.section>
 
           {/* ── DECORATIVE DIVIDER ──────────────────────────────── */}
@@ -1531,6 +1572,129 @@ export default function App() {
                   </>
                 )}
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Review Submission Modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {reviewOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[800] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-md bg-[#0F0B26] border border-white/10 rounded-[32px] p-6 sm:p-8 relative text-[#FAF6F0] shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <button
+                onClick={() => { playClickSound(); setReviewOpen(false); }}
+                className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer font-bold text-xs"
+              >
+                ✕
+              </button>
+
+              <h3 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400 border-b border-white/10 pb-3 mb-6">
+                ✍️ Share Your Experience
+              </h3>
+
+              {reviewSuccess ? (
+                <div className="py-8 text-center space-y-4">
+                  <div className="text-5xl">🎊</div>
+                  <p className="font-marcellus text-lg font-bold text-white">Thank You!</p>
+                  <p className="text-xs text-stone-300/80 font-cormorant leading-relaxed max-w-xs mx-auto">
+                    {reviewSuccess}
+                  </p>
+                  <button
+                    onClick={() => { playClickSound(); setReviewOpen(false); setReviewSuccess(""); }}
+                    className="mt-4 px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs uppercase tracking-wider cursor-pointer active:scale-95 transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleReviewSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Your Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={reviewForm.name}
+                        onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })}
+                        placeholder="e.g. Priya & Arjun"
+                        className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">City</label>
+                      <input
+                        type="text"
+                        value={reviewForm.location}
+                        onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
+                        placeholder="e.g. Bengaluru"
+                        className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Star Rating */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Your Rating *</label>
+                    <div className="flex items-center gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => { playClickSound(); setReviewForm({ ...reviewForm, stars: star }); }}
+                          className="cursor-pointer transition-transform hover:scale-110 active:scale-95"
+                        >
+                          <Star
+                            className={`w-7 h-7 transition-colors ${
+                              star <= reviewForm.stars ? "fill-amber-400 text-amber-400" : "text-stone-600"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                      <span className="text-xs text-amber-400 font-bold font-marcellus ml-2">
+                        {reviewForm.stars}/5
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">
+                      Your Review * <span className="text-stone-600 normal-case">(min. 20 characters)</span>
+                    </label>
+                    <textarea
+                      required
+                      rows={4}
+                      value={reviewForm.text}
+                      onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                      placeholder="Share your experience with ShaadiLink — what did you love most?"
+                      className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white outline-none focus:border-amber-400/40 text-xs resize-none font-cormorant"
+                    />
+                    <p className="text-[9px] text-stone-600 text-right">{reviewForm.text.length} chars</p>
+                  </div>
+
+                  <p className="text-[9px] text-stone-500 font-cormorant">
+                    Your review will appear publicly after admin approval. We do not share your contact information.
+                  </p>
+
+                  <button
+                    type="submit"
+                    disabled={reviewSubmitting}
+                    className="w-full py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider shadow-md select-none cursor-pointer disabled:opacity-50 active:scale-95 transition-all font-marcellus"
+                  >
+                    {reviewSubmitting ? "Submitting..." : "⭐ Submit Review"}
+                  </button>
+                </form>
+              )}
             </motion.div>
           </motion.div>
         )}
