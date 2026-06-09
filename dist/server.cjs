@@ -33,18 +33,19 @@ var app = (0, import_express.default)();
 var PORT = 3e3;
 app.use(import_express.default.json({ limit: "25mb" }));
 app.use(import_express.default.urlencoded({ limit: "25mb", extended: true }));
-var DATA_DIR = import_path.default.join(process.cwd(), "data");
+var DATA_DIR = process.env.DATA_PATH ? import_path.default.resolve(process.env.DATA_PATH) : import_path.default.resolve(__dirname, "..", "data");
 var INVITATIONS_DIR = import_path.default.join(DATA_DIR, "invitations");
 var REVIEWS_FILE = import_path.default.join(DATA_DIR, "reviews.json");
 if (!import_fs.default.existsSync(DATA_DIR)) {
-  import_fs.default.mkdirSync(DATA_DIR);
+  import_fs.default.mkdirSync(DATA_DIR, { recursive: true });
 }
 if (!import_fs.default.existsSync(INVITATIONS_DIR)) {
-  import_fs.default.mkdirSync(INVITATIONS_DIR);
+  import_fs.default.mkdirSync(INVITATIONS_DIR, { recursive: true });
 }
 if (!import_fs.default.existsSync(REVIEWS_FILE)) {
   import_fs.default.writeFileSync(REVIEWS_FILE, "[]", "utf-8");
 }
+console.log("[Storage] Data directory:", DATA_DIR);
 var aiClient = null;
 function getGeminiClient() {
   if (!aiClient) {
@@ -827,7 +828,14 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = import_path.default.join(process.cwd(), "dist");
+    const distPath = process.env.DIST_PATH || (() => {
+      try {
+        return import_path.default.join(import_path.default.dirname(__filename), ".");
+      } catch {
+        return import_path.default.join(process.cwd(), "dist");
+      }
+    })();
+    console.log("[Static] Serving from:", distPath);
     app.use(import_express.default.static(distPath));
     app.get("*", (req, res) => {
       const slug = req.path.replace(/^\//, "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");

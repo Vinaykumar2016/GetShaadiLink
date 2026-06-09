@@ -471,77 +471,138 @@ export default function OpeningThemes({
     );
   };
 
-  // 3. IVORY ARCHWAY COVER (lotus mapping): Blooming lotus in center
+  // 3. IVORY LOTUS COVER: Full blooming lotus with 7 petals radiating from center
   const renderLotusTheme = () => {
-    const lotusPetalLeftVariants = {
-      idle: { rotate: 0, x: 0, opacity: 1 },
-      activated: { rotate: -45, x: -40, y: 15, opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }
-    };
-    const lotusPetalRightVariants = {
-      idle: { rotate: 0, x: 0, opacity: 1 },
-      activated: { rotate: 45, x: 40, y: 15, opacity: 0, transition: { duration: 1.5, ease: "easeInOut" } }
-    };
-    const lotusCenterVariants = {
-      idle: { scale: 1, opacity: 1 },
-      activated: { scale: 0.7, opacity: 0, transition: { duration: 1.2, ease: "easeInOut" } }
-    };
+    // 7 petals arranged radially — they all fold back down when activated
+    const petalAngles = [0, 51, 102, 153, 204, 255, 306]; // degrees evenly spread
+    const petalColors = [
+      "#F48FB1", "#F06292", "#E91E8C", "#F48FB1",
+      "#E91E63", "#F06292", "#F48FB1"
+    ];
 
     const interactiveLotus = (
-      <div className="w-full h-56 relative flex items-center justify-center overflow-visible">
-        {/* Arch Backdrop */}
-        <div className="w-48 h-40 border-[6px] border-white/60 bg-[#FAF8F5] rounded-t-full relative flex items-end justify-center shadow-paper border-b-2 border-b-brand-rust/20 overflow-hidden">
-          {/* Floral border decor at arch crest */}
-          <div className="absolute -top-3 w-16 h-4 flex justify-around">
-            <span className="text-[6px] text-brand-gold">🌸</span>
-            <span className="text-[6px] text-brand-gold">🌸</span>
-            <span className="text-[6px] text-brand-gold">🌸</span>
-          </div>
+      <div className="w-full h-56 relative flex items-center justify-center">
+        {/* Soft glow backdrop */}
+        <div className="absolute w-32 h-32 rounded-full bg-pink-300/20 blur-2xl animate-pulse pointer-events-none" />
 
-          {/* Couple Silhouette (Revealed inside arch) */}
-          <svg viewBox="0 0 100 100" className="w-24 h-24 absolute bottom-0 fill-[#8A3A1A]/20">
-            <path d="M30,100 C30,70 42,60 42,48 L58,48 C58,60 70,70 70,100 Z" />
-            <circle cx="50" cy="40" r="4.5" />
+        {/* Water ripple rings */}
+        {[0, 1, 2].map(i => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full border border-pink-300/20 pointer-events-none"
+            style={{ width: 48 + i * 32, height: 48 + i * 32 }}
+            animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
+          />
+        ))}
+
+        {/* SVG lotus — all petals + center */}
+        <svg
+          viewBox="-60 -80 120 120"
+          className="w-44 h-44 absolute"
+          style={{ overflow: "visible" }}
+        >
+          {petalAngles.map((angle, idx) => {
+            const rad = (angle * Math.PI) / 180;
+            const tx = Math.sin(rad) * 28;
+            const ty = -Math.cos(rad) * 28;
+            return (
+              <motion.g
+                key={idx}
+                initial={{ scaleY: 1, opacity: 1, x: 0, y: 0 }}
+                animate={
+                  activated
+                    ? { scaleY: 0.1, opacity: 0, x: tx * 1.8, y: ty * 1.8 }
+                    : { scaleY: 1, opacity: 1, x: 0, y: 0 }
+                }
+                transition={{ duration: 1.2, ease: "easeInOut", delay: idx * 0.07 }}
+                style={{ originX: "0", originY: "1", transformOrigin: "0px 0px" }}
+              >
+                <g transform={`rotate(${angle}) translate(0, -24)`}>
+                  <ellipse cx="0" cy="-14" rx="8" ry="18"
+                    fill={petalColors[idx]}
+                    opacity="0.92"
+                  />
+                  {/* Petal vein */}
+                  <line x1="0" y1="-2" x2="0" y2="-28"
+                    stroke="white" strokeWidth="0.6" opacity="0.35"
+                    strokeDasharray="2,2"
+                  />
+                </g>
+              </motion.g>
+            );
+          })}
+
+          {/* Inner petals (shorter, lighter) */}
+          {[25, 97, 169, 241, 313].map((angle, idx) => (
+            <motion.g
+              key={`inner-${idx}`}
+              initial={{ scaleY: 1, opacity: 0.8 }}
+              animate={
+                activated
+                  ? { scaleY: 0, opacity: 0 }
+                  : { scaleY: 1, opacity: 0.8 }
+              }
+              transition={{ duration: 0.9, ease: "easeInOut", delay: 0.1 + idx * 0.05 }}
+            >
+              <g transform={`rotate(${angle}) translate(0, -14)`}>
+                <ellipse cx="0" cy="-8" rx="5.5" ry="12"
+                  fill="#FCE4EC"
+                  opacity="0.85"
+                />
+              </g>
+            </motion.g>
+          ))}
+
+          {/* Golden center stamen */}
+          <motion.circle
+            cx="0" cy="0" r="8"
+            fill="#FFD54F"
+            initial={{ scale: 1, opacity: 1 }}
+            animate={activated ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8 }}
+          />
+          <motion.circle
+            cx="0" cy="0" r="4"
+            fill="#FF8F00"
+            initial={{ scale: 1, opacity: 1 }}
+            animate={activated ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+            transition={{ duration: 0.7 }}
+          />
+          {/* Stamen dots */}
+          {[0, 72, 144, 216, 288].map((a, i) => (
+            <motion.circle
+              key={i}
+              cx={Math.sin((a * Math.PI) / 180) * 6}
+              cy={-Math.cos((a * Math.PI) / 180) * 6}
+              r="1.2"
+              fill="#FFF8E1"
+              initial={{ opacity: 1 }}
+              animate={activated ? { opacity: 0 } : { opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            />
+          ))}
+        </svg>
+
+        {/* Lotus leaf base */}
+        <motion.div
+          className="absolute bottom-2 pointer-events-none"
+          initial={{ opacity: 1 }}
+          animate={activated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.3 }}
+        >
+          <svg viewBox="0 0 80 30" className="w-28 h-10 fill-green-600/40 stroke-green-700/20 stroke-[0.5]">
+            <ellipse cx="40" cy="18" rx="38" ry="14" />
+            <line x1="40" y1="4" x2="40" y2="30" />
+            <path d="M40,18 Q20,10 6,18" />
+            <path d="M40,18 Q60,10 74,18" />
           </svg>
-        </div>
-        {/* Layered Lotus Flower Bud (Covers silhouette, opens on tap) */}
-        <div className="absolute w-36 h-32 flex items-end justify-center z-10 bottom-4 pointer-events-none overflow-visible">
-          {/* Left Petal */}
-          <motion.svg
-            variants={lotusPetalLeftVariants}
-            animate={activated ? "activated" : "idle"}
-            viewBox="0 0 60 120" className="w-12 h-24 absolute text-pink-500 fill-current drop-shadow-md"
-            style={{ transformOrigin: "bottom center", left: "12%" }}
-          >
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </motion.svg>
+        </motion.div>
 
-          {/* Right Petal */}
-          <motion.svg
-            variants={lotusPetalRightVariants}
-            animate={activated ? "activated" : "idle"}
-            viewBox="0 0 60 120" className="w-12 h-24 absolute text-pink-500 fill-current drop-shadow-md"
-            style={{ transformOrigin: "bottom center", right: "12%", transform: "scaleX(-1)" }}
-          >
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </motion.svg>
-
-          {/* Center Main Petal */}
-          <motion.svg
-            variants={lotusCenterVariants}
-            animate={activated ? "activated" : "idle"}
-            viewBox="0 0 60 120" className="w-14 h-24 absolute text-pink-600 fill-current drop-shadow-lg"
-            style={{ transformOrigin: "bottom center" }}
-          >
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </motion.svg>
-        </div>
         {!activated && (
           <button
             onClick={handleActivate}
-            className="absolute z-20 py-2.5 px-6 rounded-full border-2 border-brand-rust bg-brand-rust text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-md transition-transform"
+            className="absolute bottom-2 z-20 py-2.5 px-7 rounded-full border-2 border-pink-400 bg-pink-500 hover:bg-pink-400 text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-lg shadow-pink-300/30 transition-all"
           >
             {t("unfoldCard")}
           </button>
@@ -550,9 +611,9 @@ export default function OpeningThemes({
     );
 
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #F4EFE6 0%, #FAF8F5 50%, #FAF6F0 100%)",
+      "linear-gradient(160deg, #FFF0F5 0%, #FCE4EC 40%, #F8EFF8 70%, #FFF8F0 100%)",
       interactiveLotus,
-      "#8A3A1A",
+      "#880E4F",
       t("archwayPrompt"),
       false
     );
@@ -661,122 +722,208 @@ export default function OpeningThemes({
     );
   };
 
-  // 5. SACRED THREAD PULL: Kalava string pull layout
+  // 5. SACRED THREAD PULL: Kalava string pull — beautifully centered
   const renderThreadTheme = () => {
     const handleDrag = (e: any, info: any) => {
       setThreadY(info.offset.y);
-      if (info.offset.y > 100 && !activated) {
+      if (info.offset.y > 90 && !activated) {
         handleActivate();
       }
     };
 
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #FAF8F5 0%, #F5EFEB 100%)",
-      <div className="w-full h-56 relative flex flex-col items-center overflow-visible">
-        {/* Top Toran */}
-        <div className="w-40 h-5 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 rounded-full border border-amber-200/25 flex items-center justify-around">
-          <span className="text-[7px]">🌻</span>
-          <span className="text-[7px]">🌻</span>
-          <span className="text-[7px]">🌻</span>
+      "linear-gradient(to bottom, #FFF8EE 0%, #FFF3E0 50%, #FAF6F0 100%)",
+      <div className="w-full h-56 relative flex flex-col items-center justify-start pt-0 overflow-visible">
+        {/* Decorative Toran arch at top */}
+        <div className="w-48 flex justify-center items-center gap-0 absolute top-0">
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="flex flex-col items-center" style={{ marginTop: i % 2 === 0 ? 0 : 6 }}>
+              <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-yellow-300 shadow-sm flex items-center justify-center text-[6px]">🌻</div>
+              <div className="w-[2px] h-5 bg-green-700 rounded-b-full" />
+            </div>
+          ))}
         </div>
 
-        {/* Thread line */}
-        <svg className="absolute top-5 left-1/2 -translate-x-1/2 overflow-visible pointer-events-none" width="10" height="150">
-          <line x1="5" y1="0" x2="5" y2={40 + threadY} stroke="#D32F2F" strokeWidth="3" strokeLinecap="round" />
-          <line x1="5" y1="0" x2="5" y2={40 + threadY} stroke="#FFB300" strokeWidth="1.2" strokeDasharray="3,3" strokeLinecap="round" />
+        {/* The hanging thread — reacts to drag */}
+        <svg
+          className="absolute pointer-events-none z-0"
+          style={{ top: 20, left: "50%", transform: "translateX(-50%)" }}
+          width="12"
+          height="170"
+          overflow="visible"
+        >
+          {/* Red kalava thread */}
+          <motion.path
+            d={`M6,0 Q${6 + (threadY > 0 ? threadY * 0.3 : 0)},${40 + threadY * 0.5} 6,${50 + Math.min(threadY, 100)}`}
+            stroke="#C62828"
+            strokeWidth="3"
+            fill="none"
+            strokeLinecap="round"
+          />
+          {/* Gold shimmer thread */}
+          <motion.path
+            d={`M6,0 Q${6 + (threadY > 0 ? threadY * 0.3 : 0)},${40 + threadY * 0.5} 6,${50 + Math.min(threadY, 100)}`}
+            stroke="#FFD600"
+            strokeWidth="1"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray="4,4"
+            opacity="0.7"
+          />
         </svg>
 
-        {/* Draggable gold amulet handle */}
+        {/* Draggable Bell */}
         <motion.div
           drag="y"
-          dragConstraints={{ top: 0, bottom: 110 }}
-          dragElastic={0.15}
+          dragConstraints={{ top: 0, bottom: 100 }}
+          dragElastic={0.12}
           onDrag={handleDrag}
-          onDragEnd={() => setThreadY(0)}
-          style={{ y: 30 }}
-          animate={activated ? { y: 150, scale: 0.9, opacity: 0 } : {}}
-          transition={activated ? { duration: 0.5 } : { type: "spring", stiffness: 300, damping: 15 }}
+          onDragEnd={() => !activated && setThreadY(0)}
+          initial={{ y: 22 }}
+          animate={
+            activated
+              ? { y: 160, scale: 0.6, opacity: 0 }
+              : { y: 22 }
+          }
+          transition={activated
+            ? { duration: 0.6, ease: "easeIn" }
+            : { type: "spring", stiffness: 280, damping: 18 }
+          }
           className="absolute z-20 cursor-grab active:cursor-grabbing flex flex-col items-center"
         >
-          <div className="w-3.5 h-3.5 bg-amber-500 rounded-full border border-amber-300 shadow-inner" />
-          <div 
-            className="w-14 h-14 rounded-full border-4 flex flex-col items-center justify-center shadow-md hover:scale-105"
+          {/* Thread attachment knob */}
+          <div className="w-3 h-3 bg-amber-500 rounded-full border-2 border-amber-300 shadow-md mb-0.5" />
+          {/* Bell body */}
+          <motion.div
+            className="w-16 h-16 rounded-full flex items-center justify-center shadow-xl"
             style={{
-              background: `radial-gradient(circle, #FFE082 0%, #D84315 100%)`,
-              borderColor: "#FFF9C4",
+              background: "radial-gradient(circle at 35% 35%, #FFE082 0%, #F9A825 55%, #E65100 100%)",
+              border: "3px solid #FFD54F",
+              boxShadow: "0 0 18px rgba(255,193,7,0.4), inset 0 -4px 8px rgba(0,0,0,0.2)",
             }}
+            animate={{ rotate: threadY > 10 ? [-6, 6, -4, 4, 0] : 0 }}
+            transition={{ duration: 0.4 }}
           >
-            <span className="text-xl">🔔</span>
-          </div>
+            <span className="text-2xl select-none">🔔</span>
+          </motion.div>
           {!activated && (
-            <span className="text-[8px] font-marcellus text-brand-rust font-bold tracking-widest mt-1 block">PULL ↓</span>
+            <motion.span
+              className="text-[8px] font-marcellus text-brand-rust font-bold tracking-widest mt-1.5 block"
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              PULL ↓
+            </motion.span>
           )}
         </motion.div>
 
-        {/* Target Ring */}
-        <div className="w-18 h-18 rounded-full border border-dashed border-brand-rust/20 absolute bottom-4 flex items-center justify-center bg-brand-rust/5">
-          <span className="text-[8px] font-marcellus text-brand-rust/30 tracking-wider">KNOT SEAL</span>
-        </div>
+        {/* Target landing ring */}
+        <motion.div
+          className="absolute bottom-6 flex flex-col items-center"
+          animate={activated ? { scale: 1.4, opacity: 0 } : { scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              border: "2px dashed rgba(138,58,26,0.3)",
+              background: "rgba(138,58,26,0.04)",
+              boxShadow: "0 0 0 6px rgba(138,58,26,0.04)",
+            }}
+          >
+            <span className="text-[9px] font-marcellus text-brand-rust/40 tracking-wider text-center leading-tight">KNOT<br/>HERE</span>
+          </div>
+        </motion.div>
       </div>,
-      "#8A3A1A",
+      "#7B3F00",
       t("dragBell"),
       false
     );
   };
 
-  // 6. TORAN GARLAND COVER: Garland swag curtains
+  // 6. TORAN GARLAND COVER: Grand silk curtain reveal with animated toran
   const renderGarlandTheme = () => {
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #E8F5E9 0%, #FAF6F0 100%)",
-      <div className="w-full h-56 relative flex flex-col items-center overflow-visible">
-        {/* Toran loops hanging */}
+      "linear-gradient(160deg, #E8F5E9 0%, #F1F8E9 30%, #FAF6F0 100%)",
+      <div className="w-full h-56 relative flex flex-col items-center justify-center overflow-hidden">
+        {/* Hanging toran row — rises on activate */}
         <motion.div
-          animate={activated ? { y: -45, opacity: 0 } : {}}
-          transition={{ duration: 0.8 }}
-          className="w-full flex justify-between px-6 absolute top-0 z-20 pointer-events-none"
+          className="absolute top-0 w-full flex justify-between px-2 z-20"
+          animate={activated ? { y: -60, opacity: 0 } : { y: 0, opacity: 1 }}
+          transition={{ duration: 1.0, ease: "easeInOut" }}
         >
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 border border-yellow-400 shadow-sm flex items-center justify-center text-[8px]">🌻</div>
-              <div className="w-[3px] h-6 bg-emerald-600 rounded-b-full mt-0.5" />
+          {[...Array(7)].map((_, i) => (
+            <div key={i} className="flex flex-col items-center" style={{ marginTop: i % 2 === 0 ? 0 : 8 }}>
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 border border-yellow-300 shadow flex items-center justify-center text-[7px]">🌻</div>
+              <div className="w-[2.5px] h-7 bg-green-700/80 rounded-b-full" />
+              <div className="w-2 h-2 rounded-full bg-red-600" />
             </div>
           ))}
         </motion.div>
 
-        {/* Crimson silk screen cards */}
-        <div className="w-48 h-32 bg-[#4A000A] rounded-2xl border border-brand-gold/20 relative overflow-hidden shadow-inner flex mt-6">
-          {/* Left drape */}
-          <motion.div 
-            animate={activated ? { x: -75, opacity: 0 } : {}}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
-            className="w-1/2 h-full bg-[#800010] border-r border-[#60000A] shadow-md relative"
+        {/* Silk curtain panels */}
+        <div className="w-52 h-36 relative flex rounded-xl overflow-hidden shadow-xl mt-6 border border-amber-900/20">
+          {/* Left silk panel */}
+          <motion.div
+            className="w-1/2 h-full relative flex items-center justify-center"
+            style={{
+              background: "linear-gradient(135deg, #8B0000 0%, #6D0000 50%, #4A000A 100%)",
+              borderRight: "1px solid rgba(212,168,67,0.3)",
+            }}
+            animate={activated ? { x: -90, opacity: 0 } : { x: 0, opacity: 1 }}
+            transition={{ duration: 1.3, ease: "easeInOut", delay: 0.1 }}
           >
-            <div className="absolute inset-1 border border-[#4A000A] border-dashed rounded" />
+            {/* Embroidery pattern */}
+            <svg viewBox="0 0 50 80" className="w-full h-full absolute inset-0 opacity-20">
+              <path d="M5,5 Q25,20 45,5 Q25,40 5,5" fill="#FFD700" />
+              <path d="M5,40 Q25,55 45,40" stroke="#FFD700" fill="none" strokeWidth="1" />
+              <circle cx="25" cy="65" r="6" fill="#FFD700" opacity="0.5" />
+            </svg>
+            <div className="absolute inset-2 border border-dashed border-amber-500/20 rounded" />
+            <span className="text-amber-300/40 text-2xl font-serif select-none">❋</span>
           </motion.div>
-          {/* Right drape */}
-          <motion.div 
-            animate={activated ? { x: 75, opacity: 0 } : {}}
-            transition={{ duration: 1.2, ease: "easeInOut" }}
-            className="w-1/2 h-full bg-[#800010] shadow-md relative"
+          {/* Right silk panel */}
+          <motion.div
+            className="w-1/2 h-full relative flex items-center justify-center"
+            style={{
+              background: "linear-gradient(225deg, #8B0000 0%, #6D0000 50%, #4A000A 100%)",
+            }}
+            animate={activated ? { x: 90, opacity: 0 } : { x: 0, opacity: 1 }}
+            transition={{ duration: 1.3, ease: "easeInOut", delay: 0.1 }}
           >
-            <div className="absolute inset-1 border border-[#4A000A] border-dashed rounded" />
+            <svg viewBox="0 0 50 80" className="w-full h-full absolute inset-0 opacity-20">
+              <path d="M45,5 Q25,20 5,5 Q25,40 45,5" fill="#FFD700" />
+              <path d="M45,40 Q25,55 5,40" stroke="#FFD700" fill="none" strokeWidth="1" />
+              <circle cx="25" cy="65" r="6" fill="#FFD700" opacity="0.5" />
+            </svg>
+            <div className="absolute inset-2 border border-dashed border-amber-500/20 rounded" />
+            <span className="text-amber-300/40 text-2xl font-serif select-none">❋</span>
           </motion.div>
 
-          <div className="absolute inset-0 flex items-center justify-center bg-[#2C0005] z-0">
-            <span className="text-2xl animate-pulse">🌸</span>
+          {/* Revealed center glow behind curtains */}
+          <div className="absolute inset-0 flex items-center justify-center bg-[#1A0005] z-[-1]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={activated ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.5 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="flex flex-col items-center gap-1"
+            >
+              <span className="text-3xl">💐</span>
+              <span className="font-marcellus text-[8px] tracking-widest text-amber-300 uppercase">Welcome</span>
+            </motion.div>
           </div>
         </div>
 
         {!activated && (
           <button
             onClick={handleActivate}
-            className="py-2.5 px-6 rounded-full border-2 border-brand-rust bg-[#8A3A1A] hover:bg-[#782E13] text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer absolute bottom-4 z-20 shadow-md"
+            className="py-2.5 px-7 rounded-full border-2 border-amber-400 bg-[#6D0000] hover:bg-[#8B0000] text-amber-200 font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer absolute bottom-2 z-20 shadow-lg transition-all active:scale-95"
           >
             {t("liftGarland")}
           </button>
         )}
       </div>,
-      "#8A3A1A",
+      "#4A000A",
       t("medallionGarlandPrompt"),
       false
     );

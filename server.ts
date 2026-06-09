@@ -15,19 +15,27 @@ app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
 
 // Data storage directories
-const DATA_DIR = path.join(process.cwd(), "data");
+// DATA_PATH env var lets Hostinger set an explicit absolute path to the data folder.
+// Default: go one level up from this script (__dirname = dist/ in the CJS bundle)
+// so data/ resolves to the project root — same folder that has package.json.
+const DATA_DIR = process.env.DATA_PATH
+  ? path.resolve(process.env.DATA_PATH)
+  : path.resolve(__dirname, "..", "data");
+
 const INVITATIONS_DIR = path.join(DATA_DIR, "invitations");
 const REVIEWS_FILE = path.join(DATA_DIR, "reviews.json");
 
 if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR);
+  fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 if (!fs.existsSync(INVITATIONS_DIR)) {
-  fs.mkdirSync(INVITATIONS_DIR);
+  fs.mkdirSync(INVITATIONS_DIR, { recursive: true });
 }
 if (!fs.existsSync(REVIEWS_FILE)) {
   fs.writeFileSync(REVIEWS_FILE, "[]", "utf-8");
 }
+
+console.log("[Storage] Data directory:", DATA_DIR);
 
 // Lazy load Gemini Client to prevent crashing on launch if the key is missing
 let aiClient: GoogleGenAI | null = null;
@@ -964,7 +972,12 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     // Production static build assets serving
-    const distPath = path.join(process.cwd(), "dist");
+    // Use DATA_PATH parent or __dirname-based resolution to find dist/
+    const distPath = process.env.DIST_PATH ||
+      (() => {
+        try { return path.join(path.dirname(__filename), "."); } catch { return path.join(process.cwd(), "dist"); }
+      })();
+    console.log("[Static] Serving from:", distPath);
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
       const slug = req.path.replace(/^\//, "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
