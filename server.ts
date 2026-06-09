@@ -4,6 +4,7 @@ import fs from "fs";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 dotenv.config();
 
@@ -14,130 +15,160 @@ const PORT = 3000;
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
 
-// Data storage directories
-// DATA_PATH env var lets Hostinger set an explicit absolute path to the data folder.
-// Default: go one level up from this script (__dirname = dist/ in the CJS bundle)
-// so data/ resolves to the project root — same folder that has package.json.
-const DATA_DIR = process.env.DATA_PATH
-  ? path.resolve(process.env.DATA_PATH)
-  : path.resolve(__dirname, "..", "data");
+// ─────────────────────────────────────────────
+// MongoDB Connection
+// ─────────────────────────────────────────────
+const MONGODB_URI = process.env.MONGODB_URI || "";
 
-const INVITATIONS_DIR = path.join(DATA_DIR, "invitations");
-const REVIEWS_FILE = path.join(DATA_DIR, "reviews.json");
-
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(INVITATIONS_DIR)) {
-  fs.mkdirSync(INVITATIONS_DIR, { recursive: true });
-}
-if (!fs.existsSync(REVIEWS_FILE)) {
-  fs.writeFileSync(REVIEWS_FILE, "[]", "utf-8");
+async function connectDB() {
+  if (!MONGODB_URI) {
+    console.error("❌ MONGODB_URI is not set. Please add it in Hostinger Environment Variables.");
+    process.exit(1);
+  }
+  try {
+    await mongoose.connect(MONGODB_URI, { dbName: "getshaadilink" });
+    console.log("✅ Connected to MongoDB Atlas successfully.");
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err);
+    process.exit(1);
+  }
 }
 
-console.log("[Storage] Data directory:", DATA_DIR);
+// ─────────────────────────────────────────────
+// Mongoose Schemas & Models
+// ─────────────────────────────────────────────
 
-// Lazy load Gemini Client to prevent crashing on launch if the key is missing
+// Invitation — uses strict:false to allow all AI-generated dynamic fields
+const invitationSchema = new Schema(
+  {
+    slug:         { type: String, required: true, unique: true, index: true },
+    bride:        String,
+    groom:        String,
+    wdate:        String,
+    niceDate:     String,
+    city:         String,
+    vname:        String,
+    vaddr:        String,
+    ownerEmail:   { type: String, default: "" },
+    editPassword: { type: String, default: "" },
+    openingTheme: { type: String, default: "elephant" },
+    views:        { type: Number, default: 0 },
+    guestbookNotes: { type: Array, default: [] },
+    createdAt:    { type: String, default: () => new Date().toISOString() },
+  },
+  { strict: false }
+);
+const Invitation: Model<Document> = mongoose.models.Invitation || mongoose.model("Invitation", invitationSchema);
+
+// Review
+const reviewSchema = new Schema({
+  id:          { type: String, required: true, unique: true, index: true },
+  name:        String,
+  location:    { type: String, default: "" },
+  stars:       { type: Number, default: 5 },
+  text:        String,
+  status:      { type: String, default: "pending" },
+  submittedAt: { type: String, default: () => new Date().toISOString() },
+});
+const Review: Model<Document> = mongoose.models.Review || mongoose.model("Review", reviewSchema);
+
+// Support Query
+const supportQuerySchema = new Schema({
+  id:      { type: String, required: true, unique: true, index: true },
+  name:    String,
+  email:   String,
+  subject: String,
+  message: String,
+  date:    { type: String, default: () => new Date().toISOString() },
+  status:  { type: String, default: "open" },
+});
+const SupportQuery: Model<Document> = mongoose.models.SupportQuery || mongoose.model("SupportQuery", supportQuerySchema);
+
+// ─────────────────────────────────────────────
+// Lazy-load Gemini Client
+// ─────────────────────────────────────────────
 let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI {
   if (!aiClient) {
     const key = process.env.GEMINI_API_KEY;
     if (!key) {
-      console.warn("WARNING: GEMINI_API_KEY is not defined in environment variables. Gemini features will fail.");
+      console.warn("WARNING: GEMINI_API_KEY is not defined. Gemini features will fail.");
     }
     aiClient = new GoogleGenAI({
       apiKey: key || "MOCK_KEY_FOR_BUILD",
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
+      httpOptions: { headers: { "User-Agent": "aistudio-build" } },
     });
   }
   return aiClient;
 }
 
+// ─────────────────────────────────────────────
 // API: Check if slug is available
-app.get("/api/check-slug/:slug", (req, res) => {
+// ─────────────────────────────────────────────
+app.get("/api/check-slug/:slug", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-  if (!slug) {
+  if (!slug) { res.json({ available: false }); return; }
+  try {
+    const exists = await Invitation.exists({ slug });
+    res.json({ available: !exists });
+  } catch {
     res.json({ available: false });
-    return;
   }
-  const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-  const exists = fs.existsSync(filePath);
-  res.json({ available: !exists });
 });
 
-// Helper: read reviews from disk
-function readReviews(): any[] {
+// ─────────────────────────────────────────────
+// API: Public stats
+// ─────────────────────────────────────────────
+app.get("/api/stats", async (req, res) => {
   try {
-    if (!fs.existsSync(REVIEWS_FILE)) return [];
-    return JSON.parse(fs.readFileSync(REVIEWS_FILE, "utf-8")) || [];
-  } catch { return []; }
-}
-
-// Helper: write reviews to disk
-function writeReviews(reviews: any[]) {
-  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(reviews, null, 2), "utf-8");
-}
-
-// Helper: compute average rating from approved reviews
-function computeStats() {
-  const approved = readReviews().filter((r: any) => r.status === "approved");
-  const avg = approved.length > 0
-    ? approved.reduce((sum: number, r: any) => sum + (r.stars || 5), 0) / approved.length
-    : 0;
-  return { totalReviews: approved.length, averageRating: Math.round(avg * 10) / 10 };
-}
-
-// API: Fetch live invitation statistics (rating now dynamic)
-app.get("/api/stats", (req, res) => {
-  try {
-    const files = fs.readdirSync(INVITATIONS_DIR);
-    const jsonFilesCount = files.filter((f) => f.endsWith(".json")).length;
-    const { totalReviews, averageRating } = computeStats();
+    const totalGenerated = await Invitation.countDocuments();
+    const approvedReviews = await Review.find({ status: "approved" }).lean();
+    const totalReviews = approvedReviews.length;
+    const avg = totalReviews > 0
+      ? (approvedReviews as any[]).reduce((s, r) => s + (r.stars || 5), 0) / totalReviews
+      : 0;
+    const averageRating = Math.round(avg * 10) / 10;
     res.json({
-      totalGenerated: jsonFilesCount,
-      rating: averageRating > 0 ? averageRating : 4.9,  // fallback until first review
+      totalGenerated,
+      rating: averageRating > 0 ? averageRating : 4.9,
       totalReviews,
     });
-  } catch (error) {
+  } catch {
     res.json({ totalGenerated: 0, rating: 4.9, totalReviews: 0 });
   }
 });
 
+// ─────────────────────────────────────────────
 // API: Public — fetch approved reviews
-app.get("/api/reviews", (req, res) => {
+// ─────────────────────────────────────────────
+app.get("/api/reviews", async (req, res) => {
   try {
-    const approved = readReviews().filter((r: any) => r.status === "approved");
-    // Newest first
-    approved.sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-    res.json({ success: true, reviews: approved });
-  } catch (err) {
+    const reviews = await Review.find({ status: "approved" })
+      .sort({ submittedAt: -1 })
+      .lean();
+    res.json({ success: true, reviews });
+  } catch {
     res.status(500).json({ error: "Failed to fetch reviews." });
   }
 });
 
-// API: Public — submit a new review (goes to pending)
-app.post("/api/reviews/submit", (req, res) => {
+// ─────────────────────────────────────────────
+// API: Public — submit a new review
+// ─────────────────────────────────────────────
+app.post("/api/reviews/submit", async (req, res) => {
   const { name, location, stars, text } = req.body;
   if (!name || !text || !stars) {
     res.status(400).json({ error: "Please fill in all required fields." });
     return;
   }
   const starsNum = Math.min(5, Math.max(1, parseInt(stars, 10)));
-  if (isNaN(starsNum)) {
-    res.status(400).json({ error: "Invalid star rating." });
-    return;
-  }
+  if (isNaN(starsNum)) { res.status(400).json({ error: "Invalid star rating." }); return; }
   if (text.trim().length < 20) {
     res.status(400).json({ error: "Please write at least 20 characters in your review." });
     return;
   }
   try {
-    const reviews = readReviews();
-    const newReview = {
+    const newReview = new Review({
       id: "rev_" + Date.now() + Math.random().toString(36).substr(2, 5),
       name: name.trim(),
       location: (location || "").trim(),
@@ -145,139 +176,105 @@ app.post("/api/reviews/submit", (req, res) => {
       text: text.trim(),
       status: "pending",
       submittedAt: new Date().toISOString(),
-    };
-    reviews.push(newReview);
-    writeReviews(reviews);
+    });
+    await newReview.save();
     res.json({ success: true, message: "Thank you! Your review has been submitted and will appear after approval." });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to save review." });
   }
 });
 
+// ─────────────────────────────────────────────
 // API: Fetch an invitation by slug
-app.get("/api/invitations/:slug", (req, res) => {
+// ─────────────────────────────────────────────
+app.get("/api/invitations/:slug", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: "Invitation not found" });
-    return;
-  }
-
   try {
-    const rawData = fs.readFileSync(filePath, "utf-8");
-    const parsed = JSON.parse(rawData);
-    
-    // Increment view count unless requested by dashboard/admin preview
-    if (req.query.admin !== "true") {
-      parsed.views = (parsed.views || 0) + 1;
-      fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2), "utf-8");
+    const invitation = await Invitation.findOne({ slug }).lean() as any;
+    if (!invitation) {
+      res.status(404).json({ error: "Invitation not found" });
+      return;
     }
-
-    res.json(parsed);
+    // Increment view count unless admin preview
+    if (req.query.admin !== "true") {
+      await Invitation.updateOne({ slug }, { $inc: { views: 1 } });
+      invitation.views = (invitation.views || 0) + 1;
+    }
+    res.json(invitation);
   } catch (error) {
-    console.error("Error reading invitation file:", error);
+    console.error("Error fetching invitation:", error);
     res.status(500).json({ error: "Failed to read invitation" });
   }
 });
 
-// API: Auth / Login verifying passcode for invitation
-app.post("/api/invitations/:slug/auth", (req, res) => {
+// ─────────────────────────────────────────────
+// API: Auth / Login for invitation by slug + password
+// ─────────────────────────────────────────────
+app.post("/api/invitations/:slug/auth", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password } = req.body;
-  const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: "No invitation exists with this link path." });
-    return;
-  }
-
   try {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-    
-    // Check password
-    const storedPassword = data.editPassword || "";
+    const invitation = await Invitation.findOne({ slug }).lean() as any;
+    if (!invitation) {
+      res.status(404).json({ error: "No invitation exists with this link path." });
+      return;
+    }
+    const storedPassword = invitation.editPassword || "";
     if (password && storedPassword && password.trim() === storedPassword.trim()) {
-      res.json({ success: true, data });
+      res.json({ success: true, data: invitation });
     } else if (!storedPassword) {
-      res.json({ success: true, data });
+      res.json({ success: true, data: invitation });
     } else {
       res.status(401).json({ error: "Invalid passcode. Please try again." });
     }
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Server authentication error." });
   }
 });
 
-// API: Unified account login checking email & password and returning all owned invitation metadata
-app.post("/api/auth/login", (req, res) => {
+// ─────────────────────────────────────────────
+// API: Unified account login — finds all owned invitations by email+password
+// ─────────────────────────────────────────────
+app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
-
   if (!email || !password) {
     res.status(400).json({ error: "Please enter both Email and Password." });
     return;
   }
-
   const cleanEmail = email.trim().toLowerCase();
   const cleanPassword = password.trim();
-
   try {
-    const files = fs.readdirSync(INVITATIONS_DIR);
-    const matchedInvitations: any[] = [];
+    const invitations = await Invitation.find({
+      ownerEmail: cleanEmail,
+      editPassword: cleanPassword,
+    }).select("-photos").lean();
 
-    files.forEach((file) => {
-      if (file.endsWith(".json")) {
-        const filePath = path.join(INVITATIONS_DIR, file);
-        try {
-          const raw = fs.readFileSync(filePath, "utf-8");
-          const parsed = JSON.parse(raw);
-          if (
-            parsed.ownerEmail &&
-            parsed.ownerEmail.trim().toLowerCase() === cleanEmail &&
-            parsed.editPassword &&
-            parsed.editPassword.trim() === cleanPassword
-          ) {
-            // Light mapping: exclude base64 photos to speed up login payload size
-            const { photos, ...lightweightRecord } = parsed;
-            matchedInvitations.push(lightweightRecord);
-          }
-        } catch (err) {
-          console.error(`Error reading card JSON file ${file}:`, err);
-        }
-      }
-    });
-
-    if (matchedInvitations.length === 0) {
+    if (!invitations || invitations.length === 0) {
       res.status(401).json({ error: "No invitations match this Email and Passcode/Password combination." });
       return;
     }
-
-    res.json({ success: true, invitations: matchedInvitations });
-  } catch (error: any) {
+    res.json({ success: true, invitations });
+  } catch (error) {
     console.error("Account login lookup failed:", error);
     res.status(500).json({ error: "Internal server validation failure." });
   }
 });
 
-// API: Direct update for an x-invitation after creations
-app.post("/api/invitations/:slug/update", (req, res) => {
+// ─────────────────────────────────────────────
+// API: Update an invitation (after auth)
+// ─────────────────────────────────────────────
+app.post("/api/invitations/:slug/update", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password, editPassword, ...fields } = req.body;
-  const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: "Invitation not found to update." });
-    return;
-  }
-
   try {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-
-    const storedPassword = data.editPassword || "";
-    const isAuthorized = !storedPassword || 
-      (password && password.trim() === storedPassword.trim()) || 
+    const invitation = await Invitation.findOne({ slug }).lean() as any;
+    if (!invitation) {
+      res.status(404).json({ error: "Invitation not found to update." });
+      return;
+    }
+    const storedPassword = invitation.editPassword || "";
+    const isAuthorized = !storedPassword ||
+      (password && password.trim() === storedPassword.trim()) ||
       (editPassword && editPassword.trim() === storedPassword.trim());
 
     if (!isAuthorized) {
@@ -285,150 +282,102 @@ app.post("/api/invitations/:slug/update", (req, res) => {
       return;
     }
 
-    // Merge modified fields while maintaining integrity of guestbook & events
-    const updatedRecord = {
-      ...data,
+    const updateData: any = {
       ...fields,
       slug,
       editPassword: editPassword !== undefined ? editPassword.trim() : storedPassword,
-      ownerEmail: fields.ownerEmail !== undefined ? fields.ownerEmail.trim().toLowerCase() : data.ownerEmail,
-      openingTheme: fields.openingTheme !== undefined ? fields.openingTheme : data.openingTheme,
-      views: data.views || 0,
-      guestbookNotes: fields.guestbookNotes !== undefined ? fields.guestbookNotes : (data.guestbookNotes || []),
+      ownerEmail: fields.ownerEmail !== undefined ? fields.ownerEmail.trim().toLowerCase() : invitation.ownerEmail,
+      openingTheme: fields.openingTheme !== undefined ? fields.openingTheme : invitation.openingTheme,
+      guestbookNotes: fields.guestbookNotes !== undefined ? fields.guestbookNotes : (invitation.guestbookNotes || []),
     };
+    delete updateData._id;
 
-    fs.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
+    await Invitation.updateOne({ slug }, { $set: updateData });
     res.json({ success: true, slug });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to update invitation." });
   }
 });
 
-// API: Guest submits a blessing note onto the digital wall
-app.post("/api/invitations/:slug/add-note", (req, res) => {
+// ─────────────────────────────────────────────
+// API: Guest submits a guestbook blessing note
+// ─────────────────────────────────────────────
+app.post("/api/invitations/:slug/add-note", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { name, note, amount } = req.body;
-  const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: "Wedding page not found." });
-    return;
-  }
-
   const noteText = (note || req.body.message || "").trim();
   if (!name || name.trim() === "" || !noteText) {
     res.status(400).json({ error: "Please enter your name and a heartfelt blessing." });
     return;
   }
-
   try {
-    const raw = fs.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-
-    if (!data.guestbookNotes) {
-      data.guestbookNotes = [];
+    const invitation = await Invitation.findOne({ slug });
+    if (!invitation) {
+      res.status(404).json({ error: "Wedding page not found." });
+      return;
     }
-
     const newNote = {
       id: "note_" + Date.now() + Math.random().toString(36).substr(2, 4),
       name: name.trim(),
       note: noteText,
       amount: amount ? String(amount).trim() : undefined,
-      date: new Date().toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
+      date: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }),
     };
-
-    data.guestbookNotes.push(newNote);
-
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-    res.json({ success: true, note: newNote, notes: data.guestbookNotes });
+    const current = (invitation as any).guestbookNotes || [];
+    const updated = [...current, newNote];
+    await Invitation.updateOne({ slug }, { $set: { guestbookNotes: updated } });
+    res.json({ success: true, note: newNote, notes: updated });
   } catch (err: any) {
     res.status(500).json({ error: "Failed to register blessing." });
   }
 });
 
+// ─────────────────────────────────────────────
 // API: Submit a support/contact query
-app.post("/api/contact/submit", (req, res) => {
+// ─────────────────────────────────────────────
+app.post("/api/contact/submit", async (req, res) => {
   const { name, email, subject, message } = req.body;
   if (!name || !email || !subject || !message) {
     res.status(400).json({ error: "Please fill out all fields in the contact form." });
     return;
   }
-  
   try {
-    const queriesPath = path.join(DATA_DIR, "support_queries.json");
-    let queries: any[] = [];
-    if (fs.existsSync(queriesPath)) {
-      const raw = fs.readFileSync(queriesPath, "utf-8");
-      queries = JSON.parse(raw);
-    }
-    
-    const newQuery = {
+    const newQuery = new SupportQuery({
       id: "query_" + Date.now() + Math.random().toString(36).substr(2, 4),
       name: name.trim(),
       email: email.trim().toLowerCase(),
       subject: subject.trim(),
       message: message.trim(),
       date: new Date().toISOString(),
-    };
-    
-    queries.push(newQuery);
-    fs.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    });
+    await newQuery.save();
 
-    // Try to send email notification using SMTP if configured
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = process.env.SMTP_PORT;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (smtpHost && smtpPort && smtpUser && smtpPass) {
+    // Try to send email notification via SMTP
+    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+    if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS) {
       const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: parseInt(smtpPort, 10),
-        secure: smtpPort === "465", // true for 465, false for other ports
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
+        host: SMTP_HOST,
+        port: parseInt(SMTP_PORT, 10),
+        secure: SMTP_PORT === "465",
+        auth: { user: SMTP_USER, pass: SMTP_PASS },
       });
-
-      const mailOptions = {
-        from: `"${name.trim()} via GetShaadiLink" <${smtpUser}>`,
+      transporter.sendMail({
+        from: `"${name.trim()} via GetShaadiLink" <${SMTP_USER}>`,
         to: "support@getshaadilink.in",
         replyTo: email.trim(),
         subject: `[Support Query] ${subject.trim()}`,
-        text: `You have received a new support query via GetShaadiLink contact form.
-
-Name: ${name.trim()}
-Email: ${email.trim()}
-Subject: ${subject.trim()}
-
-Message:
-${message.trim()}
-
----
-Date: ${new Date().toLocaleString()}
-Query ID: ${newQuery.id}`,
-      };
-
-      transporter.sendMail(mailOptions).catch((err) => {
-        console.error("Failed to send support email via SMTP:", err);
-      });
-    } else {
-      console.warn("SMTP email variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS) not fully configured. Email was not sent, but query was saved to disk.");
+        text: `Name: ${name.trim()}\nEmail: ${email.trim()}\nSubject: ${subject.trim()}\n\n${message.trim()}`,
+      }).catch((err) => console.error("SMTP email failed:", err));
     }
-
     res.json({ success: true });
-  } catch (err) {
-    console.error("Failed to save support query:", err);
+  } catch {
     res.status(500).json({ error: "Failed to submit your support message." });
   }
 });
 
+// ─────────────────────────────────────────────
 // Admin Authorization Middleware
+// ─────────────────────────────────────────────
 const requireAdminAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -444,59 +393,13 @@ const requireAdminAuth = (req: express.Request, res: express.Response, next: exp
   next();
 };
 
-// API: Admin — fetch all reviews (pending + approved)
-app.get("/api/admin/reviews", requireAdminAuth, (req, res) => {
-  try {
-    const reviews = readReviews();
-    reviews.sort((a: any, b: any) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-    res.json({ success: true, reviews });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch reviews." });
-  }
-});
-
-// API: Admin — approve a review
-app.post("/api/admin/reviews/:id/approve", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-  try {
-    const reviews = readReviews();
-    const review = reviews.find((r: any) => r.id === id);
-    if (!review) {
-      res.status(404).json({ error: "Review not found." });
-      return;
-    }
-    review.status = review.status === "approved" ? "pending" : "approved";
-    writeReviews(reviews);
-    res.json({ success: true, review });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update review." });
-  }
-});
-
-// API: Admin — delete a review
-app.delete("/api/admin/reviews/:id", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-  try {
-    const reviews = readReviews();
-    const idx = reviews.findIndex((r: any) => r.id === id);
-    if (idx === -1) {
-      res.status(404).json({ error: "Review not found." });
-      return;
-    }
-    reviews.splice(idx, 1);
-    writeReviews(reviews);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete review." });
-  }
-});
-
-// API: Admin Login
+// ─────────────────────────────────────────────
+// Admin: Login
+// ─────────────────────────────────────────────
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
   const expectedUsername = process.env.ADMIN_USERNAME || "VinayMathad";
   const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
-
   if (username === expectedUsername && password === expectedPassword) {
     res.json({ success: true, token: expectedPassword });
   } else {
@@ -504,256 +407,159 @@ app.post("/api/admin/login", (req, res) => {
   }
 });
 
-// API: Admin Dashboard Stats
-app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
+// ─────────────────────────────────────────────
+// Admin: Fetch all reviews (pending + approved)
+// ─────────────────────────────────────────────
+app.get("/api/admin/reviews", requireAdminAuth, async (req, res) => {
   try {
-    let totalInvitations = 0;
-    let totalViews = 0;
-    let totalQueries = 0;
-
-    // Count invitations & sum views
-    if (fs.existsSync(INVITATIONS_DIR)) {
-      const files = fs.readdirSync(INVITATIONS_DIR);
-      totalInvitations = files.filter(f => f.endsWith(".json")).length;
-
-      for (const file of files) {
-        if (file.endsWith(".json")) {
-          try {
-            const raw = fs.readFileSync(path.join(INVITATIONS_DIR, file), "utf-8");
-            const data = JSON.parse(raw);
-            totalViews += (data.views || 0);
-          } catch (e) {
-            // ignore malformed files
-          }
-        }
-      }
-    }
-
-    // Count support queries
-    const queriesPath = path.join(DATA_DIR, "support_queries.json");
-    if (fs.existsSync(queriesPath)) {
-      try {
-        const raw = fs.readFileSync(queriesPath, "utf-8");
-        const queries = JSON.parse(raw);
-        totalQueries = Array.isArray(queries) ? queries.length : 0;
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    res.json({
-      success: true,
-      stats: {
-        totalInvitations,
-        totalViews,
-        totalQueries
-      }
-    });
-  } catch (error) {
-    console.error("Failed to fetch admin stats:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const reviews = await Review.find().sort({ submittedAt: -1 }).lean();
+    res.json({ success: true, reviews });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch reviews." });
   }
 });
 
-// API: Admin List Invitations
-app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
+// ─────────────────────────────────────────────
+// Admin: Approve / toggle a review
+// ─────────────────────────────────────────────
+app.post("/api/admin/reviews/:id/approve", requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
   try {
-    const list: any[] = [];
-    if (fs.existsSync(INVITATIONS_DIR)) {
-      const files = fs.readdirSync(INVITATIONS_DIR);
-      for (const file of files) {
-        if (file.endsWith(".json")) {
-          try {
-            const raw = fs.readFileSync(path.join(INVITATIONS_DIR, file), "utf-8");
-            const data = JSON.parse(raw);
-            list.push({
-              slug: data.slug,
-              bride: data.bride,
-              groom: data.groom,
-              wdate: data.wdate,
-              city: data.city,
-              ownerEmail: data.ownerEmail || "",
-              views: data.views || 0,
-              createdDate: data.createdDate || data.date || "",
-            });
-          } catch (e) {
-            // ignore
-          }
-        }
-      }
-    }
-    // Sort by views, then newest
-    list.sort((a, b) => b.views - a.views);
-    res.json({ success: true, invitations: list });
-  } catch (error) {
-    console.error("Failed to list invitations:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const review = await Review.findOne({ id }).lean() as any;
+    if (!review) { res.status(404).json({ error: "Review not found." }); return; }
+    const newStatus = review.status === "approved" ? "pending" : "approved";
+    await Review.updateOne({ id }, { $set: { status: newStatus } });
+    res.json({ success: true, review: { ...review, status: newStatus } });
+  } catch {
+    res.status(500).json({ error: "Failed to update review." });
   }
 });
 
-// API: Admin Delete Invitation
-app.delete("/api/admin/invitations/:slug", requireAdminAuth, (req, res) => {
-  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-
-  if (!fs.existsSync(filePath)) {
-    res.status(404).json({ error: "Invitation not found" });
-    return;
-  }
-
+// ─────────────────────────────────────────────
+// Admin: Delete a review
+// ─────────────────────────────────────────────
+app.delete("/api/admin/reviews/:id", requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
   try {
-    fs.unlinkSync(filePath);
+    const result = await Review.deleteOne({ id });
+    if (result.deletedCount === 0) { res.status(404).json({ error: "Review not found." }); return; }
     res.json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete invitation:", error);
+  } catch {
+    res.status(500).json({ error: "Failed to delete review." });
+  }
+});
+
+// ─────────────────────────────────────────────
+// Admin: Dashboard Stats
+// ─────────────────────────────────────────────
+app.get("/api/admin/stats", requireAdminAuth, async (req, res) => {
+  try {
+    const totalInvitations = await Invitation.countDocuments();
+    const viewsAgg = await Invitation.aggregate([{ $group: { _id: null, total: { $sum: "$views" } } }]);
+    const totalViews = viewsAgg.length > 0 ? viewsAgg[0].total : 0;
+    const totalQueries = await SupportQuery.countDocuments();
+    res.json({ success: true, stats: { totalInvitations, totalViews, totalQueries } });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────
+// Admin: List all invitations
+// ─────────────────────────────────────────────
+app.get("/api/admin/invitations", requireAdminAuth, async (req, res) => {
+  try {
+    const invitations = await Invitation.find()
+      .select("slug bride groom wdate city ownerEmail views createdAt")
+      .sort({ views: -1 })
+      .lean();
+    res.json({ success: true, invitations });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// ─────────────────────────────────────────────
+// Admin: Delete an invitation
+// ─────────────────────────────────────────────
+app.delete("/api/admin/invitations/:slug", requireAdminAuth, async (req, res) => {
+  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  try {
+    const result = await Invitation.deleteOne({ slug });
+    if (result.deletedCount === 0) { res.status(404).json({ error: "Invitation not found" }); return; }
+    res.json({ success: true });
+  } catch {
     res.status(500).json({ error: "Failed to delete invitation" });
   }
 });
 
-// API: Admin List Support Queries
-app.get("/api/admin/queries", requireAdminAuth, (req, res) => {
+// ─────────────────────────────────────────────
+// Admin: List support queries
+// ─────────────────────────────────────────────
+app.get("/api/admin/queries", requireAdminAuth, async (req, res) => {
   try {
-    const queriesPath = path.join(DATA_DIR, "support_queries.json");
-    let queries: any[] = [];
-    if (fs.existsSync(queriesPath)) {
-      const raw = fs.readFileSync(queriesPath, "utf-8");
-      queries = JSON.parse(raw);
-    }
-    // Sort queries newest first
-    if (Array.isArray(queries)) {
-      queries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }
+    const queries = await SupportQuery.find().sort({ date: -1 }).lean();
     res.json({ success: true, queries });
-  } catch (error) {
-    console.error("Failed to list queries:", error);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// API: Admin Update Support Query Status
-app.post("/api/admin/queries/:id/update", requireAdminAuth, (req, res) => {
+// ─────────────────────────────────────────────
+// Admin: Update support query status
+// ─────────────────────────────────────────────
+app.post("/api/admin/queries/:id/update", requireAdminAuth, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
-
-  if (!status) {
-    res.status(400).json({ error: "Status field is required" });
-    return;
-  }
-
+  if (!status) { res.status(400).json({ error: "Status field is required" }); return; }
   try {
-    const queriesPath = path.join(DATA_DIR, "support_queries.json");
-    if (!fs.existsSync(queriesPath)) {
-      res.status(404).json({ error: "No queries exist" });
-      return;
-    }
-
-    const raw = fs.readFileSync(queriesPath, "utf-8");
-    const queries = JSON.parse(raw);
-    const query = queries.find((q: any) => q.id === id);
-
-    if (!query) {
-      res.status(404).json({ error: "Query not found" });
-      return;
-    }
-
-    query.status = status;
-    fs.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
-    res.json({ success: true, query });
-  } catch (error) {
-    console.error("Failed to update query status:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// API: Admin Delete Support Query
-app.delete("/api/admin/queries/:id", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const queriesPath = path.join(DATA_DIR, "support_queries.json");
-    if (!fs.existsSync(queriesPath)) {
-      res.status(404).json({ error: "No queries exist" });
-      return;
-    }
-
-    const raw = fs.readFileSync(queriesPath, "utf-8");
-    const queries = JSON.parse(raw);
-    const index = queries.findIndex((q: any) => q.id === id);
-
-    if (index === -1) {
-      res.status(404).json({ error: "Query not found" });
-      return;
-    }
-
-    queries.splice(index, 1);
-    fs.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
+    const result = await SupportQuery.updateOne({ id }, { $set: { status } });
+    if (result.matchedCount === 0) { res.status(404).json({ error: "Query not found" }); return; }
     res.json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete support query:", error);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-// API: Generate invitation using Gemini and persist it
+// ─────────────────────────────────────────────
+// Admin: Delete support query
+// ─────────────────────────────────────────────
+app.delete("/api/admin/queries/:id", requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await SupportQuery.deleteOne({ id });
+    if (result.deletedCount === 0) { res.status(404).json({ error: "Query not found" }); return; }
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: "Failed to delete query" });
+  }
+});
+
+// ─────────────────────────────────────────────
+// API: Generate invitation using Gemini AI and save to MongoDB
+// ─────────────────────────────────────────────
 app.post("/api/invitations/generate", async (req, res) => {
   try {
     const {
-      bride,
-      groom,
-      wdate,
-      city,
-      vname,
-      vaddr,
-      lang,
-      story,
-      storyText,
-      upiId,
-      shagunOn,
-      photos,
-      e1n,
-      e1t,
-      e2n,
-      e2t,
-      e3n,
-      e3t,
-      slug,
-      editPassword,
-      groomParents,
-      brideParents,
-      familyBlessings,
-      postWeddingPhotosUrl,
-      ownerEmail,
-      openingTheme,
-      razorpayPaymentId,
+      bride, groom, wdate, city, vname, vaddr, lang, story, storyText,
+      upiId, shagunOn, photos, e1n, e1t, e2n, e2t, e3n, e3t,
+      slug, editPassword, groomParents, brideParents, familyBlessings,
+      postWeddingPhotosUrl, ownerEmail, openingTheme, razorpayPaymentId,
     } = req.body;
 
     const formattedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-    if (!formattedSlug) {
-      res.status(400).json({ error: "A valid URL path is required" });
-      return;
-    }
-
+    if (!formattedSlug) { res.status(400).json({ error: "A valid URL path is required" }); return; }
     if (!bride || !groom || !wdate || !city || !vname || !vaddr) {
       res.status(400).json({ error: "Please provide all required wedding details." });
       return;
     }
 
     const parsedDate = new Date(wdate);
-    const niceDate = parsedDate.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    const niceDate = parsedDate.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
     const langMap: Record<string, string> = {
-      en: "English",
-      kn: "Kannada",
-      hi: "Hindi",
-      ta: "Tamil",
-      te: "Telugu",
-      ml: "Malayalam",
+      en: "English", kn: "Kannada", hi: "Hindi", ta: "Tamil", te: "Telugu", ml: "Malayalam",
     };
-
     const targetLangName = langMap[lang] || "English";
     const seed = Math.floor(Math.random() * 9999);
     const rawStory = (story || storyText || "").trim() || "We met, fell in love, and decided to marry.";
@@ -792,49 +598,38 @@ Instructions:
             responseSchema: {
               type: Type.OBJECT,
               properties: {
-                storyEnglish: { type: Type.STRING },
-                storyRegional: { type: Type.STRING },
-                tagline: { type: Type.STRING },
-                event1Regional: { type: Type.STRING },
-                event2Regional: { type: Type.STRING },
-                event3Regional: { type: Type.STRING },
+                storyEnglish:    { type: Type.STRING },
+                storyRegional:   { type: Type.STRING },
+                tagline:         { type: Type.STRING },
+                event1Regional:  { type: Type.STRING },
+                event2Regional:  { type: Type.STRING },
+                event3Regional:  { type: Type.STRING },
                 theme: {
                   type: Type.OBJECT,
                   properties: {
-                    name: { type: Type.STRING },
-                    primary: { type: Type.STRING },
+                    name:      { type: Type.STRING },
+                    primary:   { type: Type.STRING },
                     secondary: { type: Type.STRING },
-                    accent: { type: Type.STRING },
-                    bg: { type: Type.STRING },
+                    accent:    { type: Type.STRING },
+                    bg:        { type: Type.STRING },
                     heroEmoji: { type: Type.STRING },
                   },
                   required: ["name", "primary", "secondary", "accent", "bg", "heroEmoji"],
                 },
               },
-              required: [
-                "storyEnglish",
-                "storyRegional",
-                "tagline",
-                "event1Regional",
-                "event2Regional",
-                "event3Regional",
-                "theme",
-              ],
+              required: ["storyEnglish", "storyRegional", "tagline", "event1Regional", "event2Regional", "event3Regional", "theme"],
             },
           },
         });
 
         const aiOutputText = geminiRes.text;
-        if (aiOutputText) {
-          parsedAiResult = JSON.parse(aiOutputText);
-        }
+        if (aiOutputText) parsedAiResult = JSON.parse(aiOutputText);
       } catch (err) {
         console.warn("WARNING: Gemini AI generation failed. Falling back to local templates. Error:", err);
       }
     }
 
     if (!parsedAiResult) {
-      // Local fallback generation with basic translation and polishing
       const polishedEnglish = `The journey of ${bride} and ${groom} is a beautiful testament to love and partnership. ` +
         (rawStory.length > 5 ? rawStory : `We met, fell in love, and decided to share our lives forever.`) +
         ` Guided by trust and shared dreams, we are taking our next beautiful step together on ${niceDate} in ${city}.`;
@@ -864,13 +659,13 @@ Instructions:
           `நம்பிக்கை மற்றும் பகிரப்பட்ட கனவுகளுடன், நாம் ${niceDate} அன்று ${city} இல் எங்கள் புதிய வாழ்க்கையைத் தொடங்குகிறோம்.`;
         ev1Reg = e1n === "Haldi Ceremony" ? "நலங்கு / மஞ்சள் நீராட்டு" : e1n;
         ev2Reg = e2n === "Sangeet Night" ? "சங்கீத் விழா" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "திருமணம் / சுപ முகூர்த்தம்" : e3n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "திருமணம் / சுபமுகூர்த்தம்" : e3n;
       } else if (lang === "te") {
         polishedRegional = `${bride} మరియు ${groom} ల ఈ ప్రయాణం ప్రేమ మరియు బంధానికి ఒక అందమైన నిదర్శనం. ` +
           (rawStory.length > 5 ? `మా కథ: "${rawStory}"। ` : `మేము కలుసుకున్నాము, ప్రేమలో పడ్డాము మరియు మా జీవితాలను ఎప్పటికీ పంచుకోవాలని నిర్ణయించుకున్నాము. `) +
           `నమ్మకం మరియు కలలతో, మేము ${niceDate} న ${city} లో మా జీవిత కొత్త అధ్యాయాన్ని ప్రారంభిస్తున్నాము.`;
         ev1Reg = e1n === "Haldi Ceremony" ? "హల్దీ వేడుక" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "സംഗీത് సంధ్యా" : e2n;
+        ev2Reg = e2n === "Sangeet Night" ? "సంగీత్ సంధ్యా" : e2n;
         ev3Reg = e3n === "Wedding Ceremony" ? "శుభ కళ్యాణం" : e3n;
       } else if (lang === "ml") {
         polishedRegional = `${bride} യുടെയും ${groom} ന്റെയും ഈ യാത്ര സ്നേഹത്തിന്റെയും കൂട്ടുകെട്ടിന്റെയും മനോഹരമായ കഥയാണ്. ` +
@@ -899,7 +694,7 @@ Instructions:
       };
     }
 
-    // Merge and finalize the record to persist database on disk
+    // Build invitation record and save to MongoDB
     const invitationRecord = {
       slug: formattedSlug,
       bride,
@@ -912,18 +707,11 @@ Instructions:
       storyRegional: parsedAiResult.storyRegional,
       tagline: parsedAiResult.tagline,
       lang,
-      langNative: {
-        en: "English",
-        kn: "ಕನ್ನಡ",
-        hi: "हिंदी",
-        ta: "தமிழ்",
-        te: "తెలుగు",
-        ml: "മലയാളം",
-      }[lang] || "English",
+      langNative: { en: "English", kn: "ಕನ್ನಡ", hi: "हिंदी", ta: "தமிழ்", te: "తెలుగు", ml: "മലയാളം" }[lang] || "English",
       events: [
         { name: e1n || "Haldi Ceremony", regional: parsedAiResult.event1Regional, time: e1t || "", emoji: "💛" },
-        { name: e2n || "Sangeet Night", regional: parsedAiResult.event2Regional, time: e2t || "", emoji: "💃" },
-        { name: e3n || "Wedding Ceremony", regional: parsedAiResult.event3Regional, time: e3t || "", emoji: "🌸" },
+        { name: e2n || "Sangeet Night",   regional: parsedAiResult.event2Regional, time: e2t || "", emoji: "💃" },
+        { name: e3n || "Wedding Ceremony",regional: parsedAiResult.event3Regional, time: e3t || "", emoji: "🌸" },
       ],
       shagunOn: !!shagunOn,
       upiId: (upiId || "").trim(),
@@ -931,11 +719,7 @@ Instructions:
       photos: photos || [],
       theme: parsedAiResult.theme || {
         name: "Standard Saffron",
-        primary: "#C2185B",
-        secondary: "#D4A843",
-        accent: "#2CB5B0",
-        bg: "#08000F",
-        heroEmoji: "🌸",
+        primary: "#C2185B", secondary: "#D4A843", accent: "#2CB5B0", bg: "#08000F", heroEmoji: "🌸",
       },
       editPassword: (editPassword || "").trim(),
       groomParents: (groomParents || "").trim(),
@@ -950,20 +734,28 @@ Instructions:
       createdAt: new Date().toISOString(),
     };
 
-    const targetFilePath = path.join(INVITATIONS_DIR, `${formattedSlug}.json`);
-    fs.writeFileSync(targetFilePath, JSON.stringify(invitationRecord, null, 2), "utf-8");
+    // Upsert: update if slug exists (re-generation), insert if new
+    await Invitation.findOneAndUpdate(
+      { slug: formattedSlug },
+      { $set: invitationRecord },
+      { upsert: true, new: true }
+    );
 
     res.json({ success: true, slug: formattedSlug });
   } catch (error: any) {
-    console.error("AI Generation & storage failed:", error);
+    console.error("AI Generation & MongoDB storage failed:", error);
     res.status(500).json({ error: error.message || "Failed to generate wedding invitation." });
   }
 });
 
-// Vite middleware integration for live development and production static build routing
+// ─────────────────────────────────────────────
+// Vite / Static file serving + OG meta injection
+// ─────────────────────────────────────────────
 async function startServer() {
+  // Connect to MongoDB first
+  await connectDB();
+
   if (process.env.NODE_ENV !== "production") {
-    // Vite dev server
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -971,41 +763,36 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // Production static build assets serving
-    // Use DATA_PATH parent or __dirname-based resolution to find dist/
-    const distPath = process.env.DIST_PATH ||
-      (() => {
-        try { return path.join(path.dirname(__filename), "."); } catch { return path.join(process.cwd(), "dist"); }
-      })();
+    // Production: serve from dist/ (same directory as server.cjs)
+    const distPath = (() => {
+      try { return path.dirname(__filename); } catch { return path.join(process.cwd(), "dist"); }
+    })();
     console.log("[Static] Serving from:", distPath);
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+
+    app.get("*", async (req, res) => {
       const slug = req.path.replace(/^\//, "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
       const indexPath = path.join(distPath, "index.html");
-      
+
       if (!fs.existsSync(indexPath)) {
         res.status(404).send("Build index.html not found.");
         return;
       }
-      
+
       let html = fs.readFileSync(indexPath, "utf-8");
-      
+
       if (slug) {
-        const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
-        if (fs.existsSync(filePath)) {
-          try {
-            const rawData = fs.readFileSync(filePath, "utf-8");
-            const data = JSON.parse(rawData);
-            
-            const title = `${data.bride} & ${data.groom}'s Wedding Invitation | GetShaadiLink`;
-            const description = `Join us to celebrate our wedding at ${data.vname}, ${data.city} on ${data.niceDate}. Click to view details and RSVP.`;
-            const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
-            
-            // Replace Title
+        try {
+          const invitation = await Invitation.findOne({ slug }).select("bride groom vname city niceDate photos").lean() as any;
+          if (invitation) {
+            const title = `${invitation.bride} & ${invitation.groom}'s Wedding Invitation | GetShaadiLink`;
+            const description = `Join us to celebrate our wedding at ${invitation.vname}, ${invitation.city} on ${invitation.niceDate}. Click to view details and RSVP.`;
+            const ogImage = invitation.photos && invitation.photos.length > 0
+              ? invitation.photos[0]
+              : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
+
             html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
-            
-            // Inject Meta Tags
-            const metaTags = `
+            html = html.replace("</head>", `
               <meta property="og:title" content="${title}" />
               <meta property="og:description" content="${description}" />
               <meta property="og:image" content="${ogImage}" />
@@ -1014,22 +801,19 @@ async function startServer() {
               <meta name="twitter:title" content="${title}" />
               <meta name="twitter:description" content="${description}" />
               <meta name="twitter:image" content="${ogImage}" />
-            `;
-            
-            // Inject into head
-            html = html.replace("</head>", `${metaTags}</head>`);
-          } catch (err) {
-            console.error("Error injecting metadata:", err);
+            </head>`);
           }
+        } catch (err) {
+          console.error("Error injecting OG metadata:", err);
         }
       }
-      
+
       res.send(html);
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Express server powered by Gemini running on http://localhost:${PORT}`);
+    console.log(`🚀 GetShaadiLink server running on http://localhost:${PORT}`);
   });
 }
 

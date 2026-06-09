@@ -28,93 +28,118 @@ var import_fs = __toESM(require("fs"), 1);
 var import_genai = require("@google/genai");
 var import_dotenv = __toESM(require("dotenv"), 1);
 var import_nodemailer = __toESM(require("nodemailer"), 1);
+var import_mongoose = __toESM(require("mongoose"), 1);
 import_dotenv.default.config();
 var app = (0, import_express.default)();
 var PORT = 3e3;
 app.use(import_express.default.json({ limit: "25mb" }));
 app.use(import_express.default.urlencoded({ limit: "25mb", extended: true }));
-var DATA_DIR = process.env.DATA_PATH ? import_path.default.resolve(process.env.DATA_PATH) : import_path.default.resolve(__dirname, "..", "data");
-var INVITATIONS_DIR = import_path.default.join(DATA_DIR, "invitations");
-var REVIEWS_FILE = import_path.default.join(DATA_DIR, "reviews.json");
-if (!import_fs.default.existsSync(DATA_DIR)) {
-  import_fs.default.mkdirSync(DATA_DIR, { recursive: true });
+var MONGODB_URI = process.env.MONGODB_URI || "";
+async function connectDB() {
+  if (!MONGODB_URI) {
+    console.error("\u274C MONGODB_URI is not set. Please add it in Hostinger Environment Variables.");
+    process.exit(1);
+  }
+  try {
+    await import_mongoose.default.connect(MONGODB_URI, { dbName: "getshaadilink" });
+    console.log("\u2705 Connected to MongoDB Atlas successfully.");
+  } catch (err) {
+    console.error("\u274C MongoDB connection failed:", err);
+    process.exit(1);
+  }
 }
-if (!import_fs.default.existsSync(INVITATIONS_DIR)) {
-  import_fs.default.mkdirSync(INVITATIONS_DIR, { recursive: true });
-}
-if (!import_fs.default.existsSync(REVIEWS_FILE)) {
-  import_fs.default.writeFileSync(REVIEWS_FILE, "[]", "utf-8");
-}
-console.log("[Storage] Data directory:", DATA_DIR);
+var invitationSchema = new import_mongoose.Schema(
+  {
+    slug: { type: String, required: true, unique: true, index: true },
+    bride: String,
+    groom: String,
+    wdate: String,
+    niceDate: String,
+    city: String,
+    vname: String,
+    vaddr: String,
+    ownerEmail: { type: String, default: "" },
+    editPassword: { type: String, default: "" },
+    openingTheme: { type: String, default: "elephant" },
+    views: { type: Number, default: 0 },
+    guestbookNotes: { type: Array, default: [] },
+    createdAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString() }
+  },
+  { strict: false }
+);
+var Invitation = import_mongoose.default.models.Invitation || import_mongoose.default.model("Invitation", invitationSchema);
+var reviewSchema = new import_mongoose.Schema({
+  id: { type: String, required: true, unique: true, index: true },
+  name: String,
+  location: { type: String, default: "" },
+  stars: { type: Number, default: 5 },
+  text: String,
+  status: { type: String, default: "pending" },
+  submittedAt: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString() }
+});
+var Review = import_mongoose.default.models.Review || import_mongoose.default.model("Review", reviewSchema);
+var supportQuerySchema = new import_mongoose.Schema({
+  id: { type: String, required: true, unique: true, index: true },
+  name: String,
+  email: String,
+  subject: String,
+  message: String,
+  date: { type: String, default: () => (/* @__PURE__ */ new Date()).toISOString() },
+  status: { type: String, default: "open" }
+});
+var SupportQuery = import_mongoose.default.models.SupportQuery || import_mongoose.default.model("SupportQuery", supportQuerySchema);
 var aiClient = null;
 function getGeminiClient() {
   if (!aiClient) {
     const key = process.env.GEMINI_API_KEY;
     if (!key) {
-      console.warn("WARNING: GEMINI_API_KEY is not defined in environment variables. Gemini features will fail.");
+      console.warn("WARNING: GEMINI_API_KEY is not defined. Gemini features will fail.");
     }
     aiClient = new import_genai.GoogleGenAI({
       apiKey: key || "MOCK_KEY_FOR_BUILD",
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build"
-        }
-      }
+      httpOptions: { headers: { "User-Agent": "aistudio-build" } }
     });
   }
   return aiClient;
 }
-app.get("/api/check-slug/:slug", (req, res) => {
+app.get("/api/check-slug/:slug", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   if (!slug) {
     res.json({ available: false });
     return;
   }
-  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-  const exists = import_fs.default.existsSync(filePath);
-  res.json({ available: !exists });
-});
-function readReviews() {
   try {
-    if (!import_fs.default.existsSync(REVIEWS_FILE)) return [];
-    return JSON.parse(import_fs.default.readFileSync(REVIEWS_FILE, "utf-8")) || [];
+    const exists = await Invitation.exists({ slug });
+    res.json({ available: !exists });
   } catch {
-    return [];
+    res.json({ available: false });
   }
-}
-function writeReviews(reviews) {
-  import_fs.default.writeFileSync(REVIEWS_FILE, JSON.stringify(reviews, null, 2), "utf-8");
-}
-function computeStats() {
-  const approved = readReviews().filter((r) => r.status === "approved");
-  const avg = approved.length > 0 ? approved.reduce((sum, r) => sum + (r.stars || 5), 0) / approved.length : 0;
-  return { totalReviews: approved.length, averageRating: Math.round(avg * 10) / 10 };
-}
-app.get("/api/stats", (req, res) => {
+});
+app.get("/api/stats", async (req, res) => {
   try {
-    const files = import_fs.default.readdirSync(INVITATIONS_DIR);
-    const jsonFilesCount = files.filter((f) => f.endsWith(".json")).length;
-    const { totalReviews, averageRating } = computeStats();
+    const totalGenerated = await Invitation.countDocuments();
+    const approvedReviews = await Review.find({ status: "approved" }).lean();
+    const totalReviews = approvedReviews.length;
+    const avg = totalReviews > 0 ? approvedReviews.reduce((s, r) => s + (r.stars || 5), 0) / totalReviews : 0;
+    const averageRating = Math.round(avg * 10) / 10;
     res.json({
-      totalGenerated: jsonFilesCount,
+      totalGenerated,
       rating: averageRating > 0 ? averageRating : 4.9,
-      // fallback until first review
       totalReviews
     });
-  } catch (error) {
+  } catch {
     res.json({ totalGenerated: 0, rating: 4.9, totalReviews: 0 });
   }
 });
-app.get("/api/reviews", (req, res) => {
+app.get("/api/reviews", async (req, res) => {
   try {
-    const approved = readReviews().filter((r) => r.status === "approved");
-    approved.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-    res.json({ success: true, reviews: approved });
-  } catch (err) {
+    const reviews = await Review.find({ status: "approved" }).sort({ submittedAt: -1 }).lean();
+    res.json({ success: true, reviews });
+  } catch {
     res.status(500).json({ error: "Failed to fetch reviews." });
   }
 });
-app.post("/api/reviews/submit", (req, res) => {
+app.post("/api/reviews/submit", async (req, res) => {
   const { name, location, stars, text } = req.body;
   if (!name || !text || !stars) {
     res.status(400).json({ error: "Please fill in all required fields." });
@@ -130,8 +155,7 @@ app.post("/api/reviews/submit", (req, res) => {
     return;
   }
   try {
-    const reviews = readReviews();
-    const newReview = {
+    const newReview = new Review({
       id: "rev_" + Date.now() + Math.random().toString(36).substr(2, 5),
       name: name.trim(),
       location: (location || "").trim(),
@@ -139,58 +163,53 @@ app.post("/api/reviews/submit", (req, res) => {
       text: text.trim(),
       status: "pending",
       submittedAt: (/* @__PURE__ */ new Date()).toISOString()
-    };
-    reviews.push(newReview);
-    writeReviews(reviews);
+    });
+    await newReview.save();
     res.json({ success: true, message: "Thank you! Your review has been submitted and will appear after approval." });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to save review." });
   }
 });
-app.get("/api/invitations/:slug", (req, res) => {
+app.get("/api/invitations/:slug", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-  if (!import_fs.default.existsSync(filePath)) {
-    res.status(404).json({ error: "Invitation not found" });
-    return;
-  }
   try {
-    const rawData = import_fs.default.readFileSync(filePath, "utf-8");
-    const parsed = JSON.parse(rawData);
-    if (req.query.admin !== "true") {
-      parsed.views = (parsed.views || 0) + 1;
-      import_fs.default.writeFileSync(filePath, JSON.stringify(parsed, null, 2), "utf-8");
+    const invitation = await Invitation.findOne({ slug }).lean();
+    if (!invitation) {
+      res.status(404).json({ error: "Invitation not found" });
+      return;
     }
-    res.json(parsed);
+    if (req.query.admin !== "true") {
+      await Invitation.updateOne({ slug }, { $inc: { views: 1 } });
+      invitation.views = (invitation.views || 0) + 1;
+    }
+    res.json(invitation);
   } catch (error) {
-    console.error("Error reading invitation file:", error);
+    console.error("Error fetching invitation:", error);
     res.status(500).json({ error: "Failed to read invitation" });
   }
 });
-app.post("/api/invitations/:slug/auth", (req, res) => {
+app.post("/api/invitations/:slug/auth", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password } = req.body;
-  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-  if (!import_fs.default.existsSync(filePath)) {
-    res.status(404).json({ error: "No invitation exists with this link path." });
-    return;
-  }
   try {
-    const raw = import_fs.default.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-    const storedPassword = data.editPassword || "";
+    const invitation = await Invitation.findOne({ slug }).lean();
+    if (!invitation) {
+      res.status(404).json({ error: "No invitation exists with this link path." });
+      return;
+    }
+    const storedPassword = invitation.editPassword || "";
     if (password && storedPassword && password.trim() === storedPassword.trim()) {
-      res.json({ success: true, data });
+      res.json({ success: true, data: invitation });
     } else if (!storedPassword) {
-      res.json({ success: true, data });
+      res.json({ success: true, data: invitation });
     } else {
       res.status(401).json({ error: "Invalid passcode. Please try again." });
     }
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Server authentication error." });
   }
 });
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     res.status(400).json({ error: "Please enter both Email and Password." });
@@ -199,168 +218,117 @@ app.post("/api/auth/login", (req, res) => {
   const cleanEmail = email.trim().toLowerCase();
   const cleanPassword = password.trim();
   try {
-    const files = import_fs.default.readdirSync(INVITATIONS_DIR);
-    const matchedInvitations = [];
-    files.forEach((file) => {
-      if (file.endsWith(".json")) {
-        const filePath = import_path.default.join(INVITATIONS_DIR, file);
-        try {
-          const raw = import_fs.default.readFileSync(filePath, "utf-8");
-          const parsed = JSON.parse(raw);
-          if (parsed.ownerEmail && parsed.ownerEmail.trim().toLowerCase() === cleanEmail && parsed.editPassword && parsed.editPassword.trim() === cleanPassword) {
-            const { photos, ...lightweightRecord } = parsed;
-            matchedInvitations.push(lightweightRecord);
-          }
-        } catch (err) {
-          console.error(`Error reading card JSON file ${file}:`, err);
-        }
-      }
-    });
-    if (matchedInvitations.length === 0) {
+    const invitations = await Invitation.find({
+      ownerEmail: cleanEmail,
+      editPassword: cleanPassword
+    }).select("-photos").lean();
+    if (!invitations || invitations.length === 0) {
       res.status(401).json({ error: "No invitations match this Email and Passcode/Password combination." });
       return;
     }
-    res.json({ success: true, invitations: matchedInvitations });
+    res.json({ success: true, invitations });
   } catch (error) {
     console.error("Account login lookup failed:", error);
     res.status(500).json({ error: "Internal server validation failure." });
   }
 });
-app.post("/api/invitations/:slug/update", (req, res) => {
+app.post("/api/invitations/:slug/update", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password, editPassword, ...fields } = req.body;
-  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-  if (!import_fs.default.existsSync(filePath)) {
-    res.status(404).json({ error: "Invitation not found to update." });
-    return;
-  }
   try {
-    const raw = import_fs.default.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-    const storedPassword = data.editPassword || "";
+    const invitation = await Invitation.findOne({ slug }).lean();
+    if (!invitation) {
+      res.status(404).json({ error: "Invitation not found to update." });
+      return;
+    }
+    const storedPassword = invitation.editPassword || "";
     const isAuthorized = !storedPassword || password && password.trim() === storedPassword.trim() || editPassword && editPassword.trim() === storedPassword.trim();
     if (!isAuthorized) {
       res.status(401).json({ error: "Invalid passcode. Update unauthorized." });
       return;
     }
-    const updatedRecord = {
-      ...data,
+    const updateData = {
       ...fields,
       slug,
       editPassword: editPassword !== void 0 ? editPassword.trim() : storedPassword,
-      ownerEmail: fields.ownerEmail !== void 0 ? fields.ownerEmail.trim().toLowerCase() : data.ownerEmail,
-      openingTheme: fields.openingTheme !== void 0 ? fields.openingTheme : data.openingTheme,
-      views: data.views || 0,
-      guestbookNotes: fields.guestbookNotes !== void 0 ? fields.guestbookNotes : data.guestbookNotes || []
+      ownerEmail: fields.ownerEmail !== void 0 ? fields.ownerEmail.trim().toLowerCase() : invitation.ownerEmail,
+      openingTheme: fields.openingTheme !== void 0 ? fields.openingTheme : invitation.openingTheme,
+      guestbookNotes: fields.guestbookNotes !== void 0 ? fields.guestbookNotes : invitation.guestbookNotes || []
     };
-    import_fs.default.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
+    delete updateData._id;
+    await Invitation.updateOne({ slug }, { $set: updateData });
     res.json({ success: true, slug });
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to update invitation." });
   }
 });
-app.post("/api/invitations/:slug/add-note", (req, res) => {
+app.post("/api/invitations/:slug/add-note", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { name, note, amount } = req.body;
-  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-  if (!import_fs.default.existsSync(filePath)) {
-    res.status(404).json({ error: "Wedding page not found." });
-    return;
-  }
   const noteText = (note || req.body.message || "").trim();
   if (!name || name.trim() === "" || !noteText) {
     res.status(400).json({ error: "Please enter your name and a heartfelt blessing." });
     return;
   }
   try {
-    const raw = import_fs.default.readFileSync(filePath, "utf-8");
-    const data = JSON.parse(raw);
-    if (!data.guestbookNotes) {
-      data.guestbookNotes = [];
+    const invitation = await Invitation.findOne({ slug });
+    if (!invitation) {
+      res.status(404).json({ error: "Wedding page not found." });
+      return;
     }
     const newNote = {
       id: "note_" + Date.now() + Math.random().toString(36).substr(2, 4),
       name: name.trim(),
       note: noteText,
       amount: amount ? String(amount).trim() : void 0,
-      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-      })
+      date: (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
     };
-    data.guestbookNotes.push(newNote);
-    import_fs.default.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-    res.json({ success: true, note: newNote, notes: data.guestbookNotes });
+    const current = invitation.guestbookNotes || [];
+    const updated = [...current, newNote];
+    await Invitation.updateOne({ slug }, { $set: { guestbookNotes: updated } });
+    res.json({ success: true, note: newNote, notes: updated });
   } catch (err) {
     res.status(500).json({ error: "Failed to register blessing." });
   }
 });
-app.post("/api/contact/submit", (req, res) => {
+app.post("/api/contact/submit", async (req, res) => {
   const { name, email, subject, message } = req.body;
   if (!name || !email || !subject || !message) {
     res.status(400).json({ error: "Please fill out all fields in the contact form." });
     return;
   }
   try {
-    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
-    let queries = [];
-    if (import_fs.default.existsSync(queriesPath)) {
-      const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
-      queries = JSON.parse(raw);
-    }
-    const newQuery = {
+    const newQuery = new SupportQuery({
       id: "query_" + Date.now() + Math.random().toString(36).substr(2, 4),
       name: name.trim(),
       email: email.trim().toLowerCase(),
       subject: subject.trim(),
       message: message.trim(),
       date: (/* @__PURE__ */ new Date()).toISOString()
-    };
-    queries.push(newQuery);
-    import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = process.env.SMTP_PORT;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    if (smtpHost && smtpPort && smtpUser && smtpPass) {
+    });
+    await newQuery.save();
+    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+    if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS) {
       const transporter = import_nodemailer.default.createTransport({
-        host: smtpHost,
-        port: parseInt(smtpPort, 10),
-        secure: smtpPort === "465",
-        // true for 465, false for other ports
-        auth: {
-          user: smtpUser,
-          pass: smtpPass
-        }
+        host: SMTP_HOST,
+        port: parseInt(SMTP_PORT, 10),
+        secure: SMTP_PORT === "465",
+        auth: { user: SMTP_USER, pass: SMTP_PASS }
       });
-      const mailOptions = {
-        from: `"${name.trim()} via GetShaadiLink" <${smtpUser}>`,
+      transporter.sendMail({
+        from: `"${name.trim()} via GetShaadiLink" <${SMTP_USER}>`,
         to: "support@getshaadilink.in",
         replyTo: email.trim(),
         subject: `[Support Query] ${subject.trim()}`,
-        text: `You have received a new support query via GetShaadiLink contact form.
-
-Name: ${name.trim()}
+        text: `Name: ${name.trim()}
 Email: ${email.trim()}
 Subject: ${subject.trim()}
 
-Message:
-${message.trim()}
-
----
-Date: ${(/* @__PURE__ */ new Date()).toLocaleString()}
-Query ID: ${newQuery.id}`
-      };
-      transporter.sendMail(mailOptions).catch((err) => {
-        console.error("Failed to send support email via SMTP:", err);
-      });
-    } else {
-      console.warn("SMTP email variables (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS) not fully configured. Email was not sent, but query was saved to disk.");
+${message.trim()}`
+      }).catch((err) => console.error("SMTP email failed:", err));
     }
     res.json({ success: true });
-  } catch (err) {
-    console.error("Failed to save support query:", err);
+  } catch {
     res.status(500).json({ error: "Failed to submit your support message." });
   }
 });
@@ -378,47 +346,6 @@ var requireAdminAuth = (req, res, next) => {
   }
   next();
 };
-app.get("/api/admin/reviews", requireAdminAuth, (req, res) => {
-  try {
-    const reviews = readReviews();
-    reviews.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
-    res.json({ success: true, reviews });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch reviews." });
-  }
-});
-app.post("/api/admin/reviews/:id/approve", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-  try {
-    const reviews = readReviews();
-    const review = reviews.find((r) => r.id === id);
-    if (!review) {
-      res.status(404).json({ error: "Review not found." });
-      return;
-    }
-    review.status = review.status === "approved" ? "pending" : "approved";
-    writeReviews(reviews);
-    res.json({ success: true, review });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to update review." });
-  }
-});
-app.delete("/api/admin/reviews/:id", requireAdminAuth, (req, res) => {
-  const { id } = req.params;
-  try {
-    const reviews = readReviews();
-    const idx = reviews.findIndex((r) => r.id === id);
-    if (idx === -1) {
-      res.status(404).json({ error: "Review not found." });
-      return;
-    }
-    reviews.splice(idx, 1);
-    writeReviews(reviews);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to delete review." });
-  }
-});
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
   const expectedUsername = process.env.ADMIN_USERNAME || "VinayMathad";
@@ -429,112 +356,83 @@ app.post("/api/admin/login", (req, res) => {
     res.status(401).json({ error: "Invalid username or password" });
   }
 });
-app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
+app.get("/api/admin/reviews", requireAdminAuth, async (req, res) => {
   try {
-    let totalInvitations = 0;
-    let totalViews = 0;
-    let totalQueries = 0;
-    if (import_fs.default.existsSync(INVITATIONS_DIR)) {
-      const files = import_fs.default.readdirSync(INVITATIONS_DIR);
-      totalInvitations = files.filter((f) => f.endsWith(".json")).length;
-      for (const file of files) {
-        if (file.endsWith(".json")) {
-          try {
-            const raw = import_fs.default.readFileSync(import_path.default.join(INVITATIONS_DIR, file), "utf-8");
-            const data = JSON.parse(raw);
-            totalViews += data.views || 0;
-          } catch (e) {
-          }
-        }
-      }
-    }
-    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
-    if (import_fs.default.existsSync(queriesPath)) {
-      try {
-        const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
-        const queries = JSON.parse(raw);
-        totalQueries = Array.isArray(queries) ? queries.length : 0;
-      } catch (e) {
-      }
-    }
-    res.json({
-      success: true,
-      stats: {
-        totalInvitations,
-        totalViews,
-        totalQueries
-      }
-    });
-  } catch (error) {
-    console.error("Failed to fetch admin stats:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const reviews = await Review.find().sort({ submittedAt: -1 }).lean();
+    res.json({ success: true, reviews });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch reviews." });
   }
 });
-app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
+app.post("/api/admin/reviews/:id/approve", requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
   try {
-    const list = [];
-    if (import_fs.default.existsSync(INVITATIONS_DIR)) {
-      const files = import_fs.default.readdirSync(INVITATIONS_DIR);
-      for (const file of files) {
-        if (file.endsWith(".json")) {
-          try {
-            const raw = import_fs.default.readFileSync(import_path.default.join(INVITATIONS_DIR, file), "utf-8");
-            const data = JSON.parse(raw);
-            list.push({
-              slug: data.slug,
-              bride: data.bride,
-              groom: data.groom,
-              wdate: data.wdate,
-              city: data.city,
-              ownerEmail: data.ownerEmail || "",
-              views: data.views || 0,
-              createdDate: data.createdDate || data.date || ""
-            });
-          } catch (e) {
-          }
-        }
-      }
+    const review = await Review.findOne({ id }).lean();
+    if (!review) {
+      res.status(404).json({ error: "Review not found." });
+      return;
     }
-    list.sort((a, b) => b.views - a.views);
-    res.json({ success: true, invitations: list });
-  } catch (error) {
-    console.error("Failed to list invitations:", error);
-    res.status(500).json({ error: "Internal server error" });
+    const newStatus = review.status === "approved" ? "pending" : "approved";
+    await Review.updateOne({ id }, { $set: { status: newStatus } });
+    res.json({ success: true, review: { ...review, status: newStatus } });
+  } catch {
+    res.status(500).json({ error: "Failed to update review." });
   }
 });
-app.delete("/api/admin/invitations/:slug", requireAdminAuth, (req, res) => {
-  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
-  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-  if (!import_fs.default.existsSync(filePath)) {
-    res.status(404).json({ error: "Invitation not found" });
-    return;
-  }
+app.delete("/api/admin/reviews/:id", requireAdminAuth, async (req, res) => {
+  const { id } = req.params;
   try {
-    import_fs.default.unlinkSync(filePath);
+    const result = await Review.deleteOne({ id });
+    if (result.deletedCount === 0) {
+      res.status(404).json({ error: "Review not found." });
+      return;
+    }
     res.json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete invitation:", error);
+  } catch {
+    res.status(500).json({ error: "Failed to delete review." });
+  }
+});
+app.get("/api/admin/stats", requireAdminAuth, async (req, res) => {
+  try {
+    const totalInvitations = await Invitation.countDocuments();
+    const viewsAgg = await Invitation.aggregate([{ $group: { _id: null, total: { $sum: "$views" } } }]);
+    const totalViews = viewsAgg.length > 0 ? viewsAgg[0].total : 0;
+    const totalQueries = await SupportQuery.countDocuments();
+    res.json({ success: true, stats: { totalInvitations, totalViews, totalQueries } });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.get("/api/admin/invitations", requireAdminAuth, async (req, res) => {
+  try {
+    const invitations = await Invitation.find().select("slug bride groom wdate city ownerEmail views createdAt").sort({ views: -1 }).lean();
+    res.json({ success: true, invitations });
+  } catch {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.delete("/api/admin/invitations/:slug", requireAdminAuth, async (req, res) => {
+  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  try {
+    const result = await Invitation.deleteOne({ slug });
+    if (result.deletedCount === 0) {
+      res.status(404).json({ error: "Invitation not found" });
+      return;
+    }
+    res.json({ success: true });
+  } catch {
     res.status(500).json({ error: "Failed to delete invitation" });
   }
 });
-app.get("/api/admin/queries", requireAdminAuth, (req, res) => {
+app.get("/api/admin/queries", requireAdminAuth, async (req, res) => {
   try {
-    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
-    let queries = [];
-    if (import_fs.default.existsSync(queriesPath)) {
-      const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
-      queries = JSON.parse(raw);
-    }
-    if (Array.isArray(queries)) {
-      queries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }
+    const queries = await SupportQuery.find().sort({ date: -1 }).lean();
     res.json({ success: true, queries });
-  } catch (error) {
-    console.error("Failed to list queries:", error);
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-app.post("/api/admin/queries/:id/update", requireAdminAuth, (req, res) => {
+app.post("/api/admin/queries/:id/update", requireAdminAuth, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   if (!status) {
@@ -542,47 +440,27 @@ app.post("/api/admin/queries/:id/update", requireAdminAuth, (req, res) => {
     return;
   }
   try {
-    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
-    if (!import_fs.default.existsSync(queriesPath)) {
-      res.status(404).json({ error: "No queries exist" });
-      return;
-    }
-    const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
-    const queries = JSON.parse(raw);
-    const query = queries.find((q) => q.id === id);
-    if (!query) {
+    const result = await SupportQuery.updateOne({ id }, { $set: { status } });
+    if (result.matchedCount === 0) {
       res.status(404).json({ error: "Query not found" });
       return;
     }
-    query.status = status;
-    import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
-    res.json({ success: true, query });
-  } catch (error) {
-    console.error("Failed to update query status:", error);
+    res.json({ success: true });
+  } catch {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-app.delete("/api/admin/queries/:id", requireAdminAuth, (req, res) => {
+app.delete("/api/admin/queries/:id", requireAdminAuth, async (req, res) => {
   const { id } = req.params;
   try {
-    const queriesPath = import_path.default.join(DATA_DIR, "support_queries.json");
-    if (!import_fs.default.existsSync(queriesPath)) {
-      res.status(404).json({ error: "No queries exist" });
-      return;
-    }
-    const raw = import_fs.default.readFileSync(queriesPath, "utf-8");
-    const queries = JSON.parse(raw);
-    const index = queries.findIndex((q) => q.id === id);
-    if (index === -1) {
+    const result = await SupportQuery.deleteOne({ id });
+    if (result.deletedCount === 0) {
       res.status(404).json({ error: "Query not found" });
       return;
     }
-    queries.splice(index, 1);
-    import_fs.default.writeFileSync(queriesPath, JSON.stringify(queries, null, 2), "utf-8");
     res.json({ success: true });
-  } catch (error) {
-    console.error("Failed to delete support query:", error);
-    res.status(500).json({ error: "Internal server error" });
+  } catch {
+    res.status(500).json({ error: "Failed to delete query" });
   }
 });
 app.post("/api/invitations/generate", async (req, res) => {
@@ -626,11 +504,7 @@ app.post("/api/invitations/generate", async (req, res) => {
       return;
     }
     const parsedDate = new Date(wdate);
-    const niceDate = parsedDate.toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
+    const niceDate = parsedDate.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
     const langMap = {
       en: "English",
       kn: "Kannada",
@@ -693,22 +567,12 @@ Instructions:
                   required: ["name", "primary", "secondary", "accent", "bg", "heroEmoji"]
                 }
               },
-              required: [
-                "storyEnglish",
-                "storyRegional",
-                "tagline",
-                "event1Regional",
-                "event2Regional",
-                "event3Regional",
-                "theme"
-              ]
+              required: ["storyEnglish", "storyRegional", "tagline", "event1Regional", "event2Regional", "event3Regional", "theme"]
             }
           }
         });
         const aiOutputText = geminiRes.text;
-        if (aiOutputText) {
-          parsedAiResult = JSON.parse(aiOutputText);
-        }
+        if (aiOutputText) parsedAiResult = JSON.parse(aiOutputText);
       } catch (err) {
         console.warn("WARNING: Gemini AI generation failed. Falling back to local templates. Error:", err);
       }
@@ -733,11 +597,11 @@ Instructions:
         polishedRegional = `${bride} \u0BAE\u0BB1\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD ${groom} \u0B87\u0BA9\u0BCD \u0B87\u0BA8\u0BCD\u0BA4 \u0BAA\u0BAF\u0BA3\u0BAE\u0BCD \u0B95\u0BBE\u0BA4\u0BB2\u0BCD \u0BAE\u0BB1\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD \u0BA4\u0BC1\u0BA3\u0BC8\u0BAF\u0BBF\u0BA9\u0BCD \u0B85\u0BB4\u0B95\u0BBE\u0BA9 \u0B95\u0BA4\u0BC8\u0BAF\u0BBE\u0B95\u0BC1\u0BAE\u0BCD. ` + (rawStory.length > 5 ? `\u0B8E\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0B95\u0BA4\u0BC8: "${rawStory}"\u0964 ` : `\u0BA8\u0BBE\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0B9A\u0BA8\u0BCD\u0BA4\u0BBF\u0BA4\u0BCD\u0BA4\u0BCB\u0BAE\u0BCD, \u0B95\u0BBE\u0BA4\u0BB2\u0BBF\u0BA4\u0BCD\u0BA4\u0BCB\u0BAE\u0BCD, \u0B8E\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0BB5\u0BBE\u0BB4\u0BCD\u0B95\u0BCD\u0B95\u0BC8\u0BAF\u0BC8 \u0B8E\u0BA9\u0BCD\u0BB1\u0BC6\u0BA9\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD \u0BAA\u0B95\u0BBF\u0BB0\u0BCD\u0BA8\u0BCD\u0BA4\u0BC1 \u0B95\u0BCA\u0BB3\u0BCD\u0BB3 \u0BAE\u0BC1\u0B9F\u0BBF\u0BB5\u0BC1 \u0B9A\u0BC6\u0BAF\u0BCD\u0BA4\u0BCB\u0BAE\u0BCD. `) + `\u0BA8\u0BAE\u0BCD\u0BAA\u0BBF\u0B95\u0BCD\u0B95\u0BC8 \u0BAE\u0BB1\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD \u0BAA\u0B95\u0BBF\u0BB0\u0BAA\u0BCD\u0BAA\u0B9F\u0BCD\u0B9F \u0B95\u0BA9\u0BB5\u0BC1\u0B95\u0BB3\u0BC1\u0B9F\u0BA9\u0BCD, \u0BA8\u0BBE\u0BAE\u0BCD ${niceDate} \u0B85\u0BA9\u0BCD\u0BB1\u0BC1 ${city} \u0B87\u0BB2\u0BCD \u0B8E\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0BAA\u0BC1\u0BA4\u0BBF\u0BAF \u0BB5\u0BBE\u0BB4\u0BCD\u0B95\u0BCD\u0B95\u0BC8\u0BAF\u0BC8\u0BA4\u0BCD \u0BA4\u0BCA\u0B9F\u0B99\u0BCD\u0B95\u0BC1\u0B95\u0BBF\u0BB1\u0BCB\u0BAE\u0BCD.`;
         ev1Reg = e1n === "Haldi Ceremony" ? "\u0BA8\u0BB2\u0B99\u0BCD\u0B95\u0BC1 / \u0BAE\u0B9E\u0BCD\u0B9A\u0BB3\u0BCD \u0BA8\u0BC0\u0BB0\u0BBE\u0B9F\u0BCD\u0B9F\u0BC1" : e1n;
         ev2Reg = e2n === "Sangeet Night" ? "\u0B9A\u0B99\u0BCD\u0B95\u0BC0\u0BA4\u0BCD \u0BB5\u0BBF\u0BB4\u0BBE" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "\u0BA4\u0BBF\u0BB0\u0BC1\u0BAE\u0BA3\u0BAE\u0BCD / \u0B9A\u0BC1\u0D2A \u0BAE\u0BC1\u0B95\u0BC2\u0BB0\u0BCD\u0BA4\u0BCD\u0BA4\u0BAE\u0BCD" : e3n;
+        ev3Reg = e3n === "Wedding Ceremony" ? "\u0BA4\u0BBF\u0BB0\u0BC1\u0BAE\u0BA3\u0BAE\u0BCD / \u0B9A\u0BC1\u0BAA\u0BAE\u0BC1\u0B95\u0BC2\u0BB0\u0BCD\u0BA4\u0BCD\u0BA4\u0BAE\u0BCD" : e3n;
       } else if (lang === "te") {
         polishedRegional = `${bride} \u0C2E\u0C30\u0C3F\u0C2F\u0C41 ${groom} \u0C32 \u0C08 \u0C2A\u0C4D\u0C30\u0C2F\u0C3E\u0C23\u0C02 \u0C2A\u0C4D\u0C30\u0C47\u0C2E \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C2C\u0C02\u0C27\u0C3E\u0C28\u0C3F\u0C15\u0C3F \u0C12\u0C15 \u0C05\u0C02\u0C26\u0C2E\u0C48\u0C28 \u0C28\u0C3F\u0C26\u0C30\u0C4D\u0C36\u0C28\u0C02. ` + (rawStory.length > 5 ? `\u0C2E\u0C3E \u0C15\u0C25: "${rawStory}"\u0964 ` : `\u0C2E\u0C47\u0C2E\u0C41 \u0C15\u0C32\u0C41\u0C38\u0C41\u0C15\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C2E\u0C41, \u0C2A\u0C4D\u0C30\u0C47\u0C2E\u0C32\u0C4B \u0C2A\u0C21\u0C4D\u0C21\u0C3E\u0C2E\u0C41 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C2E\u0C3E \u0C1C\u0C40\u0C35\u0C3F\u0C24\u0C3E\u0C32\u0C28\u0C41 \u0C0E\u0C2A\u0C4D\u0C2A\u0C1F\u0C3F\u0C15\u0C40 \u0C2A\u0C02\u0C1A\u0C41\u0C15\u0C4B\u0C35\u0C3E\u0C32\u0C28\u0C3F \u0C28\u0C3F\u0C30\u0C4D\u0C23\u0C2F\u0C3F\u0C02\u0C1A\u0C41\u0C15\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C2E\u0C41. `) + `\u0C28\u0C2E\u0C4D\u0C2E\u0C15\u0C02 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C15\u0C32\u0C32\u0C24\u0C4B, \u0C2E\u0C47\u0C2E\u0C41 ${niceDate} \u0C28 ${city} \u0C32\u0C4B \u0C2E\u0C3E \u0C1C\u0C40\u0C35\u0C3F\u0C24 \u0C15\u0C4A\u0C24\u0C4D\u0C24 \u0C05\u0C27\u0C4D\u0C2F\u0C3E\u0C2F\u0C3E\u0C28\u0C4D\u0C28\u0C3F \u0C2A\u0C4D\u0C30\u0C3E\u0C30\u0C02\u0C2D\u0C3F\u0C38\u0C4D\u0C24\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C2E\u0C41.`;
         ev1Reg = e1n === "Haldi Ceremony" ? "\u0C39\u0C32\u0C4D\u0C26\u0C40 \u0C35\u0C47\u0C21\u0C41\u0C15" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "\u0D38\u0D02\u0D17\u0C40\u0D24\u0D4D \u0C38\u0C02\u0C27\u0C4D\u0C2F\u0C3E" : e2n;
+        ev2Reg = e2n === "Sangeet Night" ? "\u0C38\u0C02\u0C17\u0C40\u0C24\u0C4D \u0C38\u0C02\u0C27\u0C4D\u0C2F\u0C3E" : e2n;
         ev3Reg = e3n === "Wedding Ceremony" ? "\u0C36\u0C41\u0C2D \u0C15\u0C33\u0C4D\u0C2F\u0C3E\u0C23\u0C02" : e3n;
       } else if (lang === "ml") {
         polishedRegional = `${bride} \u0D2F\u0D41\u0D1F\u0D46\u0D2F\u0D41\u0D02 ${groom} \u0D28\u0D4D\u0D31\u0D46\u0D2F\u0D41\u0D02 \u0D08 \u0D2F\u0D3E\u0D24\u0D4D\u0D30 \u0D38\u0D4D\u0D28\u0D47\u0D39\u0D24\u0D4D\u0D24\u0D3F\u0D28\u0D4D\u0D31\u0D46\u0D2F\u0D41\u0D02 \u0D15\u0D42\u0D1F\u0D4D\u0D1F\u0D41\u0D15\u0D46\u0D1F\u0D4D\u0D1F\u0D3F\u0D28\u0D4D\u0D31\u0D46\u0D2F\u0D41\u0D02 \u0D2E\u0D28\u0D4B\u0D39\u0D30\u0D2E\u0D3E\u0D2F \u0D15\u0D25\u0D2F\u0D3E\u0D23\u0D4D. ` + (rawStory.length > 5 ? `\u0D1E\u0D19\u0D4D\u0D19\u0D33\u0D41\u0D1F\u0D46 \u0D15\u0D25: "${rawStory}"\u0964 ` : `\u0D1E\u0D19\u0D4D\u0D19\u0D7E \u0D15\u0D23\u0D4D\u0D1F\u0D41\u0D2E\u0D41\u0D1F\u0D4D\u0D1F\u0D3F, \u0D2A\u0D4D\u0D30\u0D23\u0D2F\u0D24\u0D4D\u0D24\u0D3F\u0D32\u0D3E\u0D2F\u0D3F, \u0D1E\u0D19\u0D4D\u0D19\u0D33\u0D41\u0D1F\u0D46 \u0D1C\u0D40\u0D35\u0D3F\u0D24\u0D02 \u0D0E\u0D28\u0D4D\u0D28\u0D46\u0D28\u0D4D\u0D28\u0D47\u0D15\u0D4D\u0D15\u0D41\u0D2E\u0D3E\u0D2F\u0D3F \u0D2A\u0D19\u0D4D\u0D15\u0D3F\u0D1F\u0D3E\u0D7B \u0D24\u0D40\u0D30\u0D41\u0D2E\u0D3E\u0D28\u0D3F\u0D1A\u0D4D\u0D1A\u0D41. `) + `\u0D35\u0D3F\u0D36\u0D4D\u0D35\u0D3E\u0D38\u0D24\u0D4D\u0D24\u0D4B\u0D1F\u0D46\u0D2F\u0D41\u0D02 \u0D38\u0D4D\u0D35\u0D2A\u0D4D\u0D28\u0D19\u0D4D\u0D19\u0D33\u0D4B\u0D1F\u0D46\u0D2F\u0D41\u0D02, \u0D1E\u0D19\u0D4D\u0D19\u0D7E ${niceDate}-\u0D7D ${city}-\u0D7D \u0D1E\u0D19\u0D4D\u0D19\u0D33\u0D41\u0D1F\u0D46 \u0D2A\u0D41\u0D24\u0D3F\u0D2F \u0D1C\u0D40\u0D35\u0D3F\u0D24\u0D02 \u0D06\u0D30\u0D02\u0D2D\u0D3F\u0D15\u0D4D\u0D15\u0D41\u0D28\u0D4D\u0D28\u0D41.`;
@@ -774,14 +638,7 @@ Instructions:
       storyRegional: parsedAiResult.storyRegional,
       tagline: parsedAiResult.tagline,
       lang,
-      langNative: {
-        en: "English",
-        kn: "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1",
-        hi: "\u0939\u093F\u0902\u0926\u0940",
-        ta: "\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD",
-        te: "\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41",
-        ml: "\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02"
-      }[lang] || "English",
+      langNative: { en: "English", kn: "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1", hi: "\u0939\u093F\u0902\u0926\u0940", ta: "\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD", te: "\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41", ml: "\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02" }[lang] || "English",
       events: [
         { name: e1n || "Haldi Ceremony", regional: parsedAiResult.event1Regional, time: e1t || "", emoji: "\u{1F49B}" },
         { name: e2n || "Sangeet Night", regional: parsedAiResult.event2Regional, time: e2t || "", emoji: "\u{1F483}" },
@@ -811,15 +668,19 @@ Instructions:
       guestbookNotes: [],
       createdAt: (/* @__PURE__ */ new Date()).toISOString()
     };
-    const targetFilePath = import_path.default.join(INVITATIONS_DIR, `${formattedSlug}.json`);
-    import_fs.default.writeFileSync(targetFilePath, JSON.stringify(invitationRecord, null, 2), "utf-8");
+    await Invitation.findOneAndUpdate(
+      { slug: formattedSlug },
+      { $set: invitationRecord },
+      { upsert: true, new: true }
+    );
     res.json({ success: true, slug: formattedSlug });
   } catch (error) {
-    console.error("AI Generation & storage failed:", error);
+    console.error("AI Generation & MongoDB storage failed:", error);
     res.status(500).json({ error: error.message || "Failed to generate wedding invitation." });
   }
 });
 async function startServer() {
+  await connectDB();
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
@@ -828,16 +689,16 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = process.env.DIST_PATH || (() => {
+    const distPath = (() => {
       try {
-        return import_path.default.join(import_path.default.dirname(__filename), ".");
+        return import_path.default.dirname(__filename);
       } catch {
         return import_path.default.join(process.cwd(), "dist");
       }
     })();
     console.log("[Static] Serving from:", distPath);
     app.use(import_express.default.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*", async (req, res) => {
       const slug = req.path.replace(/^\//, "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
       const indexPath = import_path.default.join(distPath, "index.html");
       if (!import_fs.default.existsSync(indexPath)) {
@@ -846,16 +707,14 @@ async function startServer() {
       }
       let html = import_fs.default.readFileSync(indexPath, "utf-8");
       if (slug) {
-        const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
-        if (import_fs.default.existsSync(filePath)) {
-          try {
-            const rawData = import_fs.default.readFileSync(filePath, "utf-8");
-            const data = JSON.parse(rawData);
-            const title = `${data.bride} & ${data.groom}'s Wedding Invitation | GetShaadiLink`;
-            const description = `Join us to celebrate our wedding at ${data.vname}, ${data.city} on ${data.niceDate}. Click to view details and RSVP.`;
-            const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
+        try {
+          const invitation = await Invitation.findOne({ slug }).select("bride groom vname city niceDate photos").lean();
+          if (invitation) {
+            const title = `${invitation.bride} & ${invitation.groom}'s Wedding Invitation | GetShaadiLink`;
+            const description = `Join us to celebrate our wedding at ${invitation.vname}, ${invitation.city} on ${invitation.niceDate}. Click to view details and RSVP.`;
+            const ogImage = invitation.photos && invitation.photos.length > 0 ? invitation.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
             html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
-            const metaTags = `
+            html = html.replace("</head>", `
               <meta property="og:title" content="${title}" />
               <meta property="og:description" content="${description}" />
               <meta property="og:image" content="${ogImage}" />
@@ -864,18 +723,17 @@ async function startServer() {
               <meta name="twitter:title" content="${title}" />
               <meta name="twitter:description" content="${description}" />
               <meta name="twitter:image" content="${ogImage}" />
-            `;
-            html = html.replace("</head>", `${metaTags}</head>`);
-          } catch (err) {
-            console.error("Error injecting metadata:", err);
+            </head>`);
           }
+        } catch (err) {
+          console.error("Error injecting OG metadata:", err);
         }
       }
       res.send(html);
     });
   }
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Express server powered by Gemini running on http://localhost:${PORT}`);
+    console.log(`\u{1F680} GetShaadiLink server running on http://localhost:${PORT}`);
   });
 }
 startServer();
