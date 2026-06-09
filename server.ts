@@ -20,15 +20,48 @@ app.use(express.urlencoded({ limit: "25mb", extended: true }));
 // ─────────────────────────────────────────────
 const MONGODB_URI = process.env.MONGODB_URI || "";
 
+function sanitizeMongodbUri(uri: string): string {
+  if (!uri) return uri;
+  try {
+    const prefixMatch = uri.match(/^(mongodb(?:\+srv)?:\/\/)(.*)$/);
+    if (!prefixMatch) return uri;
+    const [_, protocol, rest] = prefixMatch;
+    
+    const lastAtIdx = rest.lastIndexOf('@');
+    if (lastAtIdx === -1) return uri;
+    
+    const credentials = rest.substring(0, lastAtIdx);
+    const hostAndParams = rest.substring(lastAtIdx + 1);
+    
+    const colonIdx = credentials.indexOf(':');
+    if (colonIdx === -1) return uri;
+    
+    const username = credentials.substring(0, colonIdx);
+    const password = credentials.substring(colonIdx + 1);
+    
+    const decodedPassword = decodeURIComponent(password);
+    const encodedPassword = encodeURIComponent(decodedPassword);
+    
+    const decodedUsername = decodeURIComponent(username);
+    const encodedUsername = encodeURIComponent(decodedUsername);
+    
+    return `${protocol}${encodedUsername}:${encodedPassword}@${hostAndParams}`;
+  } catch (err) {
+    console.error("Error sanitizing MongoDB URI:", err);
+    return uri;
+  }
+}
+
 async function connectDB(): Promise<boolean> {
-  if (!MONGODB_URI) {
+  const sanitizedUri = sanitizeMongodbUri(MONGODB_URI);
+  if (!sanitizedUri) {
     console.error("❌ MONGODB_URI is not set in Environment Variables. Database features will not work.");
     return false;
   }
   // Retry up to 5 times with increasing delay
   for (let attempt = 1; attempt <= 5; attempt++) {
     try {
-      await mongoose.connect(MONGODB_URI, {
+      await mongoose.connect(sanitizedUri, {
         dbName: "getshaadilink",
         serverSelectionTimeoutMS: 10000,
         connectTimeoutMS: 10000,

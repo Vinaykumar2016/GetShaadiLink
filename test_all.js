@@ -11,6 +11,8 @@ const __dirname = path.dirname(__filename);
 const PORT = 3000;
 const BASE_URL = `http://localhost:${PORT}`;
 const TEST_SLUG = `test-integration-${Date.now()}`;
+let supportQueryId = null;
+
 
 async function runTests() {
   console.log("==========================================");
@@ -87,17 +89,16 @@ async function runTests() {
       throw new Error(`Generate response indicates failure or mismatch: ${JSON.stringify(generateResult)}`);
     }
 
-    // Verify file exists on disk
-    const targetFilePath = path.join(__dirname, "data", "invitations", `${TEST_SLUG}.json`);
-    if (!fs.existsSync(targetFilePath)) {
-      throw new Error(`Invitation JSON file was not saved on disk at: ${targetFilePath}`);
+    // Verify invitation can be fetched via API
+    const fetchRes = await fetch(`${BASE_URL}/api/invitations/${TEST_SLUG}?admin=true`);
+    if (!fetchRes.ok) {
+      throw new Error(`Failed to fetch generated invitation via API: ${fetchRes.status}`);
     }
-
-    const savedContent = JSON.parse(fs.readFileSync(targetFilePath, "utf8"));
+    const savedContent = await fetchRes.json();
     if (savedContent.razorpayPaymentId !== "pay_test_integration123") {
       throw new Error(`Persisted razorpayPaymentId does not match input value`);
     }
-    console.log("✅ TEST 2 PASSED: Invitation generated successfully and saved to disk.\n");
+    console.log("✅ TEST 2 PASSED: Invitation generated successfully and saved to database.\n");
 
     // ----------------------------------------------------
     // TEST 3: POST /api/invitations/:slug/add-note
@@ -163,10 +164,14 @@ async function runTests() {
       throw new Error(`Update API failed: ${updateResult.error || "Unknown error"}`);
     }
 
-    // Verify file content reflects updates
-    const updatedContent = JSON.parse(fs.readFileSync(targetFilePath, "utf8"));
+    // Verify updates via API
+    const fetchRes2 = await fetch(`${BASE_URL}/api/invitations/${TEST_SLUG}?admin=true`);
+    if (!fetchRes2.ok) {
+      throw new Error(`Failed to fetch updated invitation via API: ${fetchRes2.status}`);
+    }
+    const updatedContent = await fetchRes2.json();
     if (updatedContent.bride !== "Sneha-Updated" || updatedContent.groom !== "Rahul-Updated" || updatedContent.city !== "Udaipur-Updated") {
-      throw new Error(`Update was not persisted correctly in file`);
+      throw new Error(`Update was not persisted correctly`);
     }
     console.log("✅ TEST 4 PASSED: Invitation details updated successfully.\n");
 
@@ -197,10 +202,14 @@ async function runTests() {
       throw new Error(`Update Fallback API failed: ${updateFallbackResult.error || "Unknown error"}`);
     }
 
-    // Verify file content reflects updates
-    const updatedFallbackContent = JSON.parse(fs.readFileSync(targetFilePath, "utf8"));
+    // Verify updates via API
+    const fetchRes3 = await fetch(`${BASE_URL}/api/invitations/${TEST_SLUG}?admin=true`);
+    if (!fetchRes3.ok) {
+      throw new Error(`Failed to fetch updated fallback invitation via API: ${fetchRes3.status}`);
+    }
+    const updatedFallbackContent = await fetchRes3.json();
     if (updatedFallbackContent.bride !== "Sneha-Updated-Fallback" || updatedFallbackContent.groom !== "Rahul-Updated-Fallback") {
-      throw new Error(`Update fallback was not persisted correctly in file`);
+      throw new Error(`Update fallback was not persisted correctly`);
     }
     console.log("✅ TEST 5 PASSED: Invitation details updated using editPassword fallback successfully.\n");
 
@@ -232,18 +241,8 @@ async function runTests() {
       throw new Error(`Contact API response did not indicate success`);
     }
 
-    // Verify support_queries.json file exists and contains the query
-    const queriesPath = path.join(__dirname, "data", "support_queries.json");
-    if (!fs.existsSync(queriesPath)) {
-      throw new Error(`Support queries file not found at: ${queriesPath}`);
-    }
-
-    const queriesContent = JSON.parse(fs.readFileSync(queriesPath, "utf8"));
-    const foundQuery = queriesContent.find(q => q.email === contactPayload.email && q.subject === contactPayload.subject);
-    if (!foundQuery) {
-      throw new Error(`Could not find the submitted contact query in support_queries.json`);
-    }
-    console.log("✅ TEST 6 PASSED: Support form submission succeeded and was written to disk.\n");
+    // Verify query can be fetched via Admin API in Test 7d below
+    console.log("✅ TEST 6 PASSED: Support form submission succeeded.\n");
 
     // ----------------------------------------------------
     // TEST 7: Admin API Endpoints & Auth
@@ -293,18 +292,41 @@ async function runTests() {
       throw new Error(`Queries list fetch failed: ${JSON.stringify(queriesListResult)}`);
     }
     console.log(`   Queries list verified: found ${queriesListResult.queries.length} queries.`);
+    
+    // Find the test support query submitted in Test 6
+    const foundQuery = queriesListResult.queries.find(q => q.email === contactPayload.email && q.subject === contactPayload.subject);
+    if (!foundQuery) {
+      throw new Error(`Could not find the submitted contact query in queries list`);
+    }
+    supportQueryId = foundQuery.id;
+    console.log(`   Found test query. ID: ${supportQueryId}`);
     console.log("✅ TEST 7 PASSED: Admin Dashboard API verified successfully.\n");
 
     // ----------------------------------------------------
-    // Clean up test files and data
+    // Clean up test data in database
     // ----------------------------------------------------
-    console.log(`Cleaning up test invitation file at ${targetFilePath}...`);
-    fs.unlinkSync(targetFilePath);
+    console.log(`Cleaning up test invitation slug ${TEST_SLUG} via Admin API...`);
+    const deleteInvRes = await fetch(`${BASE_URL}/api/admin/invitations/${TEST_SLUG}`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${adminPass}` }
+    });
+    if (!deleteInvRes.ok) {
+      console.warn("⚠️ Failed to delete test invitation");
+    } else {
+      console.log("   Test invitation deleted.");
+    }
     
-    console.log(`Cleaning up test contact query from ${queriesPath}...`);
-    if (fs.existsSync(queriesPath)) {
-      const remainingQueries = queriesContent.filter(q => q.id !== foundQuery.id);
-      fs.writeFileSync(queriesPath, JSON.stringify(remainingQueries, null, 2), "utf8");
+    if (supportQueryId) {
+      console.log(`Cleaning up test contact query ${supportQueryId} via Admin API...`);
+      const deleteQueryRes = await fetch(`${BASE_URL}/api/admin/queries/${supportQueryId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${adminPass}` }
+      });
+      if (!deleteQueryRes.ok) {
+        console.warn("⚠️ Failed to delete test contact query");
+      } else {
+        console.log("   Test contact query deleted.");
+      }
     }
     console.log("🧹 Cleanup complete.");
 
