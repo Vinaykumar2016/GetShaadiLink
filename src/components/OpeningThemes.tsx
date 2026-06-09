@@ -500,147 +500,151 @@ export default function OpeningThemes({
     );
   };
 
-  // 3. IVORY LOTUS COVER: Full blooming lotus with 7 petals radiating from center
+  // 3. IVORY ROSE SEAL COVER: Floating rose petals around a golden wax seal that cracks open
   const renderLotusTheme = () => {
-    // 7 petals arranged radially — evenly distributed at 360/7 ≈ 51.43° apart
-    const petalAngles = [0, 51.43, 102.86, 154.29, 205.71, 257.14, 308.57];
-    const petalColors = [
-      "#F48FB1", "#F06292", "#E91E8C", "#F48FB1",
-      "#E91E63", "#F06292", "#F48FB1"
+    // Floating petal positions — simple absolute positions that drift gently
+    const floatingPetals = [
+      { emoji: "🌸", size: 18, top: "8%", left: "15%", dur: 5, delay: 0, dx: 12, dy: 8 },
+      { emoji: "🪷", size: 14, top: "18%", left: "75%", dur: 6, delay: 0.5, dx: -10, dy: 6 },
+      { emoji: "🌸", size: 16, top: "35%", left: "8%", dur: 5.5, delay: 1, dx: 8, dy: -10 },
+      { emoji: "💮", size: 12, top: "60%", left: "82%", dur: 7, delay: 0.3, dx: -14, dy: -6 },
+      { emoji: "🌸", size: 20, top: "72%", left: "20%", dur: 6.5, delay: 1.5, dx: 10, dy: -12 },
+      { emoji: "🪷", size: 13, top: "50%", left: "88%", dur: 5, delay: 0.8, dx: -8, dy: 10 },
+      { emoji: "💮", size: 15, top: "85%", left: "60%", dur: 6, delay: 0.2, dx: -6, dy: -8 },
+      { emoji: "🌸", size: 11, top: "15%", left: "50%", dur: 7.5, delay: 1.2, dx: 6, dy: 12 },
     ];
 
-    const interactiveLotus = (
-      <div className="w-full h-64 relative flex items-center justify-center">
-        {/* Soft glow backdrop */}
-        <motion.div
-          className="absolute w-36 h-36 rounded-full bg-pink-300/20 pointer-events-none"
-          style={{ filter: "blur(24px)" }}
-          animate={activated ? { opacity: 0 } : { scale: [1, 1.15, 1], opacity: [0.3, 0.55, 0.3] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Water ripple rings */}
-        {[0, 1, 2].map(i => (
-          <motion.div
+    const interactiveSeal = (
+      <div className="w-full h-56 relative flex items-center justify-center overflow-hidden">
+        {/* Floating rose petals drifting around */}
+        {floatingPetals.map((p, i) => (
+          <motion.span
             key={i}
-            className="absolute rounded-full border border-pink-300/20 pointer-events-none"
-            style={{ width: 48 + i * 32, height: 48 + i * 32 }}
-            animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
-          />
+            className="absolute pointer-events-none select-none"
+            style={{ top: p.top, left: p.left, fontSize: p.size }}
+            animate={activated
+              ? { opacity: 0, scale: 0, y: -30 }
+              : {
+                  x: [0, p.dx, -p.dx * 0.5, 0],
+                  y: [0, p.dy, -p.dy * 0.7, 0],
+                  rotate: [0, 15, -10, 0],
+                  opacity: [0.5, 0.8, 0.6, 0.5],
+                }
+            }
+            transition={activated
+              ? { duration: 0.6, delay: i * 0.05 }
+              : { duration: p.dur, repeat: Infinity, ease: "easeInOut", delay: p.delay }
+            }
+          >
+            {p.emoji}
+          </motion.span>
         ))}
 
-        {/* SVG lotus — all petals + center, properly centered viewBox */}
-        <motion.svg
-          viewBox="-60 -60 120 120"
-          className="w-44 h-44 absolute"
-          style={{ overflow: "visible" }}
-          animate={activated ? {} : { scale: [1, 1.03, 1] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        {/* Soft pink glow behind the seal */}
+        <motion.div
+          className="absolute w-32 h-32 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(236,64,122,0.15) 0%, transparent 70%)" }}
+          animate={activated
+            ? { scale: 3, opacity: 0 }
+            : { scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }
+          }
+          transition={activated
+            ? { duration: 1.2, ease: "easeOut" }
+            : { duration: 3, repeat: Infinity, ease: "easeInOut" }
+          }
+        />
+
+        {/* Golden wax seal — the main interactive element */}
+        <motion.div
+          className="relative z-10 flex items-center justify-center"
+          animate={activated
+            ? { scale: 1.3, opacity: 0, rotate: 15 }
+            : { scale: [1, 1.02, 1] }
+          }
+          transition={activated
+            ? { duration: 1, ease: "easeOut" }
+            : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
+          }
         >
-          {petalAngles.map((angle, idx) => {
-            const rad = (angle * Math.PI) / 180;
-            const tx = Math.sin(rad) * 32;
-            const ty = -Math.cos(rad) * 32;
+          {/* Outer ring glow */}
+          <motion.div
+            className="absolute w-28 h-28 rounded-full pointer-events-none"
+            style={{
+              border: "2px solid rgba(212,175,55,0.3)",
+              boxShadow: "0 0 20px rgba(212,175,55,0.15), inset 0 0 20px rgba(212,175,55,0.08)",
+            }}
+            animate={activated ? {} : { rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          />
+
+          {/* Seal body */}
+          <div
+            className="w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-xl relative overflow-hidden"
+            style={{
+              background: "radial-gradient(circle at 40% 35%, #E8B86D 0%, #C9963C 35%, #9B6B2F 70%, #7A4F1E 100%)",
+              border: "3px solid #D4AF37",
+              boxShadow: "0 4px 20px rgba(139,90,43,0.4), inset 0 2px 4px rgba(255,255,255,0.2)",
+            }}
+          >
+            {/* Embossed "S" monogram */}
+            <span className="text-3xl font-cursive text-amber-100/90 drop-shadow-sm select-none" style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}>
+              शुभ
+            </span>
+            <span className="text-[7px] font-marcellus text-amber-200/70 tracking-[3px] uppercase mt-0.5 select-none">
+              विवाह
+            </span>
+
+            {/* Wax texture shine sweep */}
+            <motion.div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                background: "linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)",
+              }}
+              animate={activated ? {} : { x: ["-100%", "100%"] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+            />
+          </div>
+
+          {/* Decorative dots around seal */}
+          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
+            const r = 58;
+            const x = Math.cos((angle * Math.PI) / 180) * r;
+            const y = Math.sin((angle * Math.PI) / 180) * r;
             return (
-              <motion.g
-                key={idx}
-                initial={{ scale: 1, opacity: 1, x: 0, y: 0 }}
-                animate={
-                  activated
-                    ? { scale: 0.2, opacity: 0, x: tx * 1.6, y: ty * 1.6 }
-                    : { scale: 1, opacity: 1, x: 0, y: 0 }
+              <motion.div
+                key={i}
+                className="absolute w-1.5 h-1.5 rounded-full bg-amber-400/40 pointer-events-none"
+                style={{ left: `calc(50% + ${x}px - 3px)`, top: `calc(50% + ${y}px - 3px)` }}
+                animate={activated
+                  ? { scale: 0, opacity: 0 }
+                  : { scale: [1, 1.5, 1], opacity: [0.3, 0.7, 0.3] }
                 }
-                transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: idx * 0.08 }}
-                style={{ transformOrigin: "0px 0px" }}
-              >
-                <g transform={`rotate(${angle}) translate(0, -24)`}>
-                  <ellipse cx="0" cy="-14" rx="8" ry="18"
-                    fill={petalColors[idx]}
-                    opacity="0.92"
-                  />
-                  {/* Petal vein */}
-                  <line x1="0" y1="-2" x2="0" y2="-28"
-                    stroke="white" strokeWidth="0.6" opacity="0.35"
-                    strokeDasharray="2,2"
-                  />
-                </g>
-              </motion.g>
+                transition={activated
+                  ? { duration: 0.4, delay: i * 0.03 }
+                  : { duration: 2, repeat: Infinity, delay: i * 0.25, ease: "easeInOut" }
+                }
+              />
             );
           })}
-
-          {/* Inner petals (shorter, lighter) — offset for layered look */}
-          {[25.71, 77.14, 128.57, 180, 231.43, 282.86, 334.29].map((angle, idx) => (
-            <motion.g
-              key={`inner-${idx}`}
-              initial={{ scale: 1, opacity: 0.8 }}
-              animate={
-                activated
-                  ? { scale: 0, opacity: 0 }
-                  : { scale: 1, opacity: 0.8 }
-              }
-              transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1], delay: 0.1 + idx * 0.04 }}
-              style={{ transformOrigin: "0px 0px" }}
-            >
-              <g transform={`rotate(${angle}) translate(0, -14)`}>
-                <ellipse cx="0" cy="-8" rx="5.5" ry="12"
-                  fill="#FCE4EC"
-                  opacity="0.85"
-                />
-              </g>
-            </motion.g>
-          ))}
-
-          {/* Golden center stamen */}
-          <motion.circle
-            cx="0" cy="0" r="8"
-            fill="#FFD54F"
-            initial={{ scale: 1, opacity: 1 }}
-            animate={activated ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          />
-          <motion.circle
-            cx="0" cy="0" r="4"
-            fill="#FF8F00"
-            initial={{ scale: 1, opacity: 1 }}
-            animate={activated ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
-            transition={{ duration: 0.7 }}
-          />
-          {/* Stamen dots */}
-          {[0, 72, 144, 216, 288].map((a, i) => (
-            <motion.circle
-              key={i}
-              cx={Math.sin((a * Math.PI) / 180) * 6}
-              cy={-Math.cos((a * Math.PI) / 180) * 6}
-              r="1.2"
-              fill="#FFF8E1"
-              initial={{ opacity: 1 }}
-              animate={activated ? { opacity: 0 } : { opacity: 1 }}
-              transition={{ duration: 0.6 }}
-            />
-          ))}
-        </motion.svg>
-
-        {/* Lotus leaf base — positioned below the lotus, not overlapping button */}
-        <motion.div
-          className="absolute pointer-events-none"
-          style={{ bottom: "28%" }}
-          initial={{ opacity: 1 }}
-          animate={activated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3 }}
-        >
-          <svg viewBox="0 0 80 30" className="w-28 h-10 fill-green-600/40 stroke-green-700/20 stroke-[0.5]">
-            <ellipse cx="40" cy="18" rx="38" ry="14" />
-            <line x1="40" y1="4" x2="40" y2="30" />
-            <path d="M40,18 Q20,10 6,18" />
-            <path d="M40,18 Q60,10 74,18" />
-          </svg>
         </motion.div>
+
+        {/* Activation: golden light burst */}
+        {activated && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0.8 }}
+            animate={{ scale: 8, opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            className="absolute w-16 h-16 rounded-full pointer-events-none z-20"
+            style={{
+              background: "radial-gradient(circle, rgba(212,175,55,0.5) 0%, rgba(212,175,55,0.2) 40%, transparent 70%)",
+            }}
+          />
+        )}
 
         {!activated && (
           <button
             onClick={handleActivate}
-            className="absolute bottom-0 z-20 py-2.5 px-7 rounded-full border-2 border-pink-400 bg-pink-500 hover:bg-pink-400 text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-lg shadow-pink-300/30 transition-all"
+            className="absolute bottom-1 z-20 py-2.5 px-7 rounded-full border-2 border-pink-400 bg-pink-500 hover:bg-pink-400 text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-lg shadow-pink-300/30 transition-all"
           >
             {t("unfoldCard")}
           </button>
@@ -650,9 +654,9 @@ export default function OpeningThemes({
 
     return renderEnvelopeFrame(
       "linear-gradient(160deg, #FFF0F5 0%, #FCE4EC 40%, #F8EFF8 70%, #FFF8F0 100%)",
-      interactiveLotus,
+      interactiveSeal,
       "#880E4F",
-      t("archwayPrompt"),
+      t("sealInvitationPrompt"),
       false
     );
   };
