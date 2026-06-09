@@ -1,0 +1,56 @@
+{
+  "slug": "aditi-kabir-run2",
+  "bride": "Aditi",
+  "groom": "Kabir",
+  "niceDate": "18 December 2026",
+  "city": "Jodhpur",
+  "vname": "Umaid Bhawan Palace",
+  "vaddr": "Circuit House Rd, Cantt Area, Jodhpur",
+  "storyEnglish": "It began with a shared canvas under the soft light of a college art studio, where Aditi and Kabir first brushed strokes of laughter and shared dreams. Over the years, their individual colors blended into a beautiful, harmonious masterpiece of love and companionship. Now, beneath the majestic skies of Jodhpur, they are ready to paint the first stroke of their forever. Join us as they bind their hearts and begin their lifelong masterpiece.",
+  "storyRegional": "Two separate palettes met over a single canvas, finding rhythm in every stroke and warmth in every shade. What began as a simple college art class blossomed into a grand gallery of shared years, tender promises, and unconditional devotion. On this magical winter day in Jodhpur, they blend their souls into a singular, eternal masterpiece.",
+  "tagline": "From a shared canvas to a lifetime of love and laughter",
+  "lang": "en",
+  "langNative": "English",
+  "events": [
+    {
+      "name": "Haldi Ceremony",
+      "regional": "The Sun-Kissed Mehendi Ceremony",
+      "time": "2026-12-18T10:00:00",
+      "emoji": "💛"
+    },
+    {
+      "name": "Sangeet Night",
+      "regional": "The Starry Sangeet & Celebration Night",
+      "time": "2026-12-18T18:00:00",
+      "emoji": "💃"
+    },
+    {
+      "name": "Wedding Ceremony",
+      "regional": "The Sacred Phere & Royal Reception",
+      "time": "2026-12-19T16:00:00",
+      "emoji": "🌸"
+    }
+  ],
+  "shagunOn": true,
+  "upiId": "test@upi",
+  "dateRaw": "2026-12-18",
+  "photos": [],
+  "theme": {
+    "name": "Royal Crimson & Marigold",
+    "primary": "#9C0F48",
+    "secondary": "#E1B143",
+    "accent": "#129E9A",
+    "bg": "#0D0214",
+    "heroEmoji": "🌺"
+  },
+  "editPassword": "secret123",
+  "groomParents": "Sri & Smt Sharma",
+  "brideParents": "Sri & Smt Verma",
+  "familyBlessings": "With blessings of families",
+  "postWeddingPhotosUrl": "",
+  "ownerEmail": "test@example.com",
+  "views": 0,
+  "openingTheme": "jaipur",
+  "guestbookNotes": [],
+  "createdAt": "2026-06-04T12:40:44.330Z"
+}
