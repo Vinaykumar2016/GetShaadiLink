@@ -626,172 +626,139 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
     offset: ["start end", "end start"]
   });
 
-  // Reversing rotation: they start at 0 (closed bud) and fan open with gentler easing
-  const rotLeftOuter = useTransform(scrollYProgress, [0.15, 0.5], [0, -52]);
-  const rotLeftInner = useTransform(scrollYProgress, [0.15, 0.5], [0, -26]);
-  const rotRightInner = useTransform(scrollYProgress, [0.15, 0.5], [0, 26]);
-  const rotRightOuter = useTransform(scrollYProgress, [0.15, 0.5], [0, 52]);
-  
-  const centerScaleY = useTransform(scrollYProgress, [0.15, 0.5], [1, 0.8]);
-  const centerScaleX = useTransform(scrollYProgress, [0.15, 0.5], [1, 0.88]);
+  // Bride walks from left, Groom walks from right — they meet at center
+  const brideX = useTransform(scrollYProgress, [0.15, 0.48], [-70, -6]);
+  const groomX = useTransform(scrollYProgress, [0.15, 0.48], [70, 6]);
 
-  // Couple fade in and rise out of the lotus center — gentler, slower reveal
-  const coupleOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
-  const coupleY = useTransform(scrollYProgress, [0.3, 0.52], [35, 0]);
-  const coupleScale = useTransform(scrollYProgress, [0.3, 0.52], [0.7, 1]);
+  // Gentle walking bob
+  const brideY = useTransform(scrollYProgress,
+    [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.48],
+    [0, -3, 0, -2.5, 0, -3, 0, 0]
+  );
+  const groomY = useTransform(scrollYProgress,
+    [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.48],
+    [0, -2, 0.5, -3, 0, -2, 0, 0]
+  );
 
-  // Floating leaves drifting with subtle vertical bob
-  const leaf1X = useTransform(scrollYProgress, [0.15, 0.65], [-8, -45]);
-  const leaf2X = useTransform(scrollYProgress, [0.15, 0.65], [8, 45]);
-  const leaf1Y = useTransform(scrollYProgress, [0.15, 0.35, 0.5, 0.65], [0, -4, 2, -2]);
-  const leaf2Y = useTransform(scrollYProgress, [0.15, 0.3, 0.45, 0.65], [0, 3, -3, 1]);
+  // Heart and blessing reveal when they meet
+  const heartOpacity = useTransform(scrollYProgress, [0.44, 0.58], [0, 1]);
+  const heartScale = useTransform(scrollYProgress, [0.44, 0.58], [0.5, 1.1]);
+
+  // Floating diyas glow intensifies as couple gets closer
+  const diyaGlow = useTransform(scrollYProgress, [0.15, 0.48], [0.3, 1]);
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className="relative w-full max-w-md mx-auto h-64 bg-gradient-to-b from-[#FFF5F7] to-[#FAF0F2] rounded-[32px] border border-pink-400/10 shadow-paper overflow-hidden flex flex-col items-center justify-between p-4"
+      className="relative w-full max-w-md mx-auto h-64 bg-gradient-to-b from-[#FFF5F7] via-[#FFF0F3] to-[#F8E8EC] rounded-[32px] border border-pink-300/15 shadow-paper overflow-hidden flex flex-col items-center justify-between p-4"
     >
-      {/* Top marigold flowers header decoration */}
+      {/* Top decorative flower row */}
       <div className="absolute top-0 inset-x-0 h-4 flex justify-between px-6 z-20 pointer-events-none opacity-80">
         {[...Array(9)].map((_, i) => (
           <span key={i} className="text-[10px] animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}>
-            🪷
+            {i % 2 === 0 ? "🌸" : "🪷"}
           </span>
         ))}
       </div>
 
-      <div className="relative w-64 h-44 mt-6 flex items-center justify-center overflow-visible">
-        {/* Soft glowing sun aura behind lotus */}
-        <div className="absolute w-32 h-32 rounded-full bg-pink-200/12 filter blur-2xl" />
+      {/* Main scene area */}
+      <div className="relative w-72 h-44 mt-6 rounded-t-full overflow-hidden flex items-end justify-center"
+        style={{ background: "linear-gradient(to bottom, #FFF8FA 0%, #FFE4EC 60%, #D4A8B8 100%)" }}
+      >
+        {/* Soft inner arch border */}
+        <div className="absolute inset-0 border-4 border-dashed border-pink-300/15 rounded-t-full pointer-events-none" />
 
-        {/* Water Surface Line & Ripples — softer pulse instead of aggressive ping */}
-        <div className="absolute bottom-2 inset-x-0 h-1 bg-sky-200/20 z-5 flex items-center justify-center overflow-visible">
-          <div className="w-16 h-8 rounded-full border border-sky-300/15 absolute -bottom-4 animate-pulse" style={{ animationDuration: "3.5s" }} />
-          <div className="w-28 h-12 rounded-full border border-sky-200/10 absolute -bottom-6 animate-pulse" style={{ animationDuration: "5s", animationDelay: "1.2s" }} />
+        {/* Floating diyas on water surface */}
+        {[
+          { left: "12%", delay: 0, size: "text-base" },
+          { left: "30%", delay: 0.8, size: "text-sm" },
+          { left: "50%", delay: 0.3, size: "text-base" },
+          { left: "68%", delay: 1.1, size: "text-sm" },
+          { left: "85%", delay: 0.6, size: "text-base" },
+        ].map((diya, i) => (
+          <motion.div
+            key={i}
+            className={`absolute bottom-6 ${diya.size} select-none pointer-events-none`}
+            style={{ left: diya.left, opacity: diyaGlow }}
+          >
+            <motion.span
+              animate={{
+                y: [0, -3, 0, -2, 0],
+                x: [0, 2, -1, 1, 0],
+              }}
+              transition={{
+                duration: 3 + i * 0.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: diya.delay,
+              }}
+              className="block filter drop-shadow-[0_0_6px_rgba(255,180,50,0.5)]"
+            >
+              🪔
+            </motion.span>
+          </motion.div>
+        ))}
+
+        {/* Water surface shimmer line */}
+        <div className="absolute bottom-4 inset-x-4 h-[1px] bg-gradient-to-r from-transparent via-pink-300/30 to-transparent" />
+        <div className="absolute bottom-3 inset-x-8 h-[1px] bg-gradient-to-r from-transparent via-rose-200/20 to-transparent" />
+
+        {/* Water ripple circles — very subtle */}
+        <motion.div
+          className="absolute bottom-2 w-20 h-6 rounded-full border border-pink-200/15 pointer-events-none"
+          animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0, 0.3] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeOut" }}
+        />
+
+        {/* Bride Silhouette — walks from left */}
+        <motion.div
+          style={{ x: brideX, y: brideY }}
+          className="absolute bottom-0 z-10 w-16 h-28 flex flex-col items-center"
+        >
+          <DetailedBrideSilhouette className="text-rose-800" />
+          <span className="text-[8px] font-marcellus tracking-wider text-rose-900 font-bold bg-white/80 px-1.5 py-0.5 rounded shadow-sm mt-1">
+            {brideName}
+          </span>
+        </motion.div>
+
+        {/* Groom Silhouette — walks from right */}
+        <motion.div
+          style={{ x: groomX, y: groomY, scaleX: -1 }}
+          className="absolute bottom-0 z-10 w-16 h-28 flex flex-col items-center"
+        >
+          <DetailedGroomSilhouette className="text-[#5D4037]" />
+          <span className="text-[8px] font-marcellus tracking-wider text-amber-900 font-bold bg-white/80 px-1.5 py-0.5 rounded shadow-sm mt-1 transform scale-x-[-1]">
+            {groomName}
+          </span>
+        </motion.div>
+
+        {/* Heart & blessing when they meet */}
+        <motion.div
+          style={{ opacity: heartOpacity, scale: heartScale }}
+          className="absolute bottom-16 z-20 flex flex-col items-center pointer-events-none"
+        >
+          <span className="text-3xl filter drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]">💖</span>
+          <span className="text-[7.5px] font-marcellus tracking-[2px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 mt-1 uppercase shadow-sm">
+            Blessed Union
+          </span>
+        </motion.div>
+
+        {/* Front railing / water edge */}
+        <div className="absolute bottom-0 inset-x-0 h-4 bg-gradient-to-b from-[#D4A8B8] to-[#C09AAC] z-15 flex items-center justify-around px-4">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="w-2 h-2.5 border border-pink-400/20 bg-pink-100/10 rounded-sm" />
+          ))}
         </div>
-
-        {/* Drifting Lotus Leaves — now with vertical bob for organic feel */}
-        <motion.span 
-          style={{ x: leaf1X, y: leaf1Y }} 
-          className="absolute bottom-1 left-6 text-lg opacity-50 z-5 select-none pointer-events-none"
-        >
-          🍃
-        </motion.span>
-        <motion.span 
-          style={{ x: leaf2X, y: leaf2Y }} 
-          className="absolute bottom-1 right-6 text-lg opacity-50 z-5 select-none pointer-events-none transform scale-x-[-1]"
-        >
-          🍃
-        </motion.span>
-
-        {/* Revealed couple silhouettes inside lotus */}
-        <motion.div 
-          style={{ opacity: coupleOpacity, scale: coupleScale, y: coupleY }}
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 z-25 flex flex-col items-center overflow-visible"
-        >
-          <div className="flex gap-4 items-end relative h-22 w-32 overflow-visible">
-            <div className="w-12 h-20">
-              <DetailedBrideSilhouette className="text-rose-800" />
-            </div>
-            <div className="w-12 h-20 transform scale-x-[-1]">
-              <DetailedGroomSilhouette className="text-[#5D4037]" />
-            </div>
-          </div>
-          
-          {/* Name Tag nested to scale/move in sync and avoid clipping */}
-          <div className="mt-2 text-center pointer-events-none whitespace-nowrap z-30">
-            <span className="text-[7.5px] font-bold text-rose-950 bg-white/90 px-2.5 py-0.7 rounded shadow-md uppercase tracking-wider border border-pink-150 backdrop-blur-sm">
-              {brideName} &amp; {groomName}
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Lotus Petal SVG Gradient Definition (shared) */}
-        <svg className="absolute w-0 h-0" aria-hidden="true">
-          <defs>
-            <linearGradient id="lotusPetalGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stopColor="#C2185B" />
-              <stop offset="60%" stopColor="#E91E63" />
-              <stop offset="100%" stopColor="#F8BBD0" />
-            </linearGradient>
-          </defs>
-        </svg>
-
-        {/* Outer Left Lotus Petal — centered with offset */}
-        <motion.div 
-          style={{ rotate: rotLeftOuter, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-[18] w-14 h-24 left-1/2" 
-          data-petal="outer-left"
-        >
-          <div className="-ml-[52px]">
-            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-sm">
-              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-            </svg>
-          </div>
-        </motion.div>
-
-        {/* Inner Left Lotus Petal — centered with offset */}
-        <motion.div 
-          style={{ rotate: rotLeftInner, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-[19] w-[60px] h-[104px] left-1/2"
-          data-petal="inner-left"
-        >
-          <div className="-ml-[38px]">
-            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-md">
-              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-            </svg>
-          </div>
-        </motion.div>
-
-        {/* Center Lotus Petal (scales Y & X to make room for couple) — truly centered */}
-        <motion.div 
-          style={{ scaleY: centerScaleY, scaleX: centerScaleX, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-[22] w-16 h-28 left-1/2 -translate-x-1/2"
-          data-petal="center"
-        >
-          <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-lg">
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </svg>
-        </motion.div>
-
-        {/* Inner Right Lotus Petal — centered with offset */}
-        <motion.div 
-          style={{ rotate: rotRightInner, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-[19] w-[60px] h-[104px] left-1/2"
-          data-petal="inner-right"
-        >
-          <div className="-ml-[22px]">
-            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-md" style={{ transform: "scaleX(-1)" }}>
-              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-            </svg>
-          </div>
-        </motion.div>
-
-        {/* Outer Right Lotus Petal — centered with offset */}
-        <motion.div 
-          style={{ rotate: rotRightOuter, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-[18] w-14 h-24 left-1/2"
-          data-petal="outer-right"
-        >
-          <div className="-ml-[4px]">
-            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-sm" style={{ transform: "scaleX(-1)" }}>
-              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-            </svg>
-          </div>
-        </motion.div>
       </div>
 
-      <span className="text-[8px] font-marcellus tracking-[3px] text-pink-750/50 uppercase font-bold animate-pulse mt-2 z-10">
-        Scroll to unfold the lotus blossom
+      {/* Scroll hint */}
+      <span className="text-[8px] font-marcellus tracking-[3px] text-rose-800/40 uppercase font-bold animate-pulse mt-2 z-10">
+        Scroll to walk by the sacred waters
       </span>
     </div>
   );
 }
+
 
 function SkyLanternRiseScrollAnimation({ brideName, groomName }: { brideName: string; groomName: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
