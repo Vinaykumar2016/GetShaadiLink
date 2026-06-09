@@ -314,13 +314,14 @@ function BalconyScrollAnimation({ brideName, groomName }: { brideName: string; g
   const heartScale = useTransform(scrollYProgress, [0.45, 0.58], [0.5, 1.1]);
 
   // Gentle bobbing/sway coordinates to simulate walking steps based on scroll
+  // Asymmetric strides for more natural gait feel
   const brideY = useTransform(scrollYProgress, 
-    [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.48], 
-    [0, -3, 0, -3, 0, -3, 0, 0]
+    [0.15, 0.19, 0.23, 0.27, 0.31, 0.35, 0.39, 0.43, 0.48], 
+    [0, -3.5, 0.5, -2.5, 0.5, -3, 0.5, -1.5, 0]
   );
   const groomY = useTransform(scrollYProgress, 
-    [0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.48], 
-    [0, -2, 0, -2, 0, -2, 0, 0]
+    [0.15, 0.19, 0.23, 0.27, 0.31, 0.35, 0.39, 0.43, 0.48], 
+    [0, -2.5, 0.5, -3, 0.5, -2, 0.5, -2.5, 0]
   );
 
   return (
@@ -368,8 +369,12 @@ function BalconyScrollAnimation({ brideName, groomName }: { brideName: string; g
           style={{ opacity: heartOpacity, scale: heartScale }}
           className="absolute bottom-16 z-20 flex flex-col items-center pointer-events-none"
         >
-          <span className="text-3xl filter drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">💖</span>
-          <span className="text-[7.5px] font-marcellus tracking-[2px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 mt-1 uppercase shadow-sm">
+          {/* Radial sparkle glow ring */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full bg-red-400/20 animate-ping" style={{ animationDuration: "2s" }} />
+          </div>
+          <span className="text-3xl filter drop-shadow-[0_0_12px_rgba(239,68,68,0.7)] relative z-10">💖</span>
+          <span className="text-[7.5px] font-marcellus tracking-[2px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 mt-1 uppercase shadow-sm relative z-10">
             Together Forever
           </span>
         </motion.div>
@@ -559,18 +564,18 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
           style={{ opacity: showerOpacity }} 
           className="absolute inset-0 pointer-events-none z-25 overflow-hidden"
         >
-          {[...Array(10)].map((_, i) => (
+          {[...Array(16)].map((_, i) => (
             <span
               key={i}
               className="absolute text-[8px] animate-fall"
               style={{
-                left: `${15 + i * 8}%`,
-                animationDelay: `${i * 0.2}s`,
-                animationDuration: `${2 + Math.random() * 1.5}s`,
+                left: `${8 + i * 5.5}%`,
+                animationDelay: `${i * 0.15}s`,
+                animationDuration: `${1.8 + Math.random() * 1.5}s`,
                 top: "-15px"
               }}
             >
-              {i % 2 === 0 ? "🌸" : "💛"}
+              {i % 3 === 0 ? "🌸" : i % 3 === 1 ? "💛" : "🌺"}
             </span>
           ))}
         </motion.div>
@@ -621,23 +626,25 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
     offset: ["start end", "end start"]
   });
 
-  // Reversing rotation: they start at 0 (closed bud) and fan open
-  const rotLeftOuter = useTransform(scrollYProgress, [0.15, 0.48], [0, -56]);
-  const rotLeftInner = useTransform(scrollYProgress, [0.15, 0.48], [0, -28]);
-  const rotRightInner = useTransform(scrollYProgress, [0.15, 0.48], [0, 28]);
-  const rotRightOuter = useTransform(scrollYProgress, [0.15, 0.48], [0, 56]);
+  // Reversing rotation: they start at 0 (closed bud) and fan open with gentler easing
+  const rotLeftOuter = useTransform(scrollYProgress, [0.15, 0.5], [0, -52]);
+  const rotLeftInner = useTransform(scrollYProgress, [0.15, 0.5], [0, -26]);
+  const rotRightInner = useTransform(scrollYProgress, [0.15, 0.5], [0, 26]);
+  const rotRightOuter = useTransform(scrollYProgress, [0.15, 0.5], [0, 52]);
   
-  const centerScaleY = useTransform(scrollYProgress, [0.15, 0.48], [1, 0.82]);
-  const centerScaleX = useTransform(scrollYProgress, [0.15, 0.48], [1, 0.9]);
+  const centerScaleY = useTransform(scrollYProgress, [0.15, 0.5], [1, 0.8]);
+  const centerScaleX = useTransform(scrollYProgress, [0.15, 0.5], [1, 0.88]);
 
-  // Couple fade in and rise out of the lotus center
-  const coupleOpacity = useTransform(scrollYProgress, [0.32, 0.48], [0, 1]);
-  const coupleY = useTransform(scrollYProgress, [0.32, 0.48], [45, 0]);
-  const coupleScale = useTransform(scrollYProgress, [0.32, 0.48], [0.75, 1]);
+  // Couple fade in and rise out of the lotus center — gentler, slower reveal
+  const coupleOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
+  const coupleY = useTransform(scrollYProgress, [0.3, 0.52], [35, 0]);
+  const coupleScale = useTransform(scrollYProgress, [0.3, 0.52], [0.7, 1]);
 
-  // Floating leaves drifting
-  const leaf1X = useTransform(scrollYProgress, [0.15, 0.65], [-10, -50]);
-  const leaf2X = useTransform(scrollYProgress, [0.15, 0.65], [10, 50]);
+  // Floating leaves drifting with subtle vertical bob
+  const leaf1X = useTransform(scrollYProgress, [0.15, 0.65], [-8, -45]);
+  const leaf2X = useTransform(scrollYProgress, [0.15, 0.65], [8, 45]);
+  const leaf1Y = useTransform(scrollYProgress, [0.15, 0.35, 0.5, 0.65], [0, -4, 2, -2]);
+  const leaf2Y = useTransform(scrollYProgress, [0.15, 0.3, 0.45, 0.65], [0, 3, -3, 1]);
 
   return (
     <div 
@@ -655,24 +662,24 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
 
       <div className="relative w-64 h-44 mt-6 flex items-center justify-center overflow-visible">
         {/* Soft glowing sun aura behind lotus */}
-        <div className="absolute w-28 h-28 rounded-full bg-pink-300/15 filter blur-xl" />
+        <div className="absolute w-32 h-32 rounded-full bg-pink-200/12 filter blur-2xl" />
 
-        {/* Water Surface Line & Ripples */}
-        <div className="absolute bottom-2 inset-x-0 h-1 bg-sky-200/25 z-5 flex items-center justify-center overflow-visible">
-          <div className="w-16 h-8 rounded-full border border-sky-300/20 absolute -bottom-4 animate-ping" style={{ animationDuration: "3s" }} />
-          <div className="w-28 h-12 rounded-full border border-sky-300/10 absolute -bottom-6 animate-ping" style={{ animationDuration: "4.5s", animationDelay: "1s" }} />
+        {/* Water Surface Line & Ripples — softer pulse instead of aggressive ping */}
+        <div className="absolute bottom-2 inset-x-0 h-1 bg-sky-200/20 z-5 flex items-center justify-center overflow-visible">
+          <div className="w-16 h-8 rounded-full border border-sky-300/15 absolute -bottom-4 animate-pulse" style={{ animationDuration: "3.5s" }} />
+          <div className="w-28 h-12 rounded-full border border-sky-200/10 absolute -bottom-6 animate-pulse" style={{ animationDuration: "5s", animationDelay: "1.2s" }} />
         </div>
 
-        {/* Drifting Lotus Leaves */}
+        {/* Drifting Lotus Leaves — now with vertical bob for organic feel */}
         <motion.span 
-          style={{ x: leaf1X }} 
-          className="absolute bottom-1.5 left-4 text-xl opacity-60 z-5 select-none pointer-events-none"
+          style={{ x: leaf1X, y: leaf1Y }} 
+          className="absolute bottom-1 left-6 text-lg opacity-50 z-5 select-none pointer-events-none"
         >
           🍃
         </motion.span>
         <motion.span 
-          style={{ x: leaf2X }} 
-          className="absolute bottom-1.5 right-4 text-xl opacity-60 z-5 select-none pointer-events-none transform scale-x-[-1]"
+          style={{ x: leaf2X, y: leaf2Y }} 
+          className="absolute bottom-1 right-6 text-lg opacity-50 z-5 select-none pointer-events-none transform scale-x-[-1]"
         >
           🍃
         </motion.span>
@@ -699,39 +706,50 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
           </div>
         </motion.div>
 
-        {/* Outer Left Lotus Petal */}
+        {/* Lotus Petal SVG Gradient Definition (shared) */}
+        <svg className="absolute w-0 h-0" aria-hidden="true">
+          <defs>
+            <linearGradient id="lotusPetalGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#C2185B" />
+              <stop offset="60%" stopColor="#E91E63" />
+              <stop offset="100%" stopColor="#F8BBD0" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        {/* Outer Left Lotus Petal — centered with offset */}
         <motion.div 
           style={{ rotate: rotLeftOuter, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-18 w-14 h-24 left-[20%]"
+          className="absolute bottom-2 z-[18] w-14 h-24 left-1/2" 
+          data-petal="outer-left"
         >
-          <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-sm">
-            <defs>
-              <linearGradient id="lotusPetalGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-                <stop offset="0%" stopColor="#C2185B" />
-                <stop offset="60%" stopColor="#E91E63" />
-                <stop offset="100%" stopColor="#F8BBD0" />
-              </linearGradient>
-            </defs>
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </svg>
+          <div className="-ml-[52px]">
+            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-sm">
+              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
+              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
+            </svg>
+          </div>
         </motion.div>
 
-        {/* Inner Left Lotus Petal */}
+        {/* Inner Left Lotus Petal — centered with offset */}
         <motion.div 
           style={{ rotate: rotLeftInner, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-19 w-15 h-26 left-[25%]"
+          className="absolute bottom-2 z-[19] w-[60px] h-[104px] left-1/2"
+          data-petal="inner-left"
         >
-          <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-md">
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </svg>
+          <div className="-ml-[38px]">
+            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-md">
+              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
+              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
+            </svg>
+          </div>
         </motion.div>
 
-        {/* Center Lotus Petal (scales Y & X to make room for couple) */}
+        {/* Center Lotus Petal (scales Y & X to make room for couple) — truly centered */}
         <motion.div 
           style={{ scaleY: centerScaleY, scaleX: centerScaleX, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-22 w-16 h-28 left-[calc(50%-32px)]"
+          className="absolute bottom-2 z-[22] w-16 h-28 left-1/2 -translate-x-1/2"
+          data-petal="center"
         >
           <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-lg">
             <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
@@ -739,26 +757,32 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
           </svg>
         </motion.div>
 
-        {/* Inner Right Lotus Petal */}
+        {/* Inner Right Lotus Petal — centered with offset */}
         <motion.div 
           style={{ rotate: rotRightInner, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-19 w-15 h-26 right-[25%]"
+          className="absolute bottom-2 z-[19] w-[60px] h-[104px] left-1/2"
+          data-petal="inner-right"
         >
-          <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-md" style={{ transform: "scaleX(-1)" }}>
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </svg>
+          <div className="-ml-[22px]">
+            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-md" style={{ transform: "scaleX(-1)" }}>
+              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
+              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
+            </svg>
+          </div>
         </motion.div>
 
-        {/* Outer Right Lotus Petal */}
+        {/* Outer Right Lotus Petal — centered with offset */}
         <motion.div 
           style={{ rotate: rotRightOuter, transformOrigin: "bottom center" }}
-          className="absolute bottom-2 z-18 w-14 h-24 right-[20%]"
+          className="absolute bottom-2 z-[18] w-14 h-24 left-1/2"
+          data-petal="outer-right"
         >
-          <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-sm" style={{ transform: "scaleX(-1)" }}>
-            <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
-            <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
-          </svg>
+          <div className="-ml-[4px]">
+            <svg viewBox="0 0 60 120" className="w-full h-full drop-shadow-sm" style={{ transform: "scaleX(-1)" }}>
+              <path d="M30,120 C12,110 2,85 2,55 C2,30 18,5 30,0 C42,5 58,30 58,55 C58,85 48,110 30,120 Z" fill="url(#lotusPetalGrad)" />
+              <path d="M30,0 L30,95" stroke="#FFF" strokeWidth="0.8" opacity="0.35" strokeDasharray="3,3" />
+            </svg>
+          </div>
         </motion.div>
       </div>
 
@@ -842,12 +866,12 @@ function SkyLanternRiseScrollAnimation({ brideName, groomName }: { brideName: st
         <div className="w-1.5 h-1.5 bg-yellow-400/50 rounded-full blur-[0.5px] -mt-0.5" />
       </motion.div>
 
-      {/* Main Sky Lantern released by the couple */}
+      {/* Main Sky Lantern released by the couple — enhanced layered glow */}
       <motion.div 
         style={{ x: mainLanternX, y: mainLanternY, scale: mainLanternScale, opacity: mainLanternOpacity }}
         className="absolute z-20 w-9 h-14 flex flex-col items-center select-none pointer-events-none left-1/2 -translate-x-1/2 bottom-10"
       >
-        <div className="w-8 h-11 bg-amber-500/70 rounded-t-xl shadow-[0_0_24px_#FFA000] border-t border-amber-300 flex items-center justify-center text-xs text-yellow-100 font-bold">
+        <div className="w-8 h-11 bg-amber-500/70 rounded-t-xl shadow-[0_0_24px_#FFA000,0_0_48px_rgba(255,160,0,0.3)] border-t border-amber-300 flex items-center justify-center text-xs text-yellow-100 font-bold">
           🏮
         </div>
         <div className="w-3 h-3 bg-red-500/30 rounded-full blur-[1.5px] -mt-1" />
@@ -859,8 +883,10 @@ function SkyLanternRiseScrollAnimation({ brideName, groomName }: { brideName: st
         style={{ scale: coupleScale, opacity: coupleOpacity }}
         className="relative z-10 w-full h-full flex flex-col items-center justify-end"
       >
-        {/* Couple Silhouette standing on the balcony terrace */}
+        {/* Couple Silhouette standing on the balcony terrace — with warm backlight glow */}
         <div className="flex gap-10 items-end relative h-22 w-36 overflow-visible mb-[-2px]">
+          {/* Warm glow behind the couple from lantern light */}
+          <div className="absolute inset-0 -inset-x-4 top-2 bg-amber-400/8 rounded-full blur-xl pointer-events-none" />
           <div className="w-12 h-20">
             <DetailedBrideSilhouette className="text-amber-250/90" />
           </div>
@@ -992,10 +1018,10 @@ function GathbandhanKnotScrollAnimation({ brideName, groomName }: { brideName: s
               <path d="M 100,66 L 100,71 M 100,99 L 100,104 M 81,85 L 86,85 M 114,85 L 119,85" stroke="#FFE082" strokeWidth="0.8" />
             </motion.g>
 
-            {/* Left hanging ribbon & jhumka */}
+            {/* Left hanging ribbon & jhumka — slower pendulum with asymmetric swing */}
             <motion.g
-              animate={{ rotate: [-6, 6, -6] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ rotate: [-5, 5.5, -4.5, 5, -5] }}
+              transition={{ duration: 3.2, repeat: Infinity, ease: [0.42, 0, 0.58, 1] }}
               style={{ transformOrigin: "95px 87px" }}
             >
               {/* Red ribbon tail */}
@@ -1010,10 +1036,10 @@ function GathbandhanKnotScrollAnimation({ brideName, groomName }: { brideName: s
               <circle cx="94" cy="123" r="0.8" fill="#FFE082" />
             </motion.g>
 
-            {/* Right hanging ribbon & jhumka */}
+            {/* Right hanging ribbon & jhumka — offset timing for natural asymmetry */}
             <motion.g
-              animate={{ rotate: [6, -6, 6] }}
-              transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ rotate: [4.5, -5, 4, -5.5, 4.5] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: [0.42, 0, 0.58, 1], delay: 0.4 }}
               style={{ transformOrigin: "105px 87px" }}
             >
               {/* Yellow ribbon tail */}
@@ -1092,12 +1118,12 @@ function VarmalaExchangeScrollAnimation({ brideName, groomName }: { brideName: s
   const garland2Scale = useTransform(scrollYProgress, [0.45, 0.6, 0.75], [0.8, 1.1, 1]);
   const garland2Opacity = useTransform(scrollYProgress, [0.35, 0.45, 0.9], [0, 1, 1]);
 
-  // Bowing gestures (both bow forward towards each other)
-  const groomRotate = useTransform(scrollYProgress, [0.35, 0.45, 0.55], [0, 8, 0]);
-  const groomY = useTransform(scrollYProgress, [0.35, 0.45, 0.55], [0, 4, 0]);
+  // Bowing gestures (both bow forward towards each other) — smoother multi-keyframe easing
+  const groomRotate = useTransform(scrollYProgress, [0.33, 0.38, 0.45, 0.50, 0.55], [0, 2, 9, 6, 0]);
+  const groomY = useTransform(scrollYProgress, [0.33, 0.38, 0.45, 0.50, 0.55], [0, 1, 5, 3, 0]);
 
-  const brideRotate = useTransform(scrollYProgress, [0.65, 0.75, 0.85], [0, 8, 0]);
-  const brideY = useTransform(scrollYProgress, [0.65, 0.75, 0.85], [0, 4, 0]);
+  const brideRotate = useTransform(scrollYProgress, [0.63, 0.68, 0.75, 0.80, 0.85], [0, 2, 9, 6, 0]);
+  const brideY = useTransform(scrollYProgress, [0.63, 0.68, 0.75, 0.80, 0.85], [0, 1, 5, 3, 0]);
 
   // Couple walking closer on ceremony completion
   const brideCloseX = useTransform(scrollYProgress, [0.75, 0.9], [0, 12]);
@@ -1295,8 +1321,8 @@ function MarigoldCurtainsDivider() {
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          animate={{ rotate: [-6, 6, -6] }}
-          transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ rotate: [-5, 5, -5] }}
+          transition={{ duration: 2.8 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.25 }}
           className="flex flex-col items-center"
           style={{ transformOrigin: "top center" }}
         >
@@ -1314,18 +1340,18 @@ function MarigoldCurtainsDivider() {
 function LotusLeafFloatingDivider() {
   return (
     <div className="relative w-full max-w-xs mx-auto h-16 my-6 flex items-center justify-center overflow-visible select-none">
-      <div className="absolute w-20 h-0.5 bg-gradient-to-r from-transparent via-pink-300 to-transparent" />
+      <div className="absolute w-24 h-0.5 bg-gradient-to-r from-transparent via-pink-300 to-transparent" />
       <motion.div
-        animate={{ x: [-40, 40, -40], y: [-2, 2, -2] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ x: [-40, 40, -40], y: [-3, 3, -3], rotate: [-8, 8, -8] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
         className="text-lg z-10"
       >
         🪷
       </motion.div>
       <motion.div
-        animate={{ x: [40, -40, 40], y: [2, -2, 2] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="text-sm opacity-60 z-10"
+        animate={{ x: [35, -35, 35], y: [2, -3, 2], rotate: [6, -10, 6] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+        className="text-sm opacity-55 z-10"
       >
         🌸
       </motion.div>
@@ -1358,8 +1384,13 @@ function TempleBellsDivider() {
       {[...Array(3)].map((_, i) => (
         <motion.div
           key={i}
-          animate={{ rotate: [-8, 8, -8] }}
-          transition={{ duration: 2.5 + i * 0.4, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ rotate: [-10, 9, -8, 7, -10] }}
+          transition={{ 
+            duration: 2.2 + i * 0.3, 
+            repeat: Infinity, 
+            ease: [0.33, 0, 0.67, 1],
+            delay: i * 0.35
+          }}
           style={{ transformOrigin: "top center" }}
           className="flex flex-col items-center"
         >
@@ -1412,6 +1443,16 @@ function PopoutPhotoFrame({ photo, themeType, themeAccent }: { photo: string; th
   const photoScale = useTransform(scrollYProgress, [0.2, 0.9], [0.85, 1.15]);
   const photoY = useTransform(scrollYProgress, [0.2, 0.9], [30, -35]);
   const frameScale = useTransform(scrollYProgress, [0.1, 0.9], [0.95, 1.05]);
+  // Dynamic shadow depth that increases as photo pops out
+  const photoShadow = useTransform(
+    scrollYProgress, 
+    [0.2, 0.5, 0.9], 
+    [
+      "0 4px 12px rgba(0,0,0,0.1)",
+      "0 12px 28px rgba(0,0,0,0.18), 0 4px 10px rgba(0,0,0,0.08)",
+      "0 20px 50px rgba(0,0,0,0.25), 0 8px 16px rgba(0,0,0,0.12)"
+    ]
+  );
 
   const renderPopoutFrameDecor = () => {
     switch (themeType) {
@@ -1490,13 +1531,14 @@ function PopoutPhotoFrame({ photo, themeType, themeAccent }: { photo: string; th
       >
         {renderPopoutFrameDecor()}
 
-        {/* 3D Pop-out Photo */}
+        {/* 3D Pop-out Photo — with dynamic shadow depth */}
         <motion.div
           style={{ 
             scale: photoScale,
             y: photoY,
+            boxShadow: photoShadow,
           }}
-          className="w-[85%] h-[85%] rounded-[24px] overflow-hidden shadow-paper-deep border-4 border-white relative z-30 transition-shadow duration-300 hover:shadow-2xl"
+          className="w-[85%] h-[85%] rounded-[24px] overflow-hidden border-4 border-white relative z-30"
         >
           <img 
             src={photo} 
@@ -1845,9 +1887,10 @@ export default function InvitationView({
           ctx.fill();
         } else if (themeType === "diya") {
           // Draw a small sky lantern shape (rounded rectangle with a burning glow at the base)
+          // Note: shadowBlur kept low (4) for mobile GPU performance
           ctx.fillStyle = this.color;
-          ctx.shadowColor = "rgba(251, 191, 36, 0.5)";
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = "rgba(251, 191, 36, 0.4)";
+          ctx.shadowBlur = 4;
           ctx.beginPath();
           // Custom path for a rounded top lantern
           ctx.moveTo(-this.size/2 + 2, -this.size);
@@ -1863,7 +1906,7 @@ export default function InvitationView({
           
           // Flame at the bottom center of lantern
           ctx.fillStyle = "rgba(255, 236, 179, 0.9)";
-          ctx.shadowBlur = 2;
+          ctx.shadowBlur = 1;
           ctx.beginPath();
           ctx.arc(0, this.size * 0.3, this.size * 0.15, 0, Math.PI * 2);
           ctx.fill();

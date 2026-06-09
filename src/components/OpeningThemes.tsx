@@ -353,8 +353,17 @@ export default function OpeningThemes({
           initial={{ x: 0 }}
           animate={activated ? { x: -140, opacity: 0 } : { x: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="absolute left-6 z-10 w-24 h-40 bg-[#8A3A1A] border-r-4 border-brand-gold rounded-l-2xl shadow-lg flex items-center justify-end pr-1.5"
+          className="absolute left-6 z-10 w-24 h-40 bg-[#8A3A1A] border-r-4 border-brand-gold rounded-l-2xl shadow-lg flex items-center justify-end pr-1.5 overflow-hidden"
         >
+          {/* Gold shimmer overlay */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.15) 45%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.15) 55%, transparent 60%)",
+            }}
+            animate={{ x: ["-100%", "200%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+          />
           <div className="w-18 h-36 border border-brand-gold/40 border-dashed rounded-l flex items-center justify-center text-brand-gold/30 font-serif">
             囍
           </div>
@@ -365,8 +374,17 @@ export default function OpeningThemes({
           initial={{ x: 0 }}
           animate={activated ? { x: 140, opacity: 0 } : { x: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
-          className="absolute right-6 z-10 w-24 h-40 bg-[#8A3A1A] border-l-4 border-brand-gold rounded-r-2xl shadow-lg flex items-center justify-start pl-1.5"
+          className="absolute right-6 z-10 w-24 h-40 bg-[#8A3A1A] border-l-4 border-brand-gold rounded-r-2xl shadow-lg flex items-center justify-start pl-1.5 overflow-hidden"
         >
+          {/* Gold shimmer overlay */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: "linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.15) 45%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.15) 55%, transparent 60%)",
+            }}
+            animate={{ x: ["-100%", "200%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2.5 }}
+          />
           <div className="w-18 h-36 border border-brand-gold/40 border-dashed rounded-r flex items-center justify-center text-brand-gold/30 font-serif">
             囍
           </div>
@@ -415,8 +433,16 @@ export default function OpeningThemes({
 
     const interactiveDiya = (
       <div className="w-full flex flex-col items-center justify-center relative h-56 overflow-visible">
-        {/* Glowing aura behind diya */}
-        <div className="absolute w-36 h-36 rounded-full bg-orange-500/10 filter blur-xl animate-pulse" />
+        {/* Warm glow pulse behind diya */}
+        <motion.div
+          className="absolute w-40 h-40 rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(255,160,0,0.18) 0%, rgba(255,111,0,0.08) 40%, transparent 70%)",
+            filter: "blur(20px)",
+          }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        />
         
         {/* Rotating golden mandala ring */}
         <svg viewBox="0 0 100 100" className="w-40 h-40 fill-none stroke-amber-400/25 stroke-[0.8] animate-spin-slow absolute">
@@ -441,13 +467,16 @@ export default function OpeningThemes({
           />
         </div>
 
-        {/* Activated gold circular screen wipe */}
+        {/* Activated gold radial wipe (no mix-blend-mode for cross-device compat) */}
         {activated && (
           <motion.div
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 12, opacity: 1 }}
+            initial={{ scale: 0, opacity: 0.9 }}
+            animate={{ scale: 12, opacity: 0 }}
             transition={{ duration: 1.5, ease: "easeOut" }}
-            className="absolute w-12 h-12 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-transparent pointer-events-none mix-blend-screen z-25"
+            className="absolute w-12 h-12 rounded-full pointer-events-none z-25"
+            style={{
+              background: "radial-gradient(circle, rgba(255,193,7,0.9) 0%, rgba(255,152,0,0.6) 40%, rgba(255,111,0,0.2) 70%, transparent 100%)",
+            }}
           />
         )}
 
@@ -473,17 +502,22 @@ export default function OpeningThemes({
 
   // 3. IVORY LOTUS COVER: Full blooming lotus with 7 petals radiating from center
   const renderLotusTheme = () => {
-    // 7 petals arranged radially — they all fold back down when activated
-    const petalAngles = [0, 51, 102, 153, 204, 255, 306]; // degrees evenly spread
+    // 7 petals arranged radially — evenly distributed at 360/7 ≈ 51.43° apart
+    const petalAngles = [0, 51.43, 102.86, 154.29, 205.71, 257.14, 308.57];
     const petalColors = [
       "#F48FB1", "#F06292", "#E91E8C", "#F48FB1",
       "#E91E63", "#F06292", "#F48FB1"
     ];
 
     const interactiveLotus = (
-      <div className="w-full h-56 relative flex items-center justify-center">
+      <div className="w-full h-64 relative flex items-center justify-center">
         {/* Soft glow backdrop */}
-        <div className="absolute w-32 h-32 rounded-full bg-pink-300/20 blur-2xl animate-pulse pointer-events-none" />
+        <motion.div
+          className="absolute w-36 h-36 rounded-full bg-pink-300/20 pointer-events-none"
+          style={{ filter: "blur(24px)" }}
+          animate={activated ? { opacity: 0 } : { scale: [1, 1.15, 1], opacity: [0.3, 0.55, 0.3] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        />
 
         {/* Water ripple rings */}
         {[0, 1, 2].map(i => (
@@ -496,27 +530,29 @@ export default function OpeningThemes({
           />
         ))}
 
-        {/* SVG lotus — all petals + center */}
-        <svg
-          viewBox="-60 -80 120 120"
+        {/* SVG lotus — all petals + center, properly centered viewBox */}
+        <motion.svg
+          viewBox="-60 -60 120 120"
           className="w-44 h-44 absolute"
           style={{ overflow: "visible" }}
+          animate={activated ? {} : { scale: [1, 1.03, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           {petalAngles.map((angle, idx) => {
             const rad = (angle * Math.PI) / 180;
-            const tx = Math.sin(rad) * 28;
-            const ty = -Math.cos(rad) * 28;
+            const tx = Math.sin(rad) * 32;
+            const ty = -Math.cos(rad) * 32;
             return (
               <motion.g
                 key={idx}
-                initial={{ scaleY: 1, opacity: 1, x: 0, y: 0 }}
+                initial={{ scale: 1, opacity: 1, x: 0, y: 0 }}
                 animate={
                   activated
-                    ? { scaleY: 0.1, opacity: 0, x: tx * 1.8, y: ty * 1.8 }
-                    : { scaleY: 1, opacity: 1, x: 0, y: 0 }
+                    ? { scale: 0.2, opacity: 0, x: tx * 1.6, y: ty * 1.6 }
+                    : { scale: 1, opacity: 1, x: 0, y: 0 }
                 }
-                transition={{ duration: 1.2, ease: "easeInOut", delay: idx * 0.07 }}
-                style={{ originX: "0", originY: "1", transformOrigin: "0px 0px" }}
+                transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: idx * 0.08 }}
+                style={{ transformOrigin: "0px 0px" }}
               >
                 <g transform={`rotate(${angle}) translate(0, -24)`}>
                   <ellipse cx="0" cy="-14" rx="8" ry="18"
@@ -533,17 +569,18 @@ export default function OpeningThemes({
             );
           })}
 
-          {/* Inner petals (shorter, lighter) */}
-          {[25, 97, 169, 241, 313].map((angle, idx) => (
+          {/* Inner petals (shorter, lighter) — offset for layered look */}
+          {[25.71, 77.14, 128.57, 180, 231.43, 282.86, 334.29].map((angle, idx) => (
             <motion.g
               key={`inner-${idx}`}
-              initial={{ scaleY: 1, opacity: 0.8 }}
+              initial={{ scale: 1, opacity: 0.8 }}
               animate={
                 activated
-                  ? { scaleY: 0, opacity: 0 }
-                  : { scaleY: 1, opacity: 0.8 }
+                  ? { scale: 0, opacity: 0 }
+                  : { scale: 1, opacity: 0.8 }
               }
-              transition={{ duration: 0.9, ease: "easeInOut", delay: 0.1 + idx * 0.05 }}
+              transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1], delay: 0.1 + idx * 0.04 }}
+              style={{ transformOrigin: "0px 0px" }}
             >
               <g transform={`rotate(${angle}) translate(0, -14)`}>
                 <ellipse cx="0" cy="-8" rx="5.5" ry="12"
@@ -582,11 +619,12 @@ export default function OpeningThemes({
               transition={{ duration: 0.6 }}
             />
           ))}
-        </svg>
+        </motion.svg>
 
-        {/* Lotus leaf base */}
+        {/* Lotus leaf base — positioned below the lotus, not overlapping button */}
         <motion.div
-          className="absolute bottom-2 pointer-events-none"
+          className="absolute pointer-events-none"
+          style={{ bottom: "28%" }}
           initial={{ opacity: 1 }}
           animate={activated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
@@ -602,7 +640,7 @@ export default function OpeningThemes({
         {!activated && (
           <button
             onClick={handleActivate}
-            className="absolute bottom-2 z-20 py-2.5 px-7 rounded-full border-2 border-pink-400 bg-pink-500 hover:bg-pink-400 text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-lg shadow-pink-300/30 transition-all"
+            className="absolute bottom-0 z-20 py-2.5 px-7 rounded-full border-2 border-pink-400 bg-pink-500 hover:bg-pink-400 text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-lg shadow-pink-300/30 transition-all"
           >
             {t("unfoldCard")}
           </button>
@@ -624,17 +662,22 @@ export default function OpeningThemes({
     return renderEnvelopeFrame(
       "linear-gradient(to bottom, #FAF6F0 0%, #F5EFEB 60%, #E8D8CC 100%)",
       <div className="w-full h-56 relative flex items-center justify-center overflow-hidden">
-        {/* Rotating gold mandala sun behind text (revealed on open) */}
+        {/* Rotating gold mandala sun behind text (revealed on open) — smooth linear rotation */}
         <motion.svg
           initial={{ rotate: 0, opacity: 0 }}
-          animate={activated ? { rotate: 360, opacity: 0.15 } : {}}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          animate={activated ? { rotate: 360, opacity: 0.15 } : { rotate: 360 }}
+          transition={activated
+            ? { rotate: { duration: 20, repeat: Infinity, ease: "linear" }, opacity: { duration: 1.2, ease: "easeOut" } }
+            : { rotate: { duration: 30, repeat: Infinity, ease: "linear" } }
+          }
           viewBox="0 0 100 100" className="absolute w-36 h-36 fill-none stroke-brand-gold stroke-[0.8]"
+          style={{ opacity: activated ? undefined : 0.06 }}
         >
           <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
+          <circle cx="50" cy="50" r="32" strokeDasharray="2,5" />
         </motion.svg>
 
-        {/* Left Elephant (Bows & Slides Left) */}
+        {/* Left Elephant (Bows & Slides Left) — with idle trunk sway */}
         <motion.div
           initial={{ x: -20, rotate: 0, opacity: 1 }}
           animate={activated ? { rotate: -15, x: -220, opacity: 0 } : { x: -20, rotate: 0, opacity: 1 }}
@@ -647,7 +690,13 @@ export default function OpeningThemes({
               d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
               fill="#963E1C" 
             />
-            <path d="M92,15 Q95,12 97,14" stroke="#FFE082" strokeWidth="1" fill="none" />
+            {/* Trunk — animated sway */}
+            <motion.path
+              d="M92,15 Q95,12 97,14"
+              stroke="#FFE082" strokeWidth="1" fill="none"
+              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q96,10 98,13", "M92,15 Q94,14 96,15", "M92,15 Q95,12 97,14"] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            />
             <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#FFE082" />
             <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#D32F2F" />
             <path d="M38,28 L50,28 L50,38 L38,38 Z" fill="#FFE082" stroke="#963E1C" strokeWidth="0.5" />
@@ -662,7 +711,7 @@ export default function OpeningThemes({
           </svg>
         </motion.div>
 
-        {/* Right Elephant (Bows & Slides Right) */}
+        {/* Right Elephant (Bows & Slides Right) — with idle trunk sway */}
         <motion.div
           initial={{ x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
           animate={activated ? { rotate: -15, x: 220, opacity: 0 } : { x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
@@ -675,7 +724,13 @@ export default function OpeningThemes({
               d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
               fill="#963E1C" 
             />
-            <path d="M92,15 Q95,12 97,14" stroke="#FFE082" strokeWidth="1" fill="none" />
+            {/* Trunk — animated sway */}
+            <motion.path
+              d="M92,15 Q95,12 97,14"
+              stroke="#FFE082" strokeWidth="1" fill="none"
+              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q94,14 96,15", "M92,15 Q96,10 98,13", "M92,15 Q95,12 97,14"] }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+            />
             <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#FFE082" />
             <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#D32F2F" />
             <path d="M38,28 L50,28 L50,38 L38,38 Z" fill="#FFE082" stroke="#963E1C" strokeWidth="0.5" />
@@ -734,17 +789,23 @@ export default function OpeningThemes({
     return renderEnvelopeFrame(
       "linear-gradient(to bottom, #FFF8EE 0%, #FFF3E0 50%, #FAF6F0 100%)",
       <div className="w-full h-56 relative flex flex-col items-center justify-start pt-0 overflow-visible">
-        {/* Decorative Toran arch at top */}
+        {/* Decorative Toran arch at top — flowers sway gently */}
         <div className="w-48 flex justify-center items-center gap-0 absolute top-0">
           {[...Array(7)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center" style={{ marginTop: i % 2 === 0 ? 0 : 6 }}>
+            <motion.div
+              key={i}
+              className="flex flex-col items-center"
+              style={{ marginTop: i % 2 === 0 ? 0 : 6 }}
+              animate={{ rotate: [0, i % 2 === 0 ? 4 : -4, 0], y: [0, i % 2 === 0 ? -2 : 2, 0] }}
+              transition={{ duration: 2.5 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}
+            >
               <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-yellow-300 shadow-sm flex items-center justify-center text-[6px]">🌻</div>
               <div className="w-[2px] h-5 bg-green-700 rounded-b-full" />
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        {/* The hanging thread — reacts to drag */}
+        {/* The hanging thread — smoother cubic bezier curve reacts to drag */}
         <svg
           className="absolute pointer-events-none z-0"
           style={{ top: 20, left: "50%", transform: "translateX(-50%)" }}
@@ -752,9 +813,9 @@ export default function OpeningThemes({
           height="170"
           overflow="visible"
         >
-          {/* Red kalava thread */}
+          {/* Red kalava thread — smooth cubic bezier */}
           <motion.path
-            d={`M6,0 Q${6 + (threadY > 0 ? threadY * 0.3 : 0)},${40 + threadY * 0.5} 6,${50 + Math.min(threadY, 100)}`}
+            d={`M6,0 C${6 + (threadY > 0 ? threadY * 0.15 : 0)},${15 + threadY * 0.2} ${6 + (threadY > 0 ? threadY * 0.25 : 0)},${35 + threadY * 0.4} 6,${50 + Math.min(threadY, 100)}`}
             stroke="#C62828"
             strokeWidth="3"
             fill="none"
@@ -762,7 +823,7 @@ export default function OpeningThemes({
           />
           {/* Gold shimmer thread */}
           <motion.path
-            d={`M6,0 Q${6 + (threadY > 0 ? threadY * 0.3 : 0)},${40 + threadY * 0.5} 6,${50 + Math.min(threadY, 100)}`}
+            d={`M6,0 C${6 + (threadY > 0 ? threadY * 0.15 : 0)},${15 + threadY * 0.2} ${6 + (threadY > 0 ? threadY * 0.25 : 0)},${35 + threadY * 0.4} 6,${50 + Math.min(threadY, 100)}`}
             stroke="#FFD600"
             strokeWidth="1"
             fill="none"
@@ -846,26 +907,36 @@ export default function OpeningThemes({
     return renderEnvelopeFrame(
       "linear-gradient(160deg, #E8F5E9 0%, #F1F8E9 30%, #FAF6F0 100%)",
       <div className="w-full h-56 relative flex flex-col items-center justify-center overflow-hidden">
-        {/* Hanging toran row — rises on activate */}
+        {/* Hanging toran row — staggered bounce + rises on activate */}
         <motion.div
           className="absolute top-0 w-full flex justify-between px-2 z-20"
           animate={activated ? { y: -60, opacity: 0 } : { y: 0, opacity: 1 }}
           transition={{ duration: 1.0, ease: "easeInOut" }}
         >
           {[...Array(7)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center" style={{ marginTop: i % 2 === 0 ? 0 : 8 }}>
+            <motion.div
+              key={i}
+              className="flex flex-col items-center"
+              style={{ marginTop: i % 2 === 0 ? 0 : 8 }}
+              animate={activated ? {} : { y: [0, -4, 0], rotate: [0, i % 2 === 0 ? 3 : -3, 0] }}
+              transition={{ duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.18 }}
+            >
               <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 border border-yellow-300 shadow flex items-center justify-center text-[7px]">🌻</div>
               <div className="w-[2.5px] h-7 bg-green-700/80 rounded-b-full" />
-              <div className="w-2 h-2 rounded-full bg-red-600" />
-            </div>
+              <motion.div
+                className="w-2 h-2 rounded-full bg-red-600"
+                animate={activated ? {} : { scale: [1, 1.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.12 }}
+              />
+            </motion.div>
           ))}
         </motion.div>
 
         {/* Silk curtain panels */}
         <div className="w-52 h-36 relative flex rounded-xl overflow-hidden shadow-xl mt-6 border border-amber-900/20">
-          {/* Left silk panel */}
+          {/* Left silk panel — with fabric shimmer */}
           <motion.div
-            className="w-1/2 h-full relative flex items-center justify-center"
+            className="w-1/2 h-full relative flex items-center justify-center overflow-hidden"
             style={{
               background: "linear-gradient(135deg, #8B0000 0%, #6D0000 50%, #4A000A 100%)",
               borderRight: "1px solid rgba(212,168,67,0.3)",
@@ -873,6 +944,15 @@ export default function OpeningThemes({
             animate={activated ? { x: -90, opacity: 0 } : { x: 0, opacity: 1 }}
             transition={{ duration: 1.3, ease: "easeInOut", delay: 0.1 }}
           >
+            {/* Fabric shimmer effect */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "linear-gradient(110deg, transparent 30%, rgba(255,215,0,0.08) 45%, rgba(255,215,0,0.15) 50%, rgba(255,215,0,0.08) 55%, transparent 70%)",
+              }}
+              animate={{ x: ["-120%", "220%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
+            />
             {/* Embroidery pattern */}
             <svg viewBox="0 0 50 80" className="w-full h-full absolute inset-0 opacity-20">
               <path d="M5,5 Q25,20 45,5 Q25,40 5,5" fill="#FFD700" />
@@ -882,15 +962,24 @@ export default function OpeningThemes({
             <div className="absolute inset-2 border border-dashed border-amber-500/20 rounded" />
             <span className="text-amber-300/40 text-2xl font-serif select-none">❋</span>
           </motion.div>
-          {/* Right silk panel */}
+          {/* Right silk panel — with fabric shimmer */}
           <motion.div
-            className="w-1/2 h-full relative flex items-center justify-center"
+            className="w-1/2 h-full relative flex items-center justify-center overflow-hidden"
             style={{
               background: "linear-gradient(225deg, #8B0000 0%, #6D0000 50%, #4A000A 100%)",
             }}
             animate={activated ? { x: 90, opacity: 0 } : { x: 0, opacity: 1 }}
             transition={{ duration: 1.3, ease: "easeInOut", delay: 0.1 }}
           >
+            {/* Fabric shimmer effect */}
+            <motion.div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "linear-gradient(110deg, transparent 30%, rgba(255,215,0,0.08) 45%, rgba(255,215,0,0.15) 50%, rgba(255,215,0,0.08) 55%, transparent 70%)",
+              }}
+              animate={{ x: ["-120%", "220%"] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+            />
             <svg viewBox="0 0 50 80" className="w-full h-full absolute inset-0 opacity-20">
               <path d="M45,5 Q25,20 5,5 Q25,40 45,5" fill="#FFD700" />
               <path d="M45,40 Q25,55 5,40" stroke="#FFD700" fill="none" strokeWidth="1" />
