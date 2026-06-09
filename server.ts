@@ -9,7 +9,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = parseInt(process.env.PORT || "3000", 10);
 
 // Increase request sizes for base64 photo uploads
 app.use(express.json({ limit: "25mb" }));
@@ -20,18 +20,32 @@ app.use(express.urlencoded({ limit: "25mb", extended: true }));
 // ─────────────────────────────────────────────
 const MONGODB_URI = process.env.MONGODB_URI || "";
 
-async function connectDB() {
+async function connectDB(): Promise<boolean> {
   if (!MONGODB_URI) {
-    console.error("❌ MONGODB_URI is not set. Please add it in Hostinger Environment Variables.");
-    process.exit(1);
+    console.error("❌ MONGODB_URI is not set in Environment Variables. Database features will not work.");
+    return false;
   }
-  try {
-    await mongoose.connect(MONGODB_URI, { dbName: "getshaadilink" });
-    console.log("✅ Connected to MongoDB Atlas successfully.");
-  } catch (err) {
-    console.error("❌ MongoDB connection failed:", err);
-    process.exit(1);
+  // Retry up to 5 times with increasing delay
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      await mongoose.connect(MONGODB_URI, {
+        dbName: "getshaadilink",
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000,
+      });
+      console.log("✅ Connected to MongoDB Atlas successfully.");
+      return true;
+    } catch (err: any) {
+      console.error(`❌ MongoDB connection attempt ${attempt}/5 failed:`, err?.message || err);
+      if (attempt < 5) {
+        const delay = attempt * 3000;
+        console.log(`⏳ Retrying in ${delay / 1000}s...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
+  console.error("❌ All MongoDB connection attempts failed. Server will start but database features will not work.");
+  return false;
 }
 
 // ─────────────────────────────────────────────

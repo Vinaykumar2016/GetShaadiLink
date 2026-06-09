@@ -22,31 +22,44 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 ));
 
 // server.ts
-var import_express = __toESM(require("express"), 1);
-var import_path = __toESM(require("path"), 1);
-var import_fs = __toESM(require("fs"), 1);
+var import_express = __toESM(require("express"));
+var import_path = __toESM(require("path"));
+var import_fs = __toESM(require("fs"));
 var import_genai = require("@google/genai");
-var import_dotenv = __toESM(require("dotenv"), 1);
-var import_nodemailer = __toESM(require("nodemailer"), 1);
-var import_mongoose = __toESM(require("mongoose"), 1);
+var import_dotenv = __toESM(require("dotenv"));
+var import_nodemailer = __toESM(require("nodemailer"));
+var import_mongoose = __toESM(require("mongoose"));
 import_dotenv.default.config();
 var app = (0, import_express.default)();
-var PORT = 3e3;
+var PORT = parseInt(process.env.PORT || "3000", 10);
 app.use(import_express.default.json({ limit: "25mb" }));
 app.use(import_express.default.urlencoded({ limit: "25mb", extended: true }));
 var MONGODB_URI = process.env.MONGODB_URI || "";
 async function connectDB() {
   if (!MONGODB_URI) {
-    console.error("\u274C MONGODB_URI is not set. Please add it in Hostinger Environment Variables.");
-    process.exit(1);
+    console.error("\u274C MONGODB_URI is not set in Environment Variables. Database features will not work.");
+    return false;
   }
-  try {
-    await import_mongoose.default.connect(MONGODB_URI, { dbName: "getshaadilink" });
-    console.log("\u2705 Connected to MongoDB Atlas successfully.");
-  } catch (err) {
-    console.error("\u274C MongoDB connection failed:", err);
-    process.exit(1);
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      await import_mongoose.default.connect(MONGODB_URI, {
+        dbName: "getshaadilink",
+        serverSelectionTimeoutMS: 1e4,
+        connectTimeoutMS: 1e4
+      });
+      console.log("\u2705 Connected to MongoDB Atlas successfully.");
+      return true;
+    } catch (err) {
+      console.error(`\u274C MongoDB connection attempt ${attempt}/5 failed:`, err?.message || err);
+      if (attempt < 5) {
+        const delay = attempt * 3e3;
+        console.log(`\u23F3 Retrying in ${delay / 1e3}s...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   }
+  console.error("\u274C All MongoDB connection attempts failed. Server will start but database features will not work.");
+  return false;
 }
 var invitationSchema = new import_mongoose.Schema(
   {
