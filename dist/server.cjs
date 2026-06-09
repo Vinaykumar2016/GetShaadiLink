@@ -77842,7 +77842,21 @@ var import_compression = __toESM(require_compression());
 import_dotenv.default.config();
 var app = (0, import_express.default)();
 var PORT = parseInt(process.env.PORT || "3000", 10);
-app.use((0, import_compression.default)());
+app.use((0, import_compression.default)({
+  level: 6,
+  // Easing CPU overhead on hostinger node server
+  threshold: 1024,
+  // Only compress responses that are larger than 1KB
+  filter: (req, res) => {
+    const contentType = res.getHeader("Content-Type");
+    if (contentType && typeof contentType === "string") {
+      if (contentType.match(/image|audio|video|zip/)) {
+        return false;
+      }
+    }
+    return import_compression.default.filter(req, res);
+  }
+}));
 var cacheMaxAge = 31536e3;
 var shortCacheMaxAge = 86400;
 app.use(import_express.default.json({ limit: "25mb" }));

@@ -12,8 +12,22 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
-// Enable Gzip compression to minimize asset transfer sizes
-app.use(compression());
+// Enable Gzip compression to minimize asset transfer sizes with balanced CPU usage
+app.use(compression({
+  level: 6, // Easing CPU overhead on hostinger node server
+  threshold: 1024, // Only compress responses that are larger than 1KB
+  filter: (req, res) => {
+    const contentType = res.getHeader("Content-Type");
+    if (contentType && typeof contentType === "string") {
+      // Do not compress images or audio/video files (they are already compressed)
+      if (contentType.match(/image|audio|video|zip/)) {
+        return false;
+      }
+    }
+    // Fall back to standard filter (compress text/html/css/json/javascript)
+    return compression.filter(req, res);
+  }
+}));
 
 // Set Cache-Control headers for static directory and public assets
 const cacheMaxAge = 31536000; // 1 Year in seconds for immutable assets
