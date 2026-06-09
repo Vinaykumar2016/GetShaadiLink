@@ -5,11 +5,19 @@ import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import os from "os";
+import compression from "compression";
 
 dotenv.config();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3000", 10);
+
+// Enable Gzip compression to minimize asset transfer sizes
+app.use(compression());
+
+// Set Cache-Control headers for static directory and public assets
+const cacheMaxAge = 31536000; // 1 Year in seconds for immutable assets
+const shortCacheMaxAge = 86400; // 1 day for HTML/Data assets
 
 // Increase request sizes for base64 photo uploads
 app.use(express.json({ limit: "25mb" }));
@@ -989,7 +997,21 @@ async function startServer() {
         try { return path.join(path.dirname(__filename), "."); } catch { return path.join(process.cwd(), "dist"); }
       })();
     console.log("[Static] Serving from:", distPath);
-    app.use(express.static(distPath));
+    app.use(express.static(distPath, {
+      maxAge: cacheMaxAge * 1000, // Serve static files with 1 Year cache headers
+      setHeaders: (res, filePath) => {
+        // If it's index.html, do not cache aggressively so dynamic updates/Meta tag injections take effect immediately
+        if (filePath.endsWith("index.html")) {
+          res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        } else if (filePath.match(/\.(js|css|woff2?|eot|ttf|otf)$/)) {
+          // Vite hashed bundles are immutable
+          res.setHeader("Cache-Control", `public, max-age=${cacheMaxAge}, immutable`);
+        } else {
+          // Images, samples, audio, manifest
+          res.setHeader("Cache-Control", `public, max-age=${shortCacheMaxAge}`);
+        }
+      }
+    }));
     app.get("*", (req, res) => {
       const slug = req.path.replace(/^\//, "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
       const indexPath = path.join(distPath, "index.html");
@@ -999,6 +1021,8 @@ async function startServer() {
         return;
       }
       
+      // Ensure the generated HTML is not cached dynamically
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       let html = fs.readFileSync(indexPath, "utf-8");
       
       if (slug) {
