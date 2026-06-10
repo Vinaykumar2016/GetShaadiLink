@@ -47,7 +47,7 @@ const DATA_DIR = (() => {
   } else {
     return process.env.DATA_PATH
       ? path.resolve(process.env.DATA_PATH)
-      : path.resolve(__dirname, "..", "data");
+      : path.join(process.cwd(), "data");
   }
 })();
 
@@ -1051,6 +1051,7 @@ async function startServer() {
             const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
             
             html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
+            html = html.replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${description}" />`);
             
             const metaTags = `
               <meta property="og:title" content="${title}" />
@@ -1061,6 +1062,7 @@ async function startServer() {
               <meta name="twitter:title" content="${title}" />
               <meta name="twitter:description" content="${description}" />
               <meta name="twitter:image" content="${ogImage}" />
+              <link rel="canonical" href="${req.protocol}://${req.get("host")}/${slug}" />
             `;
             
             html = html.replace("</head>", `${metaTags}</head>`);
@@ -1068,6 +1070,11 @@ async function startServer() {
             console.error("Error injecting metadata:", err);
           }
         }
+      } else {
+        const homeCanonical = `
+          <link rel="canonical" href="${req.protocol}://${req.get("host")}/" />
+        `;
+        html = html.replace("</head>", `${homeCanonical}</head>`);
       }
       
       res.send(html);

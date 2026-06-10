@@ -77865,7 +77865,7 @@ var DATA_DIR = (() => {
   if (process.env.NODE_ENV === "production") {
     return import_path.default.join(import_os.default.homedir(), "getshaadilink_data");
   } else {
-    return process.env.DATA_PATH ? import_path.default.resolve(process.env.DATA_PATH) : import_path.default.resolve(__dirname, "..", "data");
+    return process.env.DATA_PATH ? import_path.default.resolve(process.env.DATA_PATH) : import_path.default.join(process.cwd(), "data");
   }
 })();
 var INVITATIONS_DIR = import_path.default.join(DATA_DIR, "invitations");
@@ -78730,6 +78730,7 @@ async function startServer() {
             const description = `Join us to celebrate our wedding at ${data.vname}, ${data.city} on ${data.niceDate}. Click to view details and RSVP.`;
             const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
             html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
+            html = html.replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${description}" />`);
             const metaTags = `
               <meta property="og:title" content="${title}" />
               <meta property="og:description" content="${description}" />
@@ -78739,12 +78740,18 @@ async function startServer() {
               <meta name="twitter:title" content="${title}" />
               <meta name="twitter:description" content="${description}" />
               <meta name="twitter:image" content="${ogImage}" />
+              <link rel="canonical" href="${req.protocol}://${req.get("host")}/${slug}" />
             `;
             html = html.replace("</head>", `${metaTags}</head>`);
           } catch (err) {
             console.error("Error injecting metadata:", err);
           }
         }
+      } else {
+        const homeCanonical = `
+          <link rel="canonical" href="${req.protocol}://${req.get("host")}/" />
+        `;
+        html = html.replace("</head>", `${homeCanonical}</head>`);
       }
       res.send(html);
     });

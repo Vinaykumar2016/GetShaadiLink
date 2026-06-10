@@ -1544,6 +1544,27 @@ const getWishNotice = (lang: string) => {
   }
 };
 
+const formatEventDateTime = (rawDateTime: string) => {
+  if (!rawDateTime) return "";
+  try {
+    const dateObj = new Date(rawDateTime);
+    if (isNaN(dateObj.getTime())) {
+      return rawDateTime;
+    }
+    const options: Intl.DateTimeFormatOptions = {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return dateObj.toLocaleDateString("en-US", options);
+  } catch (e) {
+    return rawDateTime;
+  }
+};
+
 export default function InvitationView({
   data,
   isDemoMode,
@@ -1556,6 +1577,21 @@ export default function InvitationView({
   const [envelopeStarted, setEnvelopeStarted] = useState(false);
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
   const [envelopeFinished, setEnvelopeFinished] = useState(false);
+
+  // Prevent page scroll when the opening cover envelope is folded/active
+  useEffect(() => {
+    if (!envelopeFinished) {
+      document.body.style.overflow = "hidden";
+      document.body.style.height = "100%";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.height = "";
+    };
+  }, [envelopeFinished]);
   
   const [paymentId, setPaymentId] = useState(data.razorpayPaymentId || "");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -2602,7 +2638,7 @@ export default function InvitationView({
                           <p className={`text-xs text-brand-rust/60 mt-0.5 ${getRegionalFontClass()}`}>{ev.regional}</p>
                         )}
                         <p className="text-[10px] font-semibold font-marcellus mt-0.5" style={{ color: themePrimary }}>
-                          {ev.time}
+                          {formatEventDateTime(ev.time)}
                         </p>
                       </div>
                     </div>
