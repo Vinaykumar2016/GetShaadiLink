@@ -1,0 +1,74 @@
+{
+  "slug": "aditi-karan-love",
+  "bride": "Aditi-Updated",
+  "groom": "Karan",
+  "niceDate": "15 December 2026",
+  "city": "Udaipur",
+  "vname": "Lake Palace",
+  "vaddr": "Lake Pichola, Udaipur, Rajasthan 313001",
+  "storyEnglish": "The journey of Aditi and Karan is a beautiful testament to love and partnership. We met during a rainy day at a local coffee shop. Karan spilled coffee on Aditi's sketch, which started a conversation that never really ended. Five years later, we are ready to say 'I do' under the Udaipur sky. Guided by trust and shared dreams, we are taking our next beautiful step together on 15 December 2026 in Udaipur.",
+  "storyRegional": "The journey of Aditi and Karan is a beautiful testament to love and partnership. We met during a rainy day at a local coffee shop. Karan spilled coffee on Aditi's sketch, which started a conversation that never really ended. Five years later, we are ready to say 'I do' under the Udaipur sky. Guided by trust and shared dreams, we are taking our next beautiful step together on 15 December 2026 in Udaipur.",
+  "tagline": "Aditi & Karan's Sacred Wedding Celebration",
+  "lang": "en",
+  "langNative": "English",
+  "events": [
+    {
+      "name": "Haldi Ceremony",
+      "regional": "Haldi Ceremony",
+      "time": "2026-12-13T10:00",
+      "emoji": "💛"
+    },
+    {
+      "name": "Sangeet Night",
+      "regional": "Sangeet Night",
+      "time": "2026-12-14T19:00",
+      "emoji": "💃"
+    },
+    {
+      "name": "Wedding Ceremony",
+      "regional": "Wedding Ceremony",
+      "time": "2026-12-15T10:30",
+      "emoji": "🌸"
+    }
+  ],
+  "shagunOn": false,
+  "upiId": "",
+  "dateRaw": "2026-12-15",
+  "photos": [],
+  "theme": {
+    "name": "Standard Saffron",
+    "primary": "#8A3A1A",
+    "secondary": "#C5A880",
+    "accent": "#E6C252",
+    "bg": "#FAF6F0",
+    "heroEmoji": "🌸"
+  },
+  "editPassword": "love2026",
+  "groomParents": "Smt. Radha & Sri. Ramesh Mehta",
+  "brideParents": "Smt. Maya & Sri. Suresh Sharma",
+  "familyBlessings": "With the blessings of ancestors and love of friends",
+  "postWeddingPhotosUrl": "",
+  "ownerEmail": "karan.aditi@example.com",
+  "views": 5,
+  "openingTheme": "lotus",
+  "razorpayPaymentId": null,
+  "guestbookNotes": [
+    {
+      "id": "note_1781079312838723v",
+      "name": "Aunt Sunita & Uncle Vijay",
+      "note": "Wishing you a lifetime of love, happiness, and beautiful adventures together! So happy for you two! ❤️",
+      "date": "10 Jun 2026"
+    }
+  ],
+  "createdAt": "2026-06-10T08:10:24.765Z",
+  "wdate": "2026-12-15",
+  "story": "The journey of Aditi and Karan is a beautiful testament to love and partnership. We met during a rainy day at a local coffee shop. Karan spilled coffee on Aditi's sketch, which started a conversation that never really ended. Five years later, we are ready to say 'I do' under the Udaipur sky. Guided by trust and shared dreams, we are taking our next beautiful step together on 15 December 2026 in Udaipur.",
+  "storyText": "The journey of Aditi and Karan is a beautiful testament to love and partnership. We met during a rainy day at a local coffee shop. Karan spilled coffee on Aditi's sketch, which started a conversation that never really ended. Five years later, we are ready to say 'I do' under the Udaipur sky. Guided by trust and shared dreams, we are taking our next beautiful step together on 15 December 2026 in Udaipur.",
+  "isEditMode": true,
+  "e1n": "Haldi Ceremony",
+  "e1t": "2026-12-13T10:00",
+  "e2n": "Sangeet Night",
+  "e2t": "2026-12-14T19:00",
+  "e3n": "Wedding Ceremony",
+  "e3t": "2026-12-15T10:30"
+}
