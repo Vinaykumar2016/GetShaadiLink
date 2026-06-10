@@ -423,7 +423,8 @@ function AnimatedPeacock() {
               className="absolute w-6 h-20 overflow-visible"
               style={{ 
                 bottom: "20%",
-                transformOrigin: "bottom center"
+                transformOrigin: "bottom center",
+                willChange: "transform, opacity"
               }}
             >
               {/* Peacock Feather SVG shape */}
@@ -813,29 +814,29 @@ function SkyLanternRiseScrollAnimation({ brideName, groomName }: { brideName: st
       </div>
 
       {/* Background lanterns (twinkling and rising) */}
-      <motion.div style={{ y: bglantern1Y, x: bglantern1X, opacity: bglantern1Opacity }} className="absolute z-5 w-6 h-9 flex flex-col items-center select-none pointer-events-none left-[15%] bottom-4">
+      <motion.div style={{ y: bglantern1Y, x: bglantern1X, opacity: bglantern1Opacity, willChange: "transform, opacity" }} className="absolute z-5 w-6 h-9 flex flex-col items-center select-none pointer-events-none left-[15%] bottom-4">
         <div className="w-5 h-7 bg-amber-500/35 rounded-t-md shadow-[0_0_12px_orange] flex items-center justify-center text-[7px]">🏮</div>
         <div className="w-1.5 h-1.5 bg-yellow-400/50 rounded-full blur-[0.5px] -mt-0.5" />
       </motion.div>
 
-      <motion.div style={{ y: bglantern2Y, x: bglantern2X, opacity: bglantern2Opacity }} className="absolute z-5 w-5 h-8 flex flex-col items-center select-none pointer-events-none left-[80%] bottom-4">
+      <motion.div style={{ y: bglantern2Y, x: bglantern2X, opacity: bglantern2Opacity, willChange: "transform, opacity" }} className="absolute z-5 w-5 h-8 flex flex-col items-center select-none pointer-events-none left-[80%] bottom-4">
         <div className="w-4 h-6 bg-amber-500/30 rounded-t-md shadow-[0_0_10px_orange] flex items-center justify-center text-[6px]">🏮</div>
         <div className="w-1 h-1 bg-yellow-400/40 rounded-full blur-[0.5px] -mt-0.5" />
       </motion.div>
 
-      <motion.div style={{ y: bglantern3Y, x: bglantern3X, opacity: bglantern3Opacity }} className="absolute z-5 w-5 h-8 flex flex-col items-center select-none pointer-events-none left-[30%] bottom-4">
+      <motion.div style={{ y: bglantern3Y, x: bglantern3X, opacity: bglantern3Opacity, willChange: "transform, opacity" }} className="absolute z-5 w-5 h-8 flex flex-col items-center select-none pointer-events-none left-[30%] bottom-4">
         <div className="w-4 h-6 bg-amber-500/30 rounded-t-md shadow-[0_0_10px_orange] flex items-center justify-center text-[6px]">🏮</div>
         <div className="w-1.5 h-1.5 bg-yellow-400/40 rounded-full blur-[0.5px] -mt-0.5" />
       </motion.div>
 
-      <motion.div style={{ y: bglantern4Y, x: bglantern4X, opacity: bglantern4Opacity }} className="absolute z-5 w-6 h-9 flex flex-col items-center select-none pointer-events-none left-[65%] bottom-4">
+      <motion.div style={{ y: bglantern4Y, x: bglantern4X, opacity: bglantern4Opacity, willChange: "transform, opacity" }} className="absolute z-5 w-6 h-9 flex flex-col items-center select-none pointer-events-none left-[65%] bottom-4">
         <div className="w-5 h-7 bg-amber-500/35 rounded-t-md shadow-[0_0_14px_orange] flex items-center justify-center text-[7px]">🏮</div>
         <div className="w-1.5 h-1.5 bg-yellow-400/50 rounded-full blur-[0.5px] -mt-0.5" />
       </motion.div>
 
       {/* Main Sky Lantern released by the couple — enhanced layered glow */}
       <motion.div 
-        style={{ x: mainLanternX, y: mainLanternY, scale: mainLanternScale, opacity: mainLanternOpacity }}
+        style={{ x: mainLanternX, y: mainLanternY, scale: mainLanternScale, opacity: mainLanternOpacity, willChange: "transform, opacity" }}
         className="absolute z-20 w-9 h-14 flex flex-col items-center select-none pointer-events-none left-1/2 -translate-x-1/2 bottom-10"
       >
         <div className="w-8 h-11 bg-amber-500/70 rounded-t-xl shadow-[0_0_24px_#FFA000,0_0_48px_rgba(255,160,0,0.3)] border-t border-amber-300 flex items-center justify-center text-xs text-yellow-100 font-bold">
@@ -847,7 +848,7 @@ function SkyLanternRiseScrollAnimation({ brideName, groomName }: { brideName: st
 
       {/* Balcony / Terrace Railing & Couple */}
       <motion.div 
-        style={{ scale: coupleScale, opacity: coupleOpacity }}
+        style={{ scale: coupleScale, opacity: coupleOpacity, willChange: "transform, opacity" }}
         className="relative z-10 w-full h-full flex flex-col items-center justify-end"
       >
         {/* Couple Silhouette standing on the balcony terrace — with warm backlight glow */}
@@ -1168,7 +1169,7 @@ function VarmalaExchangeScrollAnimation({ brideName, groomName }: { brideName: s
 
         {/* Floating Garland 1 (Bride -> Groom) - Explicitly centered on neck level */}
         <motion.div 
-          style={{ x: garland1X, y: garland1Y, scale: garland1Scale, opacity: garland1Opacity }}
+          style={{ x: garland1X, y: garland1Y, scale: garland1Scale, opacity: garland1Opacity, willChange: "transform, opacity" }}
           className="absolute z-20 w-11 h-13 pointer-events-none left-1/2 -translate-x-1/2 bottom-[85px]"
         >
           <svg viewBox="0 0 40 50" className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.15)]">
@@ -1200,7 +1201,7 @@ function VarmalaExchangeScrollAnimation({ brideName, groomName }: { brideName: s
 
         {/* Floating Garland 2 (Groom -> Bride) - Explicitly centered on neck level */}
         <motion.div 
-          style={{ x: garland2X, y: garland2Y, scale: garland2Scale, opacity: garland2Opacity }}
+          style={{ x: garland2X, y: garland2Y, scale: garland2Scale, opacity: garland2Opacity, willChange: "transform, opacity" }}
           className="absolute z-20 w-11 h-13 pointer-events-none left-1/2 -translate-x-1/2 bottom-[85px]"
         >
           <svg viewBox="0 0 40 50" className="w-full h-full drop-shadow-[0_4px_8px_rgba(0,0,0,0.15)]">
@@ -1293,7 +1294,7 @@ function MarigoldCurtainsDivider() {
           animate={{ rotate: [-5, 5, -5] }}
           transition={{ duration: 2.8 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.25 }}
           className="flex flex-col items-center"
-          style={{ transformOrigin: "top center" }}
+          style={{ transformOrigin: "top center", willChange: "transform" }}
         >
           <div className="w-[1px] h-12 bg-green-700/40" />
           <span className="text-[8px] -mt-1">🧡</span>
@@ -1360,7 +1361,7 @@ function TempleBellsDivider() {
             ease: [0.33, 0, 0.67, 1],
             delay: i * 0.35
           }}
-          style={{ transformOrigin: "top center" }}
+          style={{ transformOrigin: "top center", willChange: "transform" }}
           className="flex flex-col items-center"
         >
           <div className="w-[1.2px] h-8 bg-red-600" />
@@ -1506,6 +1507,7 @@ function PopoutPhotoFrame({ photo, themeType, themeAccent }: { photo: string; th
             scale: photoScale,
             y: photoY,
             boxShadow: photoShadow,
+            willChange: "transform",
           }}
           className="w-[85%] h-[85%] rounded-[24px] overflow-hidden border-4 border-white relative z-30"
         >
