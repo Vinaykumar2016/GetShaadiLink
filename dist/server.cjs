@@ -78025,9 +78025,28 @@ app.get("/api/invitations/:slug", (req, res) => {
   try {
     const rawData = import_fs2.default.readFileSync(filePath, "utf-8");
     const parsed = JSON.parse(rawData);
-    if (req.query.admin !== "true") {
+    const isPaid = !!parsed.razorpayPaymentId || parsed.isDemoMode;
+    const passcode = (req.query.passcode || req.headers["x-passcode"] || "").toString().trim();
+    const isOwner = passcode && parsed.editPassword && passcode === parsed.editPassword.trim();
+    const isAdmin = req.query.admin === "true";
+    if (!isPaid && !isOwner && !isAdmin) {
+      res.json({
+        restricted: true,
+        slug: parsed.slug,
+        bride: parsed.bride,
+        groom: parsed.groom,
+        niceDate: parsed.niceDate,
+        theme: parsed.theme
+      });
+      return;
+    }
+    if (req.query.admin !== "true" && !isOwner) {
       parsed.views = (parsed.views || 0) + 1;
       import_fs2.default.writeFileSync(filePath, JSON.stringify(parsed, null, 2), "utf-8");
+    }
+    if (!isOwner && !isAdmin) {
+      delete parsed.editPassword;
+      delete parsed.ownerEmail;
     }
     res.json(parsed);
   } catch (error) {
@@ -78094,7 +78113,7 @@ app.post("/api/auth/login", (req, res) => {
     res.status(500).json({ error: "Internal server validation failure." });
   }
 });
-app.post("/api/invitations/:slug/update", (req, res) => {
+app.post("/api/invitations/:slug/update", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password, editPassword, ...fields } = req.body;
   const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
@@ -78111,6 +78130,160 @@ app.post("/api/invitations/:slug/update", (req, res) => {
       res.status(401).json({ error: "Invalid passcode. Update unauthorized." });
       return;
     }
+    let parsedAiResult = null;
+    let niceDate = data.niceDate;
+    const wdate = fields.wdate || fields.dateRaw || data.dateRaw;
+    if (wdate) {
+      const parsedDate = new Date(wdate);
+      niceDate = parsedDate.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+    }
+    const bride = fields.bride !== void 0 ? fields.bride : data.bride;
+    const groom = fields.groom !== void 0 ? fields.groom : data.groom;
+    const city = fields.city !== void 0 ? fields.city : data.city;
+    const lang = fields.lang !== void 0 ? fields.lang : data.lang;
+    const storyVal = fields.story || fields.storyText || data.story || data.storyText || "";
+    const e1n = fields.e1n !== void 0 ? fields.e1n : data.events && data.events[0]?.name || "Haldi Ceremony";
+    const e2n = fields.e2n !== void 0 ? fields.e2n : data.events && data.events[1]?.name || "Sangeet Night";
+    const e3n = fields.e3n !== void 0 ? fields.e3n : data.events && data.events[2]?.name || "Wedding Ceremony";
+    const e1t = fields.e1t !== void 0 ? fields.e1t : data.events && data.events[0]?.time || "";
+    const e2t = fields.e2t !== void 0 ? fields.e2t : data.events && data.events[1]?.time || "";
+    const e3t = fields.e3t !== void 0 ? fields.e3t : data.events && data.events[2]?.time || "";
+    if (fields.story !== void 0 || fields.storyText !== void 0 || fields.lang !== void 0 || fields.bride !== void 0 || fields.groom !== void 0 || fields.wdate !== void 0 || fields.city !== void 0) {
+      const langMap = {
+        en: "English",
+        kn: "Kannada",
+        hi: "Hindi",
+        ta: "Tamil",
+        te: "Telugu",
+        ml: "Malayalam"
+      };
+      const targetLangName = langMap[lang] || "English";
+      const seed = Math.floor(Math.random() * 9999);
+      const rawStory = storyVal.trim() || "We met, fell in love, and decided to marry.";
+      const key = process.env.GEMINI_API_KEY;
+      if (key && key !== "MOCK_KEY_FOR_BUILD") {
+        try {
+          const ai = getGeminiClient();
+          const promptText = `Generate custom written components for an Indian wedding invitation.
+Couple: Bride is "${bride}", Groom is "${groom}"
+Wedding Date: ${niceDate}
+Location City: ${city}
+Target Regional Language: ${targetLangName}
+Couple's raw story: "${rawStory}"
+Random seed for design variant: ${seed}
+
+Instructions:
+1. Write storyEnglish: Read the couple's raw story, correct any spelling, grammatical, or phrasing errors, and rewrite it into a beautifully polished, elegant, and romantic story of 3-4 sentences in perfect English. Keep all names, dates, and locations, but make it sound premium and warm.
+2. Write storyRegional: Translate ONLY the polished storyEnglish version you created in Step 1 into the script of the target regional language (${targetLangName}) (e.g. if target is Kannada write in Kannada script, if Hindi write in Devanagari script). Do NOT directly translate the unpolished raw story, and ensure no raw English words or grammatical errors are carried over.
+3. Create tagline: A short romantic heading (8-12 words).
+4. Translate e1n, e2n, e3n into ${targetLangName} script for eventRegional strings (event1Regional, event2Regional, event3Regional).
+5. Create a gorgeous, warm Indian wedding palette for the UI:
+   - primary: deep celebratory hex (e.g., silk magenta #9B1B6A, ruby #BA1A4B, crimson)
+   - secondary: royal gold lustre hex (e.g., #D4A843, #E6C252)
+   - accent: cool jewel tint hex (e.g., #2CB5B0, #14B8A6)
+   - bg: deep cosmic backdrop hex (e.g., #08000F, #0E001A, #120124)
+   - heroEmoji: selection of romantic flower or accessory emoji (e.g., \u{1F338}, \u{1F33A}, \u{1F48D}, \u{1FA94})`;
+          const geminiRes = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: promptText,
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  storyEnglish: { type: Type.STRING },
+                  storyRegional: { type: Type.STRING },
+                  tagline: { type: Type.STRING },
+                  event1Regional: { type: Type.STRING },
+                  event2Regional: { type: Type.STRING },
+                  event3Regional: { type: Type.STRING },
+                  theme: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING },
+                      primary: { type: Type.STRING },
+                      secondary: { type: Type.STRING },
+                      accent: { type: Type.STRING },
+                      bg: { type: Type.STRING },
+                      heroEmoji: { type: Type.STRING }
+                    },
+                    required: ["name", "primary", "secondary", "accent", "bg", "heroEmoji"]
+                  }
+                },
+                required: [
+                  "storyEnglish",
+                  "storyRegional",
+                  "tagline",
+                  "event1Regional",
+                  "event2Regional",
+                  "event3Regional",
+                  "theme"
+                ]
+              }
+            }
+          });
+          const aiOutputText = geminiRes.text;
+          if (aiOutputText) {
+            parsedAiResult = JSON.parse(aiOutputText);
+          }
+        } catch (err) {
+          console.warn("WARNING: Gemini AI generation failed. Falling back to local templates. Error:", err);
+        }
+      }
+      if (!parsedAiResult) {
+        const polishedEnglish = `The journey of ${bride} and ${groom} is a beautiful testament to love and partnership. ` + (rawStory.length > 5 ? rawStory : `We met, fell in love, and decided to share our lives forever.`) + ` Guided by trust and shared dreams, we are taking our next beautiful step together on ${niceDate} in ${city}.`;
+        let polishedRegional = polishedEnglish;
+        let ev1Reg = e1n || "Haldi Ceremony";
+        let ev2Reg = e2n || "Sangeet Night";
+        let ev3Reg = e3n || "Wedding Ceremony";
+        if (lang === "hi") {
+          polishedRegional = `${bride} \u0914\u0930 ${groom} \u0915\u093E \u092F\u0939 \u0938\u092B\u0930 \u092A\u094D\u092F\u093E\u0930, \u0905\u091F\u0942\u091F \u0935\u093F\u0936\u094D\u0935\u093E\u0938 \u0914\u0930 \u0938\u093E\u091D\u0947\u0926\u093E\u0930\u0940 \u0915\u0940 \u090F\u0915 \u0938\u0941\u0902\u0926\u0930 \u0915\u0939\u093E\u0928\u0940 \u0939\u0948\u0964 \u0939\u092E \u092E\u093F\u0932\u0947, \u0939\u092E\u0947\u0902 \u090F\u0915-\u0926\u0942\u0938\u0930\u0947 \u0938\u0947 \u0932\u0917\u093E\u0935 \u0939\u0941\u0906, \u0914\u0930 \u0939\u092E\u0928\u0947 \u0939\u092E\u0947\u0936\u093E \u0915\u0947 \u0932\u093F\u090F \u090F\u0915 \u0939\u094B\u0928\u0947 \u0915\u093E \u092B\u0948\u0938\u0932\u093E \u0915\u093F\u092F\u093E\u0964 \u0905\u092A\u0928\u0947 \u0938\u0941\u0902\u0926\u0930 \u0938\u092A\u0928\u094B\u0902 \u0914\u0930 \u0905\u092A\u0928\u094B\u0902 \u0915\u0947 \u0906\u0936\u0940\u0930\u094D\u0935\u093E\u0926 \u0915\u0947 \u0938\u093E\u0925, \u0939\u092E ${niceDate} \u0915\u094B ${city} \u092E\u0947\u0902 \u0905\u092A\u0928\u0947 \u091C\u0940\u0935\u0928 \u0915\u0947 \u0907\u0938 \u0928\u090F \u0914\u0930 \u092A\u093E\u0935\u0928 \u0938\u092B\u0930 \u0915\u0940 \u0936\u0941\u0930\u0941\u0906\u0924 \u0915\u0930 \u0930\u0939\u0947 \u0939\u0948\u0902\u0964`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "\u0939\u0932\u094D\u0926\u0940 \u0930\u0938\u094D\u092E" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "\u0938\u0902\u0917\u0940\u0924 \u0938\u0902\u0927\u094D\u092F\u093E" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "\u0936\u0941\u092D \u0935\u093F\u0935\u093E\u0939" : e3n;
+        } else if (lang === "kn") {
+          polishedRegional = `${bride} \u0CAE\u0CA4\u0CCD\u0CA4\u0CC1 ${groom} \u0CB0\u0CB5\u0CB0 \u0C88 \u0CAA\u0CAF\u0CA3\u0CB5\u0CC1 \u0CAA\u0CCD\u0CB0\u0CC0\u0CA4\u0CBF, \u0CAA\u0CB0\u0CB8\u0CCD\u0CAA\u0CB0 \u0CA8\u0C82\u0CAC\u0CBF\u0C95\u0CC6 \u0CAE\u0CA4\u0CCD\u0CA4\u0CC1 \u0CB8\u0CC1\u0C82\u0CA6\u0CB0 \u0C92\u0CA1\u0CA8\u0CBE\u0C9F\u0CA6 \u0C95\u0CA5\u0CC6\u0CAF\u0CBE\u0C97\u0CBF\u0CA6\u0CC6. \u0CA8\u0CBE\u0CB5\u0CC1 \u0CAD\u0CC7\u0C9F\u0CBF\u0CAF\u0CBE\u0CA6\u0CC6\u0CB5\u0CC1, \u0CAA\u0CCD\u0CB0\u0CC0\u0CA4\u0CBF\u0CAF\u0CB2\u0CCD\u0CB2\u0CBF \u0CAC\u0CBF\u0CA6\u0CCD\u0CA6\u0CC6\u0CB5\u0CC1 \u0CAE\u0CA4\u0CCD\u0CA4\u0CC1 \u0CA8\u0CAE\u0CCD\u0CAE \u0C9C\u0CC0\u0CB5\u0CA8\u0CB5\u0CA8\u0CCD\u0CA8\u0CC1 \u0C8E\u0C82\u0CA6\u0CC6\u0C82\u0CA6\u0CBF\u0C97\u0CC2 \u0C92\u0C9F\u0CCD\u0C9F\u0CBF\u0C97\u0CC6 \u0CB9\u0C82\u0C9A\u0CBF\u0C95\u0CCA\u0CB3\u0CCD\u0CB3\u0CB2\u0CC1 \u0CA8\u0CBF\u0CB0\u0CCD\u0CA7\u0CB0\u0CBF\u0CB8\u0CBF\u0CA6\u0CC6\u0CB5\u0CC1. \u0CB9\u0CBF\u0CB0\u0CBF\u0CAF\u0CB0 \u0C86\u0CB6\u0CC0\u0CB0\u0CCD\u0CB5\u0CBE\u0CA6 \u0CAE\u0CA4\u0CCD\u0CA4\u0CC1 \u0CB9\u0C82\u0C9A\u0CBF\u0C95\u0CCA\u0C82\u0CA1 \u0C95\u0CA8\u0CB8\u0CC1\u0C97\u0CB3\u0CCA\u0C82\u0CA6\u0CBF\u0C97\u0CC6, \u0CA8\u0CBE\u0CB5\u0CC1 ${niceDate} \u0CB0\u0C82\u0CA6\u0CC1 ${city} \u0CA8\u0CB2\u0CCD\u0CB2\u0CBF \u0CA8\u0CAE\u0CCD\u0CAE \u0C9C\u0CC0\u0CB5\u0CA8\u0CA6 \u0CB9\u0CCA\u0CB8 \u0CB9\u0CC6\u0C9C\u0CCD\u0C9C\u0CC6\u0CAF\u0CA8\u0CCD\u0CA8\u0CC1 \u0C87\u0CA1\u0CC1\u0CA4\u0CCD\u0CA4\u0CBF\u0CA6\u0CCD\u0CA6\u0CC7\u0CB5\u0CC6.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "\u0CB9\u0CB3\u0CA6\u0CBF \u0CB6\u0CBE\u0CB8\u0CCD\u0CA4\u0CCD\u0CB0" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "\u0CB8\u0C82\u0C97\u0CC0\u0CA4 \u0CB8\u0C82\u0C9C\u0CC6" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "\u0CB6\u0CC1\u0CAD \u0CB5\u0CBF\u0CB5\u0CBE\u0CB9" : e3n;
+        } else if (lang === "ta") {
+          polishedRegional = `${bride} \u0BAE\u0BB1\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD ${groom} \u0B87\u0BA9\u0BCD \u0B87\u0BA8\u0BCD\u0BA4 \u0BAA\u0BAF\u0BA3\u0BAE\u0BCD \u0B95\u0BBE\u0BA4\u0BB2\u0BCD, \u0BAA\u0BB0\u0BB8\u0BCD\u0BAA\u0BB0 \u0BA8\u0BAE\u0BCD\u0BAA\u0BBF\u0B95\u0BCD\u0B95\u0BC8 \u0BAE\u0BB1\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD \u0BA4\u0BC1\u0BA3\u0BC8\u0BAF\u0BBF\u0BA9\u0BCD \u0B85\u0BB4\u0B95\u0BBE\u0BA9 \u0B95\u0BA4\u0BC8\u0BAF\u0BBE\u0B95\u0BC1\u0BAE\u0BCD. \u0BA8\u0BBE\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0B9A\u0BA8\u0BCD\u0BA4\u0BBF\u0BA4\u0BCD\u0BA4\u0BCB\u0BAE\u0BCD, \u0B95\u0BBE\u0BA4\u0BB2\u0BBF\u0BA4\u0BCD\u0BA4\u0BCB\u0BAE\u0BCD, \u0B8E\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0BB5\u0BBE\u0BB4\u0BCD\u0B95\u0BCD\u0B95\u0BC8\u0BAF\u0BC8 \u0B8E\u0BA9\u0BCD\u0BB1\u0BC6\u0BA9\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD \u0BAA\u0B95\u0BBF\u0BB0\u0BCD\u0BA8\u0BCD\u0BA4\u0BC1 \u0B95\u0BCA\u0BB3\u0BCD\u0BB3 \u0BAE\u0BC1\u0B9F\u0BBF\u0BB5\u0BC1 \u0B9A\u0BC6\u0BAF\u0BCD\u0BA4\u0BCB\u0BAE\u0BCD. \u0B85\u0BA9\u0BCD\u0BAA\u0BBE\u0BA9\u0BB5\u0BB0\u0BCD\u0B95\u0BB3\u0BBF\u0BA9\u0BCD \u0B86\u0B9A\u0BBF \u0BAE\u0BB1\u0BCD\u0BB1\u0BC1\u0BAE\u0BCD \u0BAA\u0B95\u0BBF\u0BB0\u0BAA\u0BCD\u0BAA\u0B9F\u0BCD\u0B9F \u0B95\u0BA9\u0BB5\u0BC1\u0B95\u0BB3\u0BC1\u0B9F\u0BA9\u0BCD, \u0BA8\u0BBE\u0BAE\u0BCD ${niceDate} \u0B85\u0BA9\u0BCD\u0BB1\u0BC1 ${city} \u0B87\u0BB2\u0BCD \u0B8E\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0BAA\u0BC1\u0BA4\u0BBF\u0BAF \u0BB5\u0BBE\u0BB4\u0BCD\u0B95\u0BCD\u0B95\u0BC8\u0BAF\u0BC8\u0BA4\u0BCD \u0BA4\u0BCA\u0B9F\u0B99\u0BCD\u0B95\u0BC1\u0B95\u0BBF\u0BB1\u0BCB\u0BAE\u0BCD.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "\u0BA8\u0BB2\u0B99\u0BCD\u0B95\u0BC1 / \u0BAE\u0B9E\u0BCD\u0B9A\u0BB3\u0BCD \u0BA8\u0BC0\u0BB0\u0BBE\u0B9F\u0BCD\u0B9F\u0BC1" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "\u0B9A\u0B99\u0BCD\u0B95\u0BC0\u0BA4\u0BCD \u0BB5\u0BBF\u0BB4\u0BBE" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "\u0BA4\u0BBF\u0BB0\u0BC1\u0BAE\u0BA3\u0BAE\u0BCD / \u0B9A\u0BC1\u0BAA \u0BAE\u0BC1\u0B95\u0BC2\u0BB0\u0BCD\u0BA4\u0BCD\u0BA4\u0BAE\u0BCD" : e3n;
+        } else if (lang === "te") {
+          polishedRegional = `${bride} \u0C2E\u0C30\u0C3F\u0C2F\u0C41 ${groom} \u0C32 \u0C08 \u0C2A\u0C4D\u0C30\u0C2F\u0C3E\u0C23\u0C02 \u0C2A\u0C4D\u0C30\u0C47\u0C2E, \u0C28\u0C2E\u0C4D\u0C2E\u0C15\u0C02 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C2C\u0C02\u0C27\u0C3E\u0C28\u0C3F\u0C15\u0C3F \u0C12\u0C15 \u0C05\u0C02\u0C26\u0C2E\u0C48\u0C28 \u0C28\u0C3F\u0C26\u0C30\u0C4D\u0C36\u0C28\u0C02. \u0C2E\u0C47\u0C2E\u0C41 \u0C15\u0C32\u0C41\u0C38\u0C41\u0C15\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C2E\u0C41, \u0C2A\u0C4D\u0C30\u0C47\u0C2E\u0C32\u0C4B \u0C2A\u0C21\u0C4D\u0C21\u0C3E\u0C2E\u0C41 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C2E\u0C3E \u0C1C\u0C40\u0C35\u0C3F\u0C24\u0C3E\u0C32\u0C28\u0C41 \u0C0E\u0C2A\u0C4D\u0C2A\u0C1F\u0C3F\u0C15\u0C40 \u0C2A\u0C02\u0C1A\u0C41\u0C15\u0C4B\u0C35\u0C3E\u0C32\u0C28\u0C3F \u0C28\u0C3F\u0C30\u0C4D\u0C23\u0C2F\u0C3F\u0C02\u0C1A\u0C41\u0C15\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C2E\u0C41. \u0C2A\u0C46\u0C26\u0C4D\u0C26\u0C32 \u0C06\u0C36\u0C40\u0C38\u0C4D\u0C38\u0C41\u0C32\u0C41 \u0C2E\u0C30\u0C3F\u0C2F\u0C41 \u0C15\u0C32\u0C32\u0C24\u0C4B, \u0C2E\u0C47\u0C2E\u0C41 ${niceDate} \u0C28 ${city} \u0C32\u0C4B \u0C2E\u0C3E \u0C1C\u0C40\u0C35\u0C3F\u0C24 \u0C15\u0C4A\u0C24\u0C4D\u0C24 \u0C05\u0C27\u0C4D\u0C2F\u0C3E\u0C2F\u0C3E\u0C28\u0C4D\u0C28\u0C3F \u0C2A\u0C4D\u0C30\u0C3E\u0C30\u0C02\u0C2D\u0C3F\u0C38\u0C4D\u0C24\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C2E\u0C41.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "\u0C39\u0C32\u0C4D\u0C26\u0C40 \u0C35\u0C47\u0C21\u0C41\u0C15" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "\u0C38\u0C02\u0C17\u0C40\u0C24\u0C4D \u0C38\u0C02\u0C27\u0C4D\u0C2F\u0C3E" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "\u0C36\u0C41\u0C2D \u0C15\u0C33\u0C4D\u0C2F\u0C3E\u0C23\u0C02" : e3n;
+        } else if (lang === "ml") {
+          polishedRegional = `${bride} \u0D2F\u0D41\u0D1F\u0D46\u0D2F\u0D41\u0D02 ${groom} \u0D28\u0D4D\u0D31\u0D46\u0D2F\u0D41\u0D02 \u0D08 \u0D2F\u0D3E\u0D24\u0D4D\u0D30 \u0D38\u0D4D\u0D28\u0D47\u0D39\u0D24\u0D4D\u0D24\u0D3F\u0D28\u0D4D\u0D31\u0D46\u0D2F\u0D41\u0D02 \u0D2A\u0D30\u0D38\u0D4D\u0D2A\u0D30 \u0D35\u0D3F\u0D36\u0D4D\u0D35\u0D3E\u0D38\u0D24\u0D4D\u0D24\u0D3F\u0D28\u0D4D\u0D31\u0D46\u0D2F\u0D41\u0D02 \u0D2E\u0D28\u0D4B\u0D39\u0D30\u0D2E\u0D3E\u0D2F \u0D15\u0D25\u0D2F\u0D3E\u0D23\u0D4D. \u0D1E\u0D19\u0D4D\u0D19\u0D7E \u0D15\u0D23\u0D4D\u0D1F\u0D41\u0D2E\u0D41\u0D1F\u0D4D\u0D1F\u0D3F, \u0D2A\u0D4D\u0D30\u0D23\u0D2F\u0D24\u0D4D\u0D24\u0D3F\u0D32\u0D3E\u0D2F\u0D3F, \u0D1E\u0D19\u0D4D\u0D19\u0D33\u0D41\u0D1F\u0D46 \u0D1C\u0D40\u0D35\u0D3F\u0D24\u0D02 \u0D0E\u0D28\u0D4D\u0D28\u0D46\u0D28\u0D4D\u0D28\u0D47\u0D15\u0D4D\u0D15\u0D41\u0D2E\u0D3E\u0D2F\u0D3F \u0D2A\u0D19\u0D4D\u0D15\u0D3F\u0D1F\u0D3E\u0D7B \u0D24\u0D40\u0D30\u0D41\u0D2E\u0D3E\u0D28\u0D3F\u0D1A\u0D4D\u0D1A\u0D41. \u0D2A\u0D4D\u0D30\u0D3F\u0D2F\u0D2A\u0D4D\u0D2A\u0D46\u0D1F\u0D4D\u0D1F\u0D35\u0D30\u0D41\u0D1F\u0D46 \u0D05\u0D28\u0D41\u0D17\u0D4D\u0D30\u0D39\u0D24\u0D4D\u0D24\u0D4B\u0D1F\u0D46\u0D2F\u0D41\u0D02 \u0D38\u0D4D\u0D35\u0D2A\u0D4D\u0D28\u0D19\u0D4D\u0D19\u0D33\u0D4B\u0D1F\u0D46\u0D2F\u0D41\u0D02, \u0D1E\u0D19\u0D4D\u0D19\u0D7E ${niceDate}-\u0D7D ${city}-\u0D7D \u0D1E\u0D19\u0D4D\u0D19\u0D33\u0D41\u0D1F\u0D46 \u0D2A\u0D41\u0D24\u0D3F\u0D2F \u0D1C\u0D40\u0D35\u0D3F\u0D24\u0D02 \u0D06\u0D30\u0D02\u0D2D\u0D3F\u0D15\u0D4D\u0D15\u0D41\u0D28\u0D4D\u0D28\u0D41.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "\u0D39\u0D7D\u0D26\u0D3F \u0D1A\u0D1F\u0D19\u0D4D\u0D19\u0D4D" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "\u0D38\u0D02\u0D17\u0D40\u0D24\u0D4D \u0D38\u0D28\u0D4D\u0D27\u0D4D\u0D2F" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "\u0D2E\u0D02\u0D17\u0D32\u0D4D\u0D2F \u0D1A\u0D1F\u0D19\u0D4D\u0D19\u0D4D" : e3n;
+        }
+        parsedAiResult = {
+          storyEnglish: polishedEnglish,
+          storyRegional: polishedRegional,
+          tagline: `${bride} & ${groom}'s Sacred Wedding Celebration`,
+          event1Regional: ev1Reg,
+          event2Regional: ev2Reg,
+          event3Regional: ev3Reg,
+          theme: data.theme || {
+            name: "Standard Saffron",
+            primary: "#8A3A1A",
+            secondary: "#C5A880",
+            accent: "#E6C252",
+            bg: "#FAF6F0",
+            heroEmoji: "\u{1F338}"
+          }
+        };
+      }
+    }
     const updatedRecord = {
       ...data,
       ...fields,
@@ -78121,6 +78294,26 @@ app.post("/api/invitations/:slug/update", (req, res) => {
       views: data.views || 0,
       guestbookNotes: fields.guestbookNotes !== void 0 ? fields.guestbookNotes : data.guestbookNotes || []
     };
+    if (parsedAiResult) {
+      updatedRecord.storyEnglish = parsedAiResult.storyEnglish;
+      updatedRecord.storyRegional = parsedAiResult.storyRegional;
+      updatedRecord.tagline = parsedAiResult.tagline;
+      updatedRecord.niceDate = niceDate;
+      updatedRecord.langNative = {
+        en: "English",
+        kn: "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1",
+        hi: "\u0939\u093F\u0902\u0926\u0940",
+        ta: "\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD",
+        te: "\u0CA4\u0CC6\u0CB2\u0CC1\u0C97\u0CC1",
+        ml: "\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02"
+      }[lang] || "English";
+      updatedRecord.events = [
+        { name: e1n, regional: parsedAiResult.event1Regional, time: e1t, emoji: "\u{1F49B}" },
+        { name: e2n, regional: parsedAiResult.event2Regional, time: e2t, emoji: "\u{1F483}" },
+        { name: e3n, regional: parsedAiResult.event3Regional, time: e3t, emoji: "\u{1F338}" }
+      ];
+      updatedRecord.theme = data.theme || parsedAiResult.theme;
+    }
     import_fs2.default.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
     res.json({ success: true, slug });
   } catch (err) {

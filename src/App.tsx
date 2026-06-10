@@ -5,6 +5,7 @@ import InvitationView from "./components/InvitationView";
 import ThemeShowroom from "./components/ThemeShowroom";
 import UserDashboard from "./components/UserDashboard";
 import AdminDashboard from "./components/AdminDashboard";
+import RestrictedPaywall from "./components/RestrictedPaywall";
 import { playClickSound } from "./utils/soundUtils";
 import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "motion/react";
@@ -464,7 +465,8 @@ export default function App() {
 
     const fetchInvitation = async () => {
       try {
-        const res = await fetch(`/api/invitations/${slug}`);
+        const passcode = localStorage.getItem("shaadi_auth_" + slug) || "";
+        const res = await fetch(`/api/invitations/${slug}?passcode=${encodeURIComponent(passcode)}`);
         if (res.ok) {
           const parsed = await res.json();
           setInvitationData(parsed);
@@ -529,6 +531,12 @@ export default function App() {
         const parsed = await res.json();
         if (!res.ok) throw new Error(parsed.error || "Authentication failed.");
 
+        try {
+          localStorage.setItem("shaadi_auth_" + parsed.data.slug, loginPassword.trim());
+        } catch (e) {
+          console.warn("Failed to save passcode to localStorage:", e);
+        }
+
         setLoggedInCardData(parsed.data);
         setLoginOpen(false);
         setSuccessSlug(null);
@@ -571,6 +579,11 @@ export default function App() {
       if (res.ok) {
         const parsed = await res.json();
         if (parsed.editPassword && loginPassword && parsed.editPassword.trim() === loginPassword.trim()) {
+          try {
+            localStorage.setItem("shaadi_auth_" + parsed.slug, loginPassword.trim());
+          } catch (e) {
+            console.warn("Failed to save passcode to localStorage:", e);
+          }
           setLoggedInCardData(parsed);
         // Clear password from state after a successful login to avoid reuse issues
         setLoginPassword('');
@@ -706,6 +719,21 @@ export default function App() {
 
   // Draw full dynamic Invitation View if slug successfully checked and loaded
   if (slug && invitationData) {
+    if ((invitationData as any).restricted) {
+      return (
+        <RestrictedPaywall
+          data={invitationData as any}
+          onAccessGranted={(freshData) => {
+            setInvitationData(freshData);
+          }}
+          onBackHome={() => {
+            setSlug(null);
+            setInvitationData(null);
+            window.history.pushState({}, "", "/");
+          }}
+        />
+      );
+    }
     return (
       <InvitationView 
         data={invitationData} 

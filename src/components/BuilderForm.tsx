@@ -310,6 +310,12 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         throw new Error(data.error || "Failed to process wedding invitation.");
       }
 
+      try {
+        localStorage.setItem("shaadi_auth_" + payload.slug, payload.editPassword);
+      } catch (e) {
+        console.warn("Failed to save passcode to localStorage:", e);
+      }
+
       onSuccess(payload.slug);
     };
 

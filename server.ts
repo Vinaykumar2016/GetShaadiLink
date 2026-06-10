@@ -238,11 +238,38 @@ app.get("/api/invitations/:slug", (req, res) => {
   try {
     const rawData = fs.readFileSync(filePath, "utf-8");
     const parsed = JSON.parse(rawData);
+
+    // Determine payment status
+    const isPaid = !!parsed.razorpayPaymentId || parsed.isDemoMode;
+
+    // Retrieve passcode from query, headers, or body
+    const passcode = (req.query.passcode || req.headers["x-passcode"] || "").toString().trim();
+    const isOwner = passcode && parsed.editPassword && passcode === parsed.editPassword.trim();
+    const isAdmin = req.query.admin === "true";
+
+    // If unpaid and not owner/admin, return restricted info
+    if (!isPaid && !isOwner && !isAdmin) {
+      res.json({
+        restricted: true,
+        slug: parsed.slug,
+        bride: parsed.bride,
+        groom: parsed.groom,
+        niceDate: parsed.niceDate,
+        theme: parsed.theme,
+      });
+      return;
+    }
     
-    // Increment view count unless requested by dashboard/admin preview
-    if (req.query.admin !== "true") {
+    // Increment view count unless requested by dashboard/admin/owner preview
+    if (req.query.admin !== "true" && !isOwner) {
       parsed.views = (parsed.views || 0) + 1;
       fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2), "utf-8");
+    }
+
+    // Strip passcode and email from public response for security
+    if (!isOwner && !isAdmin) {
+      delete parsed.editPassword;
+      delete parsed.ownerEmail;
     }
 
     res.json(parsed);
@@ -330,7 +357,7 @@ app.post("/api/auth/login", (req, res) => {
 });
 
 // API: Direct update for an x-invitation after creations
-app.post("/api/invitations/:slug/update", (req, res) => {
+app.post("/api/invitations/:slug/update", async (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password, editPassword, ...fields } = req.body;
   const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
@@ -354,6 +381,192 @@ app.post("/api/invitations/:slug/update", (req, res) => {
       return;
     }
 
+    let parsedAiResult = null;
+    let niceDate = data.niceDate;
+
+    const wdate = fields.wdate || fields.dateRaw || data.dateRaw;
+    if (wdate) {
+      const parsedDate = new Date(wdate);
+      niceDate = parsedDate.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+
+    const bride = fields.bride !== undefined ? fields.bride : data.bride;
+    const groom = fields.groom !== undefined ? fields.groom : data.groom;
+    const city = fields.city !== undefined ? fields.city : data.city;
+    const lang = fields.lang !== undefined ? fields.lang : data.lang;
+    const storyVal = fields.story || fields.storyText || data.story || data.storyText || "";
+    const e1n = fields.e1n !== undefined ? fields.e1n : (data.events && data.events[0]?.name) || "Haldi Ceremony";
+    const e2n = fields.e2n !== undefined ? fields.e2n : (data.events && data.events[1]?.name) || "Sangeet Night";
+    const e3n = fields.e3n !== undefined ? fields.e3n : (data.events && data.events[2]?.name) || "Wedding Ceremony";
+    const e1t = fields.e1t !== undefined ? fields.e1t : (data.events && data.events[0]?.time) || "";
+    const e2t = fields.e2t !== undefined ? fields.e2t : (data.events && data.events[1]?.time) || "";
+    const e3t = fields.e3t !== undefined ? fields.e3t : (data.events && data.events[2]?.time) || "";
+
+    if (
+      fields.story !== undefined || 
+      fields.storyText !== undefined || 
+      fields.lang !== undefined || 
+      fields.bride !== undefined || 
+      fields.groom !== undefined || 
+      fields.wdate !== undefined || 
+      fields.city !== undefined
+    ) {
+      const langMap: Record<string, string> = {
+        en: "English",
+        kn: "Kannada",
+        hi: "Hindi",
+        ta: "Tamil",
+        te: "Telugu",
+        ml: "Malayalam",
+      };
+
+      const targetLangName = langMap[lang] || "English";
+      const seed = Math.floor(Math.random() * 9999);
+      const rawStory = storyVal.trim() || "We met, fell in love, and decided to marry.";
+      const key = process.env.GEMINI_API_KEY;
+
+      if (key && key !== "MOCK_KEY_FOR_BUILD") {
+        try {
+          const ai = getGeminiClient();
+          const promptText = `Generate custom written components for an Indian wedding invitation.
+Couple: Bride is "${bride}", Groom is "${groom}"
+Wedding Date: ${niceDate}
+Location City: ${city}
+Target Regional Language: ${targetLangName}
+Couple's raw story: "${rawStory}"
+Random seed for design variant: ${seed}
+
+Instructions:
+1. Write storyEnglish: Read the couple's raw story, correct any spelling, grammatical, or phrasing errors, and rewrite it into a beautifully polished, elegant, and romantic story of 3-4 sentences in perfect English. Keep all names, dates, and locations, but make it sound premium and warm.
+2. Write storyRegional: Translate ONLY the polished storyEnglish version you created in Step 1 into the script of the target regional language (${targetLangName}) (e.g. if target is Kannada write in Kannada script, if Hindi write in Devanagari script). Do NOT directly translate the unpolished raw story, and ensure no raw English words or grammatical errors are carried over.
+3. Create tagline: A short romantic heading (8-12 words).
+4. Translate e1n, e2n, e3n into ${targetLangName} script for eventRegional strings (event1Regional, event2Regional, event3Regional).
+5. Create a gorgeous, warm Indian wedding palette for the UI:
+   - primary: deep celebratory hex (e.g., silk magenta #9B1B6A, ruby #BA1A4B, crimson)
+   - secondary: royal gold lustre hex (e.g., #D4A843, #E6C252)
+   - accent: cool jewel tint hex (e.g., #2CB5B0, #14B8A6)
+   - bg: deep cosmic backdrop hex (e.g., #08000F, #0E001A, #120124)
+   - heroEmoji: selection of romantic flower or accessory emoji (e.g., 🌸, 🌺, 💍, 🪔)`;
+
+          const geminiRes = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: promptText,
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  storyEnglish: { type: Type.STRING },
+                  storyRegional: { type: Type.STRING },
+                  tagline: { type: Type.STRING },
+                  event1Regional: { type: Type.STRING },
+                  event2Regional: { type: Type.STRING },
+                  event3Regional: { type: Type.STRING },
+                  theme: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING },
+                      primary: { type: Type.STRING },
+                      secondary: { type: Type.STRING },
+                      accent: { type: Type.STRING },
+                      bg: { type: Type.STRING },
+                      heroEmoji: { type: Type.STRING },
+                    },
+                    required: ["name", "primary", "secondary", "accent", "bg", "heroEmoji"],
+                  },
+                },
+                required: [
+                  "storyEnglish",
+                  "storyRegional",
+                  "tagline",
+                  "event1Regional",
+                  "event2Regional",
+                  "event3Regional",
+                  "theme",
+                ],
+              },
+            },
+          });
+
+          const aiOutputText = geminiRes.text;
+          if (aiOutputText) {
+            parsedAiResult = JSON.parse(aiOutputText);
+          }
+        } catch (err) {
+          console.warn("WARNING: Gemini AI generation failed. Falling back to local templates. Error:", err);
+        }
+      }
+
+      if (!parsedAiResult) {
+        const polishedEnglish = `The journey of ${bride} and ${groom} is a beautiful testament to love and partnership. ` +
+          (rawStory.length > 5 ? rawStory : `We met, fell in love, and decided to share our lives forever.`) +
+          ` Guided by trust and shared dreams, we are taking our next beautiful step together on ${niceDate} in ${city}.`;
+
+        let polishedRegional = polishedEnglish;
+        let ev1Reg = e1n || "Haldi Ceremony";
+        let ev2Reg = e2n || "Sangeet Night";
+        let ev3Reg = e3n || "Wedding Ceremony";
+
+        if (lang === "hi") {
+          polishedRegional = `${bride} और ${groom} का यह सफर प्यार, अटूट विश्वास और साझेदारी की एक सुंदर कहानी है। ` +
+            `हम मिले, हमें एक-दूसरे से लगाव हुआ, और हमने हमेशा के लिए एक होने का फैसला किया। ` +
+            `अपने सुंदर सपनों और अपनों के आशीर्वाद के साथ, हम ${niceDate} को ${city} में अपने जीवन के इस नए और पावन सफर की शुरुआत कर रहे हैं।`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "हल्दी रस्म" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "संगीत संध्या" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "शुभ विवाह" : e3n;
+        } else if (lang === "kn") {
+          polishedRegional = `${bride} ಮತ್ತು ${groom} ರವರ ಈ ಪಯಣವು ಪ್ರೀತಿ, ಪರಸ್ಪರ ನಂಬಿಕೆ ಮತ್ತು ಸುಂದರ ಒಡನಾಟದ ಕಥೆಯಾಗಿದೆ. ` +
+            `ನಾವು ಭೇಟಿಯಾದೆವು, ಪ್ರೀತಿಯಲ್ಲಿ ಬಿದ್ದೆವು ಮತ್ತು ನಮ್ಮ ಜೀವನವನ್ನು ಎಂದೆಂದಿಗೂ ಒಟ್ಟಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ನಿರ್ಧರಿಸಿದೆವು. ` +
+            `ಹಿರಿಯರ ಆಶೀರ್ವಾದ ಮತ್ತು ಹಂಚಿಕೊಂಡ ಕನಸುಗಳೊಂದಿಗೆ, ನಾವು ${niceDate} ರಂದು ${city} ನಲ್ಲಿ ನಮ್ಮ ಜೀವನದ ಹೊಸ ಹೆಜ್ಜೆಯನ್ನು ಇಡುತ್ತಿದ್ದೇವೆ.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "ಹಳದಿ ಶಾಸ್ತ್ರ" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "ಸಂಗೀತ ಸಂಜೆ" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "ಶುಭ ವಿವಾಹ" : e3n;
+        } else if (lang === "ta") {
+          polishedRegional = `${bride} மற்றும் ${groom} இன் இந்த பயணம் காதல், பரஸ்பர நம்பிக்கை மற்றும் துணையின் அழகான கதையாகும். ` +
+            `நாங்கள் சந்தித்தோம், காதலித்தோம், எங்கள் வாழ்க்கையை என்றென்றும் பகிர்ந்து கொள்ள முடிவு செய்தோம். ` +
+            `அன்பானவர்களின் ஆசி மற்றும் பகிரப்பட்ட கனவுகளுடன், நாம் ${niceDate} அன்று ${city} இல் எங்கள் புதிய வாழ்க்கையைத் தொடங்குகிறோம்.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "நலங்கு / மஞ்சள் நீராட்டு" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "சங்கீத் விழா" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "திருமணம் / சுப முகூர்த்தம்" : e3n;
+        } else if (lang === "te") {
+          polishedRegional = `${bride} మరియు ${groom} ల ఈ ప్రయాణం ప్రేమ, నమ్మకం మరియు బంధానికి ఒక అందమైన నిదర్శనం. ` +
+            `మేము కలుసుకున్నాము, ప్రేమలో పడ్డాము మరియు మా జీవితాలను ఎప్పటికీ పంచుకోవాలని నిర్ణయించుకున్నాము. ` +
+            `పెద్దల ఆశీస్సులు మరియు కలలతో, మేము ${niceDate} న ${city} లో మా జీవిత కొత్త అధ్యాయాన్ని ప్రారంభిస్తున్నాము.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "హల్దీ వేడుక" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "సంగీత్ సంధ్యా" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "శుభ కళ్యాణం" : e3n;
+        } else if (lang === "ml") {
+          polishedRegional = `${bride} യുടെയും ${groom} ന്റെയും ഈ യാത്ര സ്നേഹത്തിന്റെയും പരസ്പര വിശ്വാസത്തിന്റെയും മനോഹരമായ കഥയാണ്. ` +
+            `ഞങ്ങൾ കണ്ടുമുട്ടി, പ്രണയത്തിലായി, ഞങ്ങളുടെ ജീവിതം എന്നെന്നേക്കുമായി പങ്കിടാൻ തീരുമാനിച്ചു. ` +
+            `പ്രിയപ്പെട്ടവരുടെ അനുഗ്രഹത്തോടെയും സ്വപ്നങ്ങളോടെയും, ഞങ്ങൾ ${niceDate}-ൽ ${city}-ൽ ഞങ്ങളുടെ പുതിയ ജീവിതം ആരംഭിക്കുന്നു.`;
+          ev1Reg = e1n === "Haldi Ceremony" ? "ഹൽദി ചടങ്ങ്" : e1n;
+          ev2Reg = e2n === "Sangeet Night" ? "സംഗീത് സന്ധ്യ" : e2n;
+          ev3Reg = e3n === "Wedding Ceremony" ? "മംഗല്യ ചടങ്ങ്" : e3n;
+        }
+
+        parsedAiResult = {
+          storyEnglish: polishedEnglish,
+          storyRegional: polishedRegional,
+          tagline: `${bride} & ${groom}'s Sacred Wedding Celebration`,
+          event1Regional: ev1Reg,
+          event2Regional: ev2Reg,
+          event3Regional: ev3Reg,
+          theme: data.theme || {
+            name: "Standard Saffron",
+            primary: "#8A3A1A",
+            secondary: "#C5A880",
+            accent: "#E6C252",
+            bg: "#FAF6F0",
+            heroEmoji: "🌸",
+          },
+        };
+      }
+    }
+
     const updatedRecord = {
       ...data,
       ...fields,
@@ -364,6 +577,27 @@ app.post("/api/invitations/:slug/update", (req, res) => {
       views: data.views || 0,
       guestbookNotes: fields.guestbookNotes !== undefined ? fields.guestbookNotes : (data.guestbookNotes || []),
     };
+
+    if (parsedAiResult) {
+      updatedRecord.storyEnglish = parsedAiResult.storyEnglish;
+      updatedRecord.storyRegional = parsedAiResult.storyRegional;
+      updatedRecord.tagline = parsedAiResult.tagline;
+      updatedRecord.niceDate = niceDate;
+      updatedRecord.langNative = {
+        en: "English",
+        kn: "ಕನ್ನಡ",
+        hi: "हिंदी",
+        ta: "தமிழ்",
+        te: "ತೆಲುಗು",
+        ml: "മലയാളം",
+      }[lang] || "English";
+      updatedRecord.events = [
+        { name: e1n, regional: parsedAiResult.event1Regional, time: e1t, emoji: "💛" },
+        { name: e2n, regional: parsedAiResult.event2Regional, time: e2t, emoji: "💃" },
+        { name: e3n, regional: parsedAiResult.event3Regional, time: e3t, emoji: "🌸" },
+      ];
+      updatedRecord.theme = data.theme || parsedAiResult.theme;
+    }
 
     fs.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
     res.json({ success: true, slug });
