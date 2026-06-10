@@ -348,7 +348,7 @@ function BalconyScrollAnimation({ brideName, groomName }: { brideName: string; g
 
         {/* Bride Silhouette */}
         <motion.div
-          style={{ x: brideX, y: brideY }}
+          style={{ x: brideX, y: brideY, willChange: "transform" }}
           className="absolute bottom-0 z-10 w-16 h-28 flex flex-col items-center"
         >
           <DetailedBrideSilhouette className="text-[#8A3A1A]" />
@@ -357,7 +357,7 @@ function BalconyScrollAnimation({ brideName, groomName }: { brideName: string; g
 
         {/* Groom Silhouette */}
         <motion.div
-          style={{ x: groomX, y: groomY, scaleX: -1 }}
+          style={{ x: groomX, y: groomY, scaleX: -1, willChange: "transform" }}
           className="absolute bottom-0 z-10 w-16 h-28 flex flex-col items-center"
         >
           <DetailedGroomSilhouette className="text-[#5D4037]" />
@@ -587,7 +587,7 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
 
         {/* Groom (Walking in from left to center-left) */}
         <motion.div 
-          style={{ x: groomX, y: groomY }} 
+          style={{ x: groomX, y: groomY, willChange: "transform" }} 
           className="absolute bottom-0 left-1/2 -translate-x-1/2 z-15 w-16 h-28 flex flex-col items-center justify-end pb-1"
         >
           <DetailedGroomSilhouette className="text-[#5D4037]" />
@@ -596,7 +596,7 @@ function PalaceGateScrollAnimation({ brideName, groomName }: { brideName: string
 
         {/* Bride (Walking in from right to center-right) */}
         <motion.div 
-          style={{ x: brideX, y: brideY }} 
+          style={{ x: brideX, y: brideY, willChange: "transform" }} 
           className="absolute bottom-0 left-1/2 -translate-x-1/2 z-15 w-16 h-28 flex flex-col items-center justify-end pb-1"
         >
           <DetailedBrideSilhouette className="text-rose-700" />
@@ -712,7 +712,7 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
 
         {/* Bride Silhouette — walks from left */}
         <motion.div
-          style={{ x: brideX, y: brideY }}
+          style={{ x: brideX, y: brideY, willChange: "transform" }}
           className="absolute bottom-0 z-10 w-16 h-28 flex flex-col items-center"
         >
           <DetailedBrideSilhouette className="text-rose-800" />
@@ -723,7 +723,7 @@ function LotusBlossomScrollAnimation({ brideName, groomName }: { brideName: stri
 
         {/* Groom Silhouette — walks from right */}
         <motion.div
-          style={{ x: groomX, y: groomY, scaleX: -1 }}
+          style={{ x: groomX, y: groomY, scaleX: -1, willChange: "transform" }}
           className="absolute bottom-0 z-10 w-16 h-28 flex flex-col items-center"
         >
           <DetailedGroomSilhouette className="text-[#5D4037]" />
@@ -852,8 +852,8 @@ function SkyLanternRiseScrollAnimation({ brideName, groomName }: { brideName: st
       >
         {/* Couple Silhouette standing on the balcony terrace — with warm backlight glow */}
         <div className="flex gap-10 items-end relative h-22 w-36 overflow-visible mb-[-2px]">
-          {/* Warm glow behind the couple from lantern light */}
-          <div className="absolute inset-0 -inset-x-4 top-2 bg-amber-400/8 rounded-full blur-xl pointer-events-none" />
+          {/* Warm glow behind the couple from lantern light - optimized to use radial gradient instead of filter blur */}
+          <div className="absolute inset-0 -inset-x-4 top-2 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 70%)" }} />
           <div className="w-12 h-20">
             <DetailedBrideSilhouette className="text-amber-250/90" />
           </div>
@@ -909,8 +909,8 @@ function GathbandhanKnotScrollAnimation({ brideName, groomName }: { brideName: s
       </div>
 
       <div className="relative w-72 h-44 mt-6 flex items-end justify-center overflow-visible">
-        {/* Soft glowing sun aura behind the knot */}
-        <div className="absolute w-28 h-28 rounded-full bg-red-100/30 filter blur-xl left-1/2 -translate-x-1/2 bottom-8 z-0 pointer-events-none" />
+        {/* Soft glowing sun aura behind the knot - optimized to use radial gradient instead of filter blur */}
+        <div className="absolute w-28 h-28 rounded-full left-1/2 -translate-x-1/2 bottom-8 z-0 pointer-events-none" style={{ background: "radial-gradient(circle, rgba(239,68,68,0.08) 0%, transparent 70%)" }} />
 
         {/* Bride (Left) */}
         <div className="absolute left-4 bottom-0 z-10 w-16 h-28 flex flex-col items-center justify-end pb-1">
@@ -1235,7 +1235,8 @@ function VarmalaExchangeScrollAnimation({ brideName, groomName }: { brideName: s
             x: brideCloseX, 
             y: brideY, 
             rotate: brideRotate,
-            transformOrigin: "bottom center"
+            transformOrigin: "bottom center",
+            willChange: "transform, opacity"
           }} 
           className="absolute left-10 z-10 w-16 h-28 flex flex-col items-center justify-end"
         >
@@ -1251,7 +1252,8 @@ function VarmalaExchangeScrollAnimation({ brideName, groomName }: { brideName: s
             y: groomY, 
             rotate: groomRotate,
             scaleX: -1,
-            transformOrigin: "bottom center"
+            transformOrigin: "bottom center",
+            willChange: "transform, opacity"
           }} 
           className="absolute right-10 z-10 w-16 h-28 flex flex-col items-center justify-end"
         >
@@ -1800,6 +1802,7 @@ export default function InvitationView({
 
   // Canvas Petals shower logic
   useEffect(() => {
+    if (!envelopeFinished) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -1890,10 +1893,13 @@ export default function InvitationView({
           ctx.fill();
         } else if (themeType === "diya") {
           // Draw a small sky lantern shape (rounded rectangle with a burning glow at the base)
-          // Note: shadowBlur kept low (4) for mobile GPU performance
+          // Draw glow behind the lantern using a semi-transparent orange circle
+          ctx.fillStyle = "rgba(249, 115, 22, 0.2)";
+          ctx.beginPath();
+          ctx.arc(0, 0, this.size * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+
           ctx.fillStyle = this.color;
-          ctx.shadowColor = "rgba(251, 191, 36, 0.4)";
-          ctx.shadowBlur = 4;
           ctx.beginPath();
           // Custom path for a rounded top lantern
           ctx.moveTo(-this.size/2 + 2, -this.size);
@@ -1907,9 +1913,14 @@ export default function InvitationView({
           ctx.quadraticCurveTo(-this.size/2, -this.size, -this.size/2 + 2, -this.size);
           ctx.fill();
           
+          // Flame glow at the bottom center of lantern
+          ctx.fillStyle = "rgba(255, 160, 0, 0.4)";
+          ctx.beginPath();
+          ctx.arc(0, this.size * 0.3, this.size * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+
           // Flame at the bottom center of lantern
           ctx.fillStyle = "rgba(255, 236, 179, 0.9)";
-          ctx.shadowBlur = 1;
           ctx.beginPath();
           ctx.arc(0, this.size * 0.3, this.size * 0.15, 0, Math.PI * 2);
           ctx.fill();
@@ -1949,7 +1960,7 @@ export default function InvitationView({
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
     };
-  }, [data.openingTheme]);
+  }, [data.openingTheme, envelopeFinished]);
 
   // Set up live countdown calculation
   useEffect(() => {
@@ -2374,17 +2385,27 @@ export default function InvitationView({
         .animate-spin-slow {
           animation: spinSlow 40s linear infinite;
         }
+        @keyframes fall {
+          0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+          15% { opacity: 1; }
+          85% { opacity: 1; }
+          100% { transform: translateY(220px) rotate(360deg); opacity: 0; }
+        }
+        .animate-fall {
+          animation: fall 2s infinite linear;
+          will-change: transform, opacity;
+        }
       `}</style>
 
       {/* Drifting background overlay images */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none opacity-[0.08] transition-opacity duration-1000">
         {/* Top-Left Floral Spray */}
         <div className="absolute -top-24 -left-24 w-80 h-80 bg-cover bg-no-repeat rotate-12 filter blur-[1px] animate-[driftLeft_20s_infinite_ease-in-out]"
-             style={{ backgroundImage: `url('/samples/flowers.jpg')`, maskImage: 'radial-gradient(circle, black, transparent 75%)', WebkitMaskImage: 'radial-gradient(circle, black, transparent 75%)' }} />
+             style={{ backgroundImage: `url('/samples/flowers.jpg')`, maskImage: 'radial-gradient(circle, black, transparent 75%)', WebkitMaskImage: 'radial-gradient(circle, black, transparent 75%)', willChange: "transform" }} />
         
         {/* Bottom-Right Soft Mandap Overlay */}
         <div className="absolute -bottom-32 -right-32 w-[400px] h-[400px] bg-cover bg-no-repeat filter blur-[1.5px] animate-[driftRight_25s_infinite_ease-in-out]"
-             style={{ backgroundImage: `url('/samples/mandap.jpg')`, maskImage: 'radial-gradient(circle, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle, black, transparent 70%)' }} />
+             style={{ backgroundImage: `url('/samples/mandap.jpg')`, maskImage: 'radial-gradient(circle, black, transparent 70%)', WebkitMaskImage: 'radial-gradient(circle, black, transparent 70%)', willChange: "transform" }} />
       </div>
 
       {/* Demo Mode Overlay banner */}
@@ -2445,10 +2466,13 @@ export default function InvitationView({
       </div>
 
       {/* Invitation Core Vertical card-stack wrapper */}
-      <main className="relative z-10 w-full max-w-xl mx-auto px-4 py-12 flex flex-col items-center">
+      <main 
+        className="relative z-10 w-full max-w-xl mx-auto px-4 py-12 flex flex-col items-center"
+        style={{ display: envelopeFinished ? "flex" : "none" }}
+      >
         
-        {/* Floating background highlight glow */}
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full filter blur-[120px] bg-brand-rust/5 pointer-events-none" />
+        {/* Floating background highlight glow - optimized to use radial gradient instead of slow filter blur */}
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(138,58,26,0.05) 0%, transparent 70%)" }} />
 
         {/* 1. COVER HERO DETAILS STACK - Upgraded to floating frosted card backing for absolute readability */}
         <section className="w-full text-center mt-8 mb-12 flex flex-col items-center bg-white/75 backdrop-blur-md border border-brand-rust/10 rounded-[32px] p-6 sm:p-8 shadow-paper relative">

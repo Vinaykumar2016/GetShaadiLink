@@ -205,6 +205,7 @@ export default function OpeningThemes({
           right: "4%",
           width: "90px",
           height: "90px",
+          willChange: "transform, opacity",
         }}
         animate={{
           y: [0, -8, 0],
@@ -285,6 +286,7 @@ export default function OpeningThemes({
                 backgroundColor: isDark ? "rgba(255,224,130,0.3)" : "rgba(138,58,26,0.1)",
                 top: `${15 + i * 14}%`,
                 left: `${10 + (i * 29) % 80}%`,
+                willChange: "transform, opacity",
               }}
               animate={{
                 y: [0, -35, 0],
@@ -353,6 +355,7 @@ export default function OpeningThemes({
           initial={{ x: 0 }}
           animate={activated ? { x: -140, opacity: 0 } : { x: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
+          style={{ willChange: "transform, opacity" }}
           className="absolute left-6 z-10 w-24 h-40 bg-[#8A3A1A] border-r-4 border-brand-gold rounded-l-2xl shadow-lg flex items-center justify-end pr-1.5 overflow-hidden"
         >
           {/* Gold shimmer overlay */}
@@ -360,6 +363,7 @@ export default function OpeningThemes({
             className="absolute inset-0 pointer-events-none"
             style={{
               background: "linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.15) 45%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.15) 55%, transparent 60%)",
+              willChange: "transform",
             }}
             animate={{ x: ["-100%", "200%"] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
@@ -374,6 +378,7 @@ export default function OpeningThemes({
           initial={{ x: 0 }}
           animate={activated ? { x: 140, opacity: 0 } : { x: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
+          style={{ willChange: "transform, opacity" }}
           className="absolute right-6 z-10 w-24 h-40 bg-[#8A3A1A] border-l-4 border-brand-gold rounded-r-2xl shadow-lg flex items-center justify-start pl-1.5 overflow-hidden"
         >
           {/* Gold shimmer overlay */}
@@ -381,6 +386,7 @@ export default function OpeningThemes({
             className="absolute inset-0 pointer-events-none"
             style={{
               background: "linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.15) 45%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.15) 55%, transparent 60%)",
+              willChange: "transform",
             }}
             animate={{ x: ["-100%", "200%"] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2.5 }}
@@ -396,6 +402,7 @@ export default function OpeningThemes({
           animate={activated ? { opacity: 1, scale: 1 } : { opacity: 0 }}
           transition={{ delay: 0.4, duration: 1.2 }}
           className="absolute text-center z-0"
+          style={{ willChange: "transform, opacity" }}
         >
           <span className="font-marcellus text-[9px] tracking-[4px] uppercase text-brand-rust font-bold block mb-1">Palace Doors Open</span>
           <h4 className="font-cursive text-3xl text-brand-rust leading-tight">{bride} &amp; {groom}</h4>
@@ -433,19 +440,19 @@ export default function OpeningThemes({
 
     const interactiveDiya = (
       <div className="w-full flex flex-col items-center justify-center relative h-56 overflow-visible">
-        {/* Warm glow pulse behind diya */}
+        {/* Warm glow pulse behind diya - optimized to use radial gradient instead of slow filter blur */}
         <motion.div
           className="absolute w-40 h-40 rounded-full pointer-events-none"
           style={{
-            background: "radial-gradient(circle, rgba(255,160,0,0.18) 0%, rgba(255,111,0,0.08) 40%, transparent 70%)",
-            filter: "blur(20px)",
+            background: "radial-gradient(circle, rgba(255,160,0,0.18) 0%, rgba(255,111,0,0.08) 45%, transparent 70%)",
+            willChange: "transform, opacity",
           }}
           animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         />
         
         {/* Rotating golden mandala ring */}
-        <svg viewBox="0 0 100 100" className="w-40 h-40 fill-none stroke-amber-400/25 stroke-[0.8] animate-spin-slow absolute">
+        <svg viewBox="0 0 100 100" className="w-40 h-40 fill-none stroke-amber-400/25 stroke-[0.8] animate-spin-slow absolute" style={{ willChange: "transform" }}>
           <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
           <path d="M50,10 A40,40 0 0,0 10,50 A40,40 0 0,0 50,90 A40,40 0 0,0 90,50 Z" />
         </svg>
@@ -463,7 +470,7 @@ export default function OpeningThemes({
             variants={diyaFlameVariants}
             animate={activated ? "activated" : "flicker"}
             className="absolute top-2 w-7 h-11 bg-gradient-to-t from-red-600 via-amber-400 to-yellow-100 rounded-t-full shadow-[0_0_20px_#FFA000]"
-            style={{ transformOrigin: "bottom center" }}
+            style={{ transformOrigin: "bottom center", willChange: "transform, opacity" }}
           />
         </div>
 
@@ -476,6 +483,7 @@ export default function OpeningThemes({
             className="absolute w-12 h-12 rounded-full pointer-events-none z-25"
             style={{
               background: "radial-gradient(circle, rgba(255,193,7,0.9) 0%, rgba(255,152,0,0.6) 40%, rgba(255,111,0,0.2) 70%, transparent 100%)",
+              willChange: "transform, opacity",
             }}
           />
         )}
@@ -511,10 +519,13 @@ export default function OpeningThemes({
 
     const interactiveLotus = (
       <div className="w-full h-64 relative flex items-center justify-center">
-        {/* Soft glow backdrop */}
+        {/* Soft glow backdrop - optimized to use radial gradient instead of filter blur */}
         <motion.div
-          className="absolute w-36 h-36 rounded-full bg-pink-300/20 pointer-events-none"
-          style={{ filter: "blur(24px)" }}
+          className="absolute w-36 h-36 rounded-full pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(244, 143, 177, 0.25) 0%, transparent 70%)",
+            willChange: "transform, opacity",
+          }}
           animate={activated ? { opacity: 0 } : { scale: [1, 1.15, 1], opacity: [0.3, 0.55, 0.3] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -524,7 +535,7 @@ export default function OpeningThemes({
           <motion.div
             key={i}
             className="absolute rounded-full border border-pink-300/20 pointer-events-none"
-            style={{ width: 48 + i * 32, height: 48 + i * 32 }}
+            style={{ width: 48 + i * 32, height: 48 + i * 32, willChange: "transform, opacity" }}
             animate={{ scale: [1, 1.6, 1], opacity: [0.5, 0, 0.5] }}
             transition={{ duration: 3, repeat: Infinity, delay: i * 1, ease: "easeOut" }}
           />
@@ -534,7 +545,7 @@ export default function OpeningThemes({
         <motion.svg
           viewBox="-60 -60 120 120"
           className="w-44 h-44 absolute"
-          style={{ overflow: "visible" }}
+          style={{ overflow: "visible", willChange: "transform" }}
           animate={activated ? {} : { scale: [1, 1.03, 1] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
@@ -552,7 +563,7 @@ export default function OpeningThemes({
                     : { scale: 1, opacity: 1, x: 0, y: 0 }
                 }
                 transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: idx * 0.08 }}
-                style={{ transformOrigin: "0px 0px" }}
+                style={{ transformOrigin: "0px 0px", willChange: "transform, opacity" }}
               >
                 <g transform={`rotate(${angle}) translate(0, -24)`}>
                   <ellipse cx="0" cy="-14" rx="8" ry="18"
@@ -580,7 +591,7 @@ export default function OpeningThemes({
                   : { scale: 1, opacity: 0.8 }
               }
               transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1], delay: 0.1 + idx * 0.04 }}
-              style={{ transformOrigin: "0px 0px" }}
+              style={{ transformOrigin: "0px 0px", willChange: "transform, opacity" }}
             >
               <g transform={`rotate(${angle}) translate(0, -14)`}>
                 <ellipse cx="0" cy="-8" rx="5.5" ry="12"
@@ -624,7 +635,7 @@ export default function OpeningThemes({
         {/* Lotus leaf base — positioned below the lotus, not overlapping button */}
         <motion.div
           className="absolute pointer-events-none"
-          style={{ bottom: "28%" }}
+          style={{ bottom: "28%", willChange: "transform, opacity" }}
           initial={{ opacity: 1 }}
           animate={activated ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.3 }}
@@ -671,7 +682,7 @@ export default function OpeningThemes({
             : { rotate: { duration: 30, repeat: Infinity, ease: "linear" } }
           }
           viewBox="0 0 100 100" className="absolute w-36 h-36 fill-none stroke-brand-gold stroke-[0.8]"
-          style={{ opacity: activated ? undefined : 0.06 }}
+          style={{ opacity: activated ? undefined : 0.06, willChange: "transform, opacity" }}
         >
           <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
           <circle cx="50" cy="50" r="32" strokeDasharray="2,5" />
@@ -683,7 +694,7 @@ export default function OpeningThemes({
           animate={activated ? { rotate: -15, x: -220, opacity: 0 } : { x: -20, rotate: 0, opacity: 1 }}
           transition={{ duration: 1.6, ease: "easeInOut" }}
           className="absolute z-10 w-28 h-28"
-          style={{ left: "10%", transformOrigin: "bottom left" }}
+          style={{ left: "10%", transformOrigin: "bottom left", willChange: "transform, opacity" }}
         >
           <svg viewBox="0 0 120 100" className="w-full h-full text-[#963E1C]">
             <path 
@@ -717,7 +728,7 @@ export default function OpeningThemes({
           animate={activated ? { rotate: -15, x: 220, opacity: 0 } : { x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
           transition={{ duration: 1.6, ease: "easeInOut" }}
           className="absolute z-10 w-28 h-28"
-          style={{ right: "10%", transformOrigin: "bottom right" }}
+          style={{ right: "10%", transformOrigin: "bottom right", willChange: "transform, opacity" }}
         >
           <svg viewBox="0 0 120 100" className="w-full h-full text-[#963E1C]">
             <path 
@@ -795,7 +806,7 @@ export default function OpeningThemes({
             <motion.div
               key={i}
               className="flex flex-col items-center"
-              style={{ marginTop: i % 2 === 0 ? 0 : 6 }}
+              style={{ marginTop: i % 2 === 0 ? 0 : 6, willChange: "transform" }}
               animate={{ rotate: [0, i % 2 === 0 ? 4 : -4, 0], y: [0, i % 2 === 0 ? -2 : 2, 0] }}
               transition={{ duration: 2.5 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}
             >
@@ -851,6 +862,7 @@ export default function OpeningThemes({
             : { type: "spring", stiffness: 280, damping: 18 }
           }
           className="absolute z-20 cursor-grab active:cursor-grabbing flex flex-col items-center"
+          style={{ willChange: "transform, opacity" }}
         >
           {/* Thread attachment knob */}
           <div className="w-3 h-3 bg-amber-500 rounded-full border-2 border-amber-300 shadow-md mb-0.5" />
@@ -883,6 +895,7 @@ export default function OpeningThemes({
           className="absolute bottom-6 flex flex-col items-center"
           animate={activated ? { scale: 1.4, opacity: 0 } : { scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
+          style={{ willChange: "transform, opacity" }}
         >
           <div
             className="w-16 h-16 rounded-full flex items-center justify-center"
@@ -912,12 +925,13 @@ export default function OpeningThemes({
           className="absolute top-0 w-full flex justify-between px-2 z-20"
           animate={activated ? { y: -60, opacity: 0 } : { y: 0, opacity: 1 }}
           transition={{ duration: 1.0, ease: "easeInOut" }}
+          style={{ willChange: "transform, opacity" }}
         >
           {[...Array(7)].map((_, i) => (
             <motion.div
               key={i}
               className="flex flex-col items-center"
-              style={{ marginTop: i % 2 === 0 ? 0 : 8 }}
+              style={{ marginTop: i % 2 === 0 ? 0 : 8, willChange: "transform" }}
               animate={activated ? {} : { y: [0, -4, 0], rotate: [0, i % 2 === 0 ? 3 : -3, 0] }}
               transition={{ duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.18 }}
             >
@@ -925,6 +939,7 @@ export default function OpeningThemes({
               <div className="w-[2.5px] h-7 bg-green-700/80 rounded-b-full" />
               <motion.div
                 className="w-2 h-2 rounded-full bg-red-600"
+                style={{ willChange: "transform" }}
                 animate={activated ? {} : { scale: [1, 1.3, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.12 }}
               />
@@ -940,6 +955,7 @@ export default function OpeningThemes({
             style={{
               background: "linear-gradient(135deg, #8B0000 0%, #6D0000 50%, #4A000A 100%)",
               borderRight: "1px solid rgba(212,168,67,0.3)",
+              willChange: "transform, opacity",
             }}
             animate={activated ? { x: -90, opacity: 0 } : { x: 0, opacity: 1 }}
             transition={{ duration: 1.3, ease: "easeInOut", delay: 0.1 }}
@@ -949,6 +965,7 @@ export default function OpeningThemes({
               className="absolute inset-0 pointer-events-none"
               style={{
                 background: "linear-gradient(110deg, transparent 30%, rgba(255,215,0,0.08) 45%, rgba(255,215,0,0.15) 50%, rgba(255,215,0,0.08) 55%, transparent 70%)",
+                willChange: "transform",
               }}
               animate={{ x: ["-120%", "220%"] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 1.5 }}
@@ -967,6 +984,7 @@ export default function OpeningThemes({
             className="w-1/2 h-full relative flex items-center justify-center overflow-hidden"
             style={{
               background: "linear-gradient(225deg, #8B0000 0%, #6D0000 50%, #4A000A 100%)",
+              willChange: "transform, opacity",
             }}
             animate={activated ? { x: 90, opacity: 0 } : { x: 0, opacity: 1 }}
             transition={{ duration: 1.3, ease: "easeInOut", delay: 0.1 }}
@@ -1042,11 +1060,12 @@ export default function OpeningThemes({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 1.5, ease: "easeInOut" }}
       className="fixed inset-0 z-[500] flex flex-col items-center justify-center p-4 bg-[#FAF6F0]"
+      style={{ willChange: "transform, opacity" }}
     >
-      {/* Background soft light accent */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full filter blur-[120px] pointer-events-none opacity-20"
+      {/* Background soft light accent - optimized to use radial gradient only and skip heavy CSS filter blur */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full pointer-events-none opacity-20"
         style={{
-          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 75%)`,
+          background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)`,
         }}
       />
       
@@ -1058,6 +1077,7 @@ export default function OpeningThemes({
         animate={activated ? { y: 35, scale: 0.95, opacity: 0 } : {}}
         transition={{ duration: 1.5, ease: "easeInOut" }}
         className="z-10 w-full flex justify-center items-center"
+        style={{ willChange: "transform, opacity" }}
       >
         {getThemeRenderer()}
       </motion.div>
