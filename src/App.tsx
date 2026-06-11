@@ -7,7 +7,7 @@ import UserDashboard from "./components/UserDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import RestrictedPaywall from "./components/RestrictedPaywall";
 import { playClickSound } from "./utils/soundUtils";
-import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote } from "lucide-react";
+import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote, ChevronDown, Minus } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "motion/react";
 
 export default function App() {
@@ -54,6 +54,9 @@ export default function App() {
   const [reviewForm, setReviewForm] = useState({ name: "", location: "", stars: 5, text: "" });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState("");
+
+  // FAQ accordion state
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Hero interactive simulator selected theme
   const [heroActiveTheme, setHeroActiveTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland">("jaipur");
@@ -1313,6 +1316,277 @@ export default function App() {
                 </div>
               </>
             )}
+          </motion.section>
+
+          {/* ── COMPARISON CHART SECTION ─────────────────────── */}
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-16 z-10 select-none"
+          >
+            <div className="text-center mb-12">
+              <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-2">
+                📊 SEE THE DIFFERENCE
+              </span>
+              <h3 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
+                Why Choose ShaadiLink?
+              </h3>
+              <p className="text-xs text-stone-400 mt-3 font-cormorant max-w-md mx-auto leading-relaxed">
+                Compare us with traditional invitation methods. One link, every feature, at a fraction of the cost.
+              </p>
+            </div>
+
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] backdrop-blur-md overflow-hidden shadow-2xl">
+              {/* Column Headers */}
+              <div className="grid grid-cols-5 border-b border-white/10">
+                <div className="p-3 sm:p-5" />
+                {[
+                  { icon: "🖨️", label: "Printed Cards" },
+                  { icon: "📸", label: "Photo Invite" },
+                  { icon: "🎬", label: "Video Invite" },
+                  { icon: "💎", label: "ShaadiLink", featured: true },
+                ].map((col, i) => (
+                  <div
+                    key={i}
+                    className={`p-3 sm:p-5 text-center flex flex-col items-center gap-1.5 ${
+                      col.featured
+                        ? "bg-gradient-to-b from-amber-500/15 to-transparent border-x border-amber-400/20"
+                        : ""
+                    }`}
+                  >
+                    <span className="text-lg sm:text-2xl">{col.icon}</span>
+                    <span
+                      className={`text-[8px] sm:text-[10px] font-marcellus font-bold tracking-wider uppercase leading-tight ${
+                        col.featured ? "text-amber-400" : "text-stone-400"
+                      }`}
+                    >
+                      {col.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Comparison Rows */}
+              {[
+                { feature: "Cost", values: ["₹50–200", "₹500–2K", "₹3K–10K", "₹999"], note: "per invite vs one-time" },
+                { feature: "AI Love Story", values: [false, false, false, true] },
+                { feature: "Live Countdown", values: [false, false, false, true] },
+                { feature: "Venue Map", values: [false, false, false, true] },
+                { feature: "Background Music", values: [false, false, true, true] },
+                { feature: "UPI Shagun Gifts", values: [false, false, false, true] },
+                { feature: "Blessing Guestbook", values: [false, false, false, true] },
+                { feature: "Interactive Covers", values: [false, false, false, true] },
+                { feature: "Easy to Share", values: [false, true, true, true] },
+                { feature: "Regional Languages", values: [true, false, false, true] },
+                { feature: "Eco-friendly", values: [false, true, true, true] },
+                { feature: "Lifetime Free Edits", values: [false, false, false, true] },
+              ].map((row, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: idx * 0.04 }}
+                  className={`grid grid-cols-5 items-center ${
+                    idx % 2 === 0 ? "bg-white/[0.02]" : ""
+                  } ${idx < 11 ? "border-b border-white/5" : ""}`}
+                >
+                  <div className="p-3 sm:p-4 sm:pl-6">
+                    <span className="text-[10px] sm:text-xs font-marcellus font-bold tracking-wider text-stone-300">
+                      {row.feature}
+                    </span>
+                    {row.note && (
+                      <span className="block text-[8px] text-stone-500 font-cormorant mt-0.5">{row.note}</span>
+                    )}
+                  </div>
+                  {row.values.map((val, vi) => (
+                    <div
+                      key={vi}
+                      className={`p-3 sm:p-4 text-center ${
+                        vi === 3
+                          ? "bg-amber-500/[0.06] border-x border-amber-400/10"
+                          : ""
+                      }`}
+                    >
+                      {typeof val === "string" ? (
+                        <span
+                          className={`text-[10px] sm:text-xs font-bold font-marcellus tracking-wider ${
+                            vi === 3 ? "text-amber-400" : "text-stone-400"
+                          }`}
+                        >
+                          {val}
+                        </span>
+                      ) : val ? (
+                        <div
+                          className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full mx-auto flex items-center justify-center ${
+                            vi === 3
+                              ? "bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/25"
+                              : "bg-emerald-500/20 border border-emerald-400/30"
+                          }`}
+                        >
+                          <Check className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${vi === 3 ? "text-stone-950" : "text-emerald-400"}`} />
+                        </div>
+                      ) : (
+                        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/5 border border-white/10 mx-auto flex items-center justify-center">
+                          <Minus className="w-3 h-3 text-stone-600" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </motion.div>
+              ))}
+
+              {/* Bottom CTA row */}
+              <div className="grid grid-cols-5 border-t border-white/10">
+                <div className="col-span-4 p-4 sm:p-5 sm:pl-6 flex items-center">
+                  <p className="text-[10px] sm:text-xs text-stone-400 font-cormorant">
+                    <span className="text-amber-400 font-bold font-marcellus">12 premium features</span> — all included in a single ₹999 payment
+                  </p>
+                </div>
+                <div className="p-4 sm:p-5 bg-amber-500/[0.06] border-x border-amber-400/10 flex items-center justify-center">
+                  <button
+                    onClick={() => {
+                      playClickSound();
+                      document.getElementById("form-container")?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="text-[8px] sm:text-[10px] font-marcellus font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 px-3 sm:px-4 py-2 rounded-full cursor-pointer active:scale-95 transition-all hover:shadow-lg hover:shadow-amber-500/25 whitespace-nowrap"
+                  >
+                    Start Free →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
+          {/* ── FAQ SECTION ───────────────────────────────────── */}
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-4xl px-4 sm:px-6 lg:px-8 py-16 z-10 select-none"
+          >
+            <div className="text-center mb-12">
+              <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-2">
+                ❓ HAVE QUESTIONS?
+              </span>
+              <h3 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
+                Frequently Asked Questions
+              </h3>
+              <p className="text-xs text-stone-400 mt-3 font-cormorant max-w-sm mx-auto leading-relaxed">
+                Everything you need to know about creating your digital wedding invitation.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                {
+                  q: "Is it really free to build and preview my invitation?",
+                  a: "Yes! You can enter all your wedding details, write your love story, choose themes, preview your full interactive invitation — all completely free. You only pay ₹999 when you're ready to activate the shareable live link."
+                },
+                {
+                  q: "What does the ₹999 payment include?",
+                  a: "One payment of ₹999 unlocks everything: your permanent shareable link, background music, interactive cover animations, Google Maps venue integration, UPI Shagun gift system, blessing guestbook wall, and unlimited free edits to your card details forever."
+                },
+                {
+                  q: "Can I edit my card after paying?",
+                  a: "Absolutely! After activation, you can change your love story, update event timings, swap cover themes, modify venue details, or add Google Drive photo links — all for free, as many times as you want. Changes reflect instantly on your live card."
+                },
+                {
+                  q: "How do guests receive the invitation?",
+                  a: "You get a unique shareable link (like getshaadilink.in/priya-rahul) that you can send via WhatsApp, Instagram, email, or any messaging app. Guests simply tap the link to view your full interactive invitation — no app download needed."
+                },
+                {
+                  q: "What is the AI Love Story feature?",
+                  a: "When you write your love story in simple words, our AI (powered by Google Gemini) polishes it into a beautiful, cinematic narrative and translates it into your chosen regional language (Hindi, Kannada, Tamil, Telugu, or Malayalam) automatically."
+                },
+                {
+                  q: "How does the UPI Shagun gift system work?",
+                  a: "Guests can send monetary blessings directly from your invitation page. They enter a custom amount, and a secure UPI QR code is generated linked to your UPI ID. The gift goes straight to your account — no middleman, no commission."
+                },
+                {
+                  q: "What if I need to change the wedding date?",
+                  a: "No problem at all. Log into your Card Management Portal using your email or card link, and update any details including the wedding date. The live countdown on your card will automatically recalculate."
+                },
+                {
+                  q: "Is my personal information safe?",
+                  a: "Yes. We only store the details you provide for your invitation card. We do not share, sell, or use your data for anything else. Payments are processed securely through Razorpay's PCI-compliant gateway."
+                },
+              ].map((item, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: idx * 0.05 }}
+                  className={`rounded-[20px] border backdrop-blur-md overflow-hidden transition-all duration-300 ${
+                    openFaq === idx
+                      ? "bg-amber-500/[0.06] border-amber-400/25 shadow-lg shadow-amber-500/5"
+                      : "bg-white/[0.03] border-white/10 hover:border-white/20"
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      playClickSound();
+                      setOpenFaq(openFaq === idx ? null : idx);
+                    }}
+                    className="w-full flex items-center justify-between p-5 sm:p-6 cursor-pointer text-left group"
+                  >
+                    <span
+                      className={`text-xs sm:text-sm font-bold font-marcellus tracking-wider pr-4 transition-colors ${
+                        openFaq === idx ? "text-amber-400" : "text-white group-hover:text-amber-300"
+                      }`}
+                    >
+                      {item.q}
+                    </span>
+                    <div
+                      className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
+                        openFaq === idx
+                          ? "bg-amber-400 rotate-180"
+                          : "bg-white/10 group-hover:bg-white/15"
+                      }`}
+                    >
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-colors ${
+                          openFaq === idx ? "text-stone-950" : "text-stone-400"
+                        }`}
+                      />
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {openFaq === idx && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-5 sm:px-6 pb-5 sm:pb-6">
+                          <div className="h-px bg-amber-400/15 mb-4" />
+                          <p className="text-xs sm:text-sm text-stone-300/80 leading-relaxed font-cormorant">
+                            {item.a}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Still have questions CTA */}
+            <div className="text-center mt-10">
+              <p className="text-xs text-stone-500 font-cormorant mb-4">Still have questions?</p>
+              <button
+                onClick={() => { playClickSound(); setContactOpen(true); setContactSuccessMsg(""); }}
+                className="py-3 px-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 hover:border-amber-400/30 text-white font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all"
+              >
+                📩 Contact Us
+              </button>
+            </div>
           </motion.section>
 
           {/* ── DECORATIVE DIVIDER ──────────────────────────────── */}
