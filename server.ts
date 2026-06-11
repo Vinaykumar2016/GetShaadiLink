@@ -29,6 +29,15 @@ app.use(compression({
   }
 }));
 
+// SEO: 301 redirect www to non-www for canonical domain consolidation
+app.use((req, res, next) => {
+  const host = req.get("host") || "";
+  if (host.startsWith("www.")) {
+    return res.redirect(301, `${req.protocol}://${host.replace(/^www\./, "")}${req.originalUrl}`);
+  }
+  next();
+});
+
 // Set Cache-Control headers for static directory and public assets
 const cacheMaxAge = 31536000; // 1 Year in seconds for immutable assets
 const shortCacheMaxAge = 86400; // 1 day for HTML/Data assets
@@ -1305,10 +1314,37 @@ async function startServer() {
           }
         }
       } else {
-        const homeCanonical = `
-          <link rel="canonical" href="${req.protocol}://${req.get("host")}/" />
+        // SEO: Inject enhanced home page meta tags + JSON-LD structured data
+        const homeHost = req.get("host") || "getshaadilink.in";
+        const homeUrl = `${req.protocol}://${homeHost}/`;
+        const homeSeo = `
+          <link rel="canonical" href="${homeUrl}" />
+          <meta property="og:url" content="${homeUrl}" />
+          <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "GetShaadiLink",
+            "url": "${homeUrl}",
+            "description": "Create premium digital wedding invitations with AI love stories, interactive covers, Bollywood music, UPI Shagun gifts, and Google Maps. Free to build, ₹999 to activate.",
+            "applicationCategory": "LifestyleApplication",
+            "operatingSystem": "Web",
+            "offers": {
+              "@type": "Offer",
+              "price": "999",
+              "priceCurrency": "INR",
+              "description": "One-time payment for lifetime access with unlimited edits"
+            },
+            "creator": {
+              "@type": "Organization",
+              "name": "GetShaadiLink",
+              "url": "${homeUrl}",
+              "sameAs": ["https://www.instagram.com/getshaadilink.in"]
+            }
+          }
+          </script>
         `;
-        html = html.replace("</head>", `${homeCanonical}</head>`);
+        html = html.replace("</head>", `${homeSeo}</head>`);
       }
       
       res.send(html);
