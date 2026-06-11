@@ -138,6 +138,69 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
+// API: Dynamic sitemap.xml for SEO search engines
+app.get("/sitemap.xml", (req, res) => {
+  try {
+    const host = req.get("host") || "getshaadilink.in";
+    const domainUrl = `${req.protocol}://${host}`;
+    
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+    
+    // 1. Home page
+    xml += `  <url>\n`;
+    xml += `    <loc>${domainUrl}/</loc>\n`;
+    xml += `    <changefreq>daily</changefreq>\n`;
+    xml += `    <priority>1.0</priority>\n`;
+    xml += `  </url>\n`;
+    
+    // 2. Query paid invitations from directory
+    if (fs.existsSync(INVITATIONS_DIR)) {
+      const files = fs.readdirSync(INVITATIONS_DIR).filter(f => f.endsWith(".json"));
+      for (const file of files) {
+        try {
+          const filePath = path.join(INVITATIONS_DIR, file);
+          const stats = fs.statSync(filePath);
+          const rawData = fs.readFileSync(filePath, "utf-8");
+          const parsed = JSON.parse(rawData);
+          
+          // Only index paid invitations
+          const isPaid = !!parsed.razorpayPaymentId || parsed.isDemoMode;
+          if (isPaid) {
+            const slug = file.replace(/\.json$/, "");
+            const lastmod = stats.mtime.toISOString().split("T")[0]; // YYYY-MM-DD
+            xml += `  <url>\n`;
+            xml += `    <loc>${domainUrl}/${slug}</loc>\n`;
+            xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += `    <changefreq>weekly</changefreq>\n`;
+            xml += `    <priority>0.8</priority>\n`;
+            xml += `  </url>\n`;
+          }
+        } catch (e) {
+          // Skip corrupt or unreadable files silently
+        }
+      }
+    }
+    
+    xml += `</urlset>`;
+    
+    res.header("Content-Type", "application/xml");
+    res.send(xml);
+  } catch (error) {
+    console.error("Error generating sitemap:", error);
+    res.status(500).send("Error generating sitemap");
+  }
+});
+
+// API: robots.txt dynamic route to point to the correct sitemap location
+app.get("/robots.txt", (req, res) => {
+  const host = req.get("host") || "getshaadilink.in";
+  const domainUrl = `${req.protocol}://${host}`;
+  const content = `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /admin/\n\nSitemap: ${domainUrl}/sitemap.xml\n`;
+  res.header("Content-Type", "text/plain");
+  res.send(content);
+});
+
 // API: Check if slug is available
 app.get("/api/check-slug/:slug", (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
