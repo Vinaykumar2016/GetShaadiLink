@@ -2965,11 +2965,6 @@ export default function InvitationView({
                 <div key={nt.id || index} className="p-4 rounded-2xl bg-[#FAF8F5] border border-brand-rust/10 text-left text-brand-rust relative shadow-sm">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="font-cursive text-xl font-normal text-brand-rust">{nt.name}</span>
-                    {nt.amount && (
-                      <span className="text-[9px] font-mono bg-brand-rust/5 border border-brand-rust/10 text-brand-rust px-2 py-0.5 rounded-full font-bold">
-                        🎁 Shagun of ₹{nt.amount}
-                      </span>
-                    )}
                   </div>
                   <p className="text-sm text-brand-rust/70 leading-relaxed font-cormorant font-medium">{nt.note || nt.message}</p>
                 </div>
