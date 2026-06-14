@@ -1623,7 +1623,7 @@ export default function InvitationView({
       }
 
       const options = {
-        key: "rzp_test_SyMbmY3vUX0U4U",
+        key: "rzp_live_T1cBBF0iEWb9ej",
         amount: 99900, // Amount in paise
         currency: "INR",
         name: "GetShaadiLink",
