@@ -1670,7 +1670,8 @@ export default function InvitationView({
     }
   };
 
-  const isPaid = !!paymentId || isDemoMode;
+  // Treat the invitation as paid (fully unlocked) if it has a payment ID, if in demo preview mode, or if viewed by the admin (has admin token in localStorage)
+  const isPaid = !!paymentId || isDemoMode || !!localStorage.getItem("gst_admin_token");
   
   const { scrollY } = useScroll();
   const bgOpacity = useTransform(scrollY, [0, 450], [0.65, 0.02]);

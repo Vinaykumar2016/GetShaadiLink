@@ -565,7 +565,12 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                           </button>
                         </td>
                         <td className="p-4">{inv.wdate}</td>
-                        <td className="p-4 text-stone-400 truncate max-w-[150px]" title={inv.ownerEmail}>{inv.ownerEmail || "-"}</td>
+                        <td className="p-4 text-stone-400 truncate max-w-[150px]" title={inv.ownerEmail}>
+                          <span className="block">{inv.ownerEmail || "-"}</span>
+                          {inv.editPassword && (
+                            <span className="block text-[9px] text-amber-500/80 font-mono mt-0.5">🔑 {inv.editPassword}</span>
+                          )}
+                        </td>
                         <td className="p-4 text-center font-bold text-white">{inv.views}</td>
                         <td className="p-4 text-right space-x-2">
                           <a

@@ -78622,7 +78622,8 @@ app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
               ownerEmail: data.ownerEmail || "",
               views: data.views || 0,
               createdDate: data.createdDate || data.date || data.createdAt || "",
-              razorpayPaymentId: data.razorpayPaymentId || null
+              razorpayPaymentId: data.razorpayPaymentId || null,
+              editPassword: data.editPassword || ""
             });
           } catch (e2) {
           }
