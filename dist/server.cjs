@@ -78629,7 +78629,11 @@ app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
         }
       }
     }
-    list.sort((a, b) => b.views - a.views);
+    list.sort((a, b) => {
+      const timeA = a.createdDate ? new Date(a.createdDate).getTime() : 0;
+      const timeB = b.createdDate ? new Date(b.createdDate).getTime() : 0;
+      return timeB - timeA;
+    });
     res.json({ success: true, invitations: list });
   } catch (error) {
     console.error("Failed to list invitations:", error);

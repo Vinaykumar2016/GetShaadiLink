@@ -2,6 +2,21 @@ import { useState, useEffect } from "react";
 import { playClickSound } from "../utils/soundUtils";
 import { LayoutDashboard, Mail, FileText, LogOut, Trash2, CheckCircle, Clock, Eye, ShieldAlert, ArrowLeft, Search, Star, MessageSquare } from "lucide-react";
 
+const formatCreatedDate = (isoStr: string) => {
+  if (!isoStr) return "-";
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr.split("T")[0] || "-";
+    return d.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch (e) {
+    return "-";
+  }
+};
+
 interface AdminDashboardProps {
   onClose: () => void;
 }
@@ -515,6 +530,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                   <tr className="border-b border-white/5 bg-white/5 text-stone-300 font-bold uppercase tracking-wider text-[10px]">
                     <th className="p-4">Couple</th>
                     <th className="p-4">Slug</th>
+                    <th className="p-4">Created At</th>
                     <th className="p-4">Payment</th>
                     <th className="p-4">Wedding Date</th>
                     <th className="p-4">Owner Email</th>
@@ -525,7 +541,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 <tbody className="divide-y divide-white/5 text-stone-300">
                   {filteredInvitations.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="p-8 text-center text-stone-500 font-medium">No invitations match your search parameters.</td>
+                      <td colSpan={8} className="p-8 text-center text-stone-500 font-medium">No invitations match your search parameters.</td>
                     </tr>
                   ) : (
                     filteredInvitations.map((inv) => (
@@ -535,6 +551,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                           <span className="block text-[10px] text-stone-500">{inv.city}</span>
                         </td>
                         <td className="p-4 font-mono text-amber-400 font-semibold">/{inv.slug}</td>
+                        <td className="p-4 text-stone-400">{formatCreatedDate(inv.createdDate)}</td>
                         <td className="p-4">
                           <button
                             onClick={() => handleTogglePaymentStatus(inv.slug, inv.razorpayPaymentId)}
