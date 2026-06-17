@@ -2036,7 +2036,8 @@ export default function InvitationView({
       noBlessings: "No blessings posted yet. Be the first! 🌸",
       whatsappInvite: "WhatsApp Invite",
       copyLink: "Copy Link",
-      copied: "Copied! ✨"
+      copied: "Copied! ✨",
+      bestWishes: "With Best Wishes"
     },
     hi: {
       days: "दिन",
@@ -2078,7 +2079,8 @@ export default function InvitationView({
       noBlessings: "अभी तक कोई आशीर्वाद पोस्ट नहीं किया गया है। पहले बनें! 🌸",
       whatsappInvite: "व्हाट्सएप आमंत्रण",
       copyLink: "लिंक कॉपी करें",
-      copied: "कॉपी हो गया! ✨"
+      copied: "कॉपी हो गया! ✨",
+      bestWishes: "शुभकामनाओं के साथ"
     },
     kn: {
       days: "ದಿನಗಳು",
@@ -2120,7 +2122,8 @@ export default function InvitationView({
       noBlessings: "ಇನ್ನೂ ಯಾವುದೇ ಹಾರೈಕೆಗಳು ಬಂದಿಲ್ಲ. ಮೊದಲಿಗರಾಗಿರಿ! 🌸",
       whatsappInvite: "ವಾಟ್ಸಾಪ್ ಆಮಂತ್ರಣ",
       copyLink: "ಲಿಂಕ್ ಕಾಪಿ ಮಾಡಿ",
-      copied: "ಕಾಪಿ ಮಾಡಲಾಗಿದೆ! ✨"
+      copied: "ಕಾಪಿ ಮಾಡಲಾಗಿದೆ! ✨",
+      bestWishes: "ಶುಭಾಶಯಗಳೊಂದಿಗೆ"
     },
     ta: {
       days: "நாட்கள்",
@@ -2162,7 +2165,8 @@ export default function InvitationView({
       noBlessings: "இதுவரை வாழ்த்துகள் எதுவும் வரவில்லை. நீங்களே முதல் நபராக வாழ்த்துங்கள்! 🌸",
       whatsappInvite: "வாட்ஸ்அப் அழைப்பு",
       copyLink: "இணைப்பை நகலெடுக்க",
-      copied: "நகலெடுக்கப்பட்டது! ✨"
+      copied: "நகலெடுக்கப்பட்டது! ✨",
+      bestWishes: "வாழ்த்துகளுடன்"
     },
     te: {
       days: "రోజులు",
@@ -2204,7 +2208,8 @@ export default function InvitationView({
       noBlessings: "ఇంకా ఎలాంటి ఆశీస్సులు రాలేదు. మొదటి వ్యక్తి మీరే అవ్వండి! 🌸",
       whatsappInvite: "వాట్సాప్ ఆహ్వానం",
       copyLink: "లింక్ కాపీ చేయండి",
-      copied: "కాపీ అయింది! ✨"
+      copied: "కాపీ అయింది! ✨",
+      bestWishes: "శుభాకాంక్షలతో"
     },
     ml: {
       days: "ദിവസങ്ങൾ",
@@ -2246,7 +2251,8 @@ export default function InvitationView({
       noBlessings: "ആരും ആശംസകൾ രേഖപ്പെടുത്തിയിട്ടില്ല. ആദ്യത്തെ ആളാകൂ! 🌸",
       whatsappInvite: "വാട്സാപ്പ് ക്ഷണം",
       copyLink: "ലിങ്ക് കോപ്പി ചെയ്യുക",
-      copied: "കോപ്പി ചെയ്തു! ✨"
+      copied: "കോപ്പി ചെയ്തു! ✨",
+      bestWishes: "ആശംസകളോടെ"
     }
   };
 
@@ -2979,7 +2985,7 @@ export default function InvitationView({
             {data.bride} &amp; {data.groom}
           </p>
           <p className="text-[10px] uppercase tracking-[3px] text-brand-rust/35 mt-1 mb-8 font-marcellus">
-            ಶುಭಾಶಯಗಳೊಂದಿಗೆ 🙏
+            {t("bestWishes")} 🙏
           </p>
           {isPaid && (
             <p className="text-[10px] tracking-widest text-brand-rust/30 font-marcellus">
