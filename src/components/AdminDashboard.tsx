@@ -132,6 +132,33 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
     }
   };
 
+  const handleTogglePaymentStatus = async (slug: string, currentPaymentId: string | null) => {
+    playClickSound();
+    const newPaymentId = currentPaymentId ? null : `pay_admin_unlock_${Date.now()}`;
+    const actionText = currentPaymentId ? "mark this invitation as UNPAID?" : "mark this invitation as PAID (unlocked)?";
+    if (!confirm(`Are you sure you want to ${actionText}`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/invitations/${slug}/payment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ razorpayPaymentId: newPaymentId })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setInvitations(prev => prev.map(inv => inv.slug === slug ? { ...inv, razorpayPaymentId: result.razorpayPaymentId } : inv));
+      } else {
+        alert("Failed to update payment status on the server.");
+      }
+    } catch (err) {
+      console.error("Failed to update payment status:", err);
+      alert("Error occurred while updating payment status.");
+    }
+  };
+
   const handleToggleQueryStatus = async (id: string, currentStatus: string) => {
     playClickSound();
     const newStatus = currentStatus === "resolved" ? "pending" : "resolved";
@@ -488,6 +515,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                   <tr className="border-b border-white/5 bg-white/5 text-stone-300 font-bold uppercase tracking-wider text-[10px]">
                     <th className="p-4">Couple</th>
                     <th className="p-4">Slug</th>
+                    <th className="p-4">Payment</th>
                     <th className="p-4">Wedding Date</th>
                     <th className="p-4">Owner Email</th>
                     <th className="p-4 text-center">Views</th>
@@ -497,7 +525,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 <tbody className="divide-y divide-white/5 text-stone-300">
                   {filteredInvitations.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="p-8 text-center text-stone-500 font-medium">No invitations match your search parameters.</td>
+                      <td colSpan={7} className="p-8 text-center text-stone-500 font-medium">No invitations match your search parameters.</td>
                     </tr>
                   ) : (
                     filteredInvitations.map((inv) => (
@@ -507,6 +535,18 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                           <span className="block text-[10px] text-stone-500">{inv.city}</span>
                         </td>
                         <td className="p-4 font-mono text-amber-400 font-semibold">/{inv.slug}</td>
+                        <td className="p-4">
+                          <button
+                            onClick={() => handleTogglePaymentStatus(inv.slug, inv.razorpayPaymentId)}
+                            className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold tracking-wide uppercase transition-all cursor-pointer border ${
+                              inv.razorpayPaymentId 
+                                ? "bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/20" 
+                                : "bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border-rose-500/20"
+                            }`}
+                          >
+                            {inv.razorpayPaymentId ? "Paid" : "Unpaid"}
+                          </button>
+                        </td>
                         <td className="p-4">{inv.wdate}</td>
                         <td className="p-4 text-stone-400 truncate max-w-[150px]" title={inv.ownerEmail}>{inv.ownerEmail || "-"}</td>
                         <td className="p-4 text-center font-bold text-white">{inv.views}</td>

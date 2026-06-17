@@ -78621,7 +78621,8 @@ app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
               city: data.city,
               ownerEmail: data.ownerEmail || "",
               views: data.views || 0,
-              createdDate: data.createdDate || data.date || data.createdAt || ""
+              createdDate: data.createdDate || data.date || data.createdAt || "",
+              razorpayPaymentId: data.razorpayPaymentId || null
             });
           } catch (e2) {
           }
@@ -78633,6 +78634,25 @@ app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
   } catch (error) {
     console.error("Failed to list invitations:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+app.post("/api/admin/invitations/:slug/payment", requireAdminAuth, (req, res) => {
+  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const { razorpayPaymentId } = req.body;
+  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
+  if (!import_fs2.default.existsSync(filePath)) {
+    res.status(404).json({ error: "Invitation not found" });
+    return;
+  }
+  try {
+    const raw = import_fs2.default.readFileSync(filePath, "utf-8");
+    const data = JSON.parse(raw);
+    data.razorpayPaymentId = razorpayPaymentId || null;
+    import_fs2.default.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    res.json({ success: true, slug, razorpayPaymentId: data.razorpayPaymentId });
+  } catch (err) {
+    console.error("Failed to update payment status:", err);
+    res.status(500).json({ error: "Failed to update payment status" });
   }
 });
 app.delete("/api/admin/invitations/:slug", requireAdminAuth, (req, res) => {
