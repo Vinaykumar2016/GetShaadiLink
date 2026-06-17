@@ -811,12 +811,15 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
-                        <input
-                          type="datetime-local"
-                          value={e1t}
-                          onChange={(e) => setE1t(e.target.value)}
-                          className="w-full px-4 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none text-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 picker-white"
-                        />
+                        <div className="relative">
+                          <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
+                          <input
+                            type="datetime-local"
+                            value={e1t}
+                            onChange={(e) => setE1t(e.target.value)}
+                            className="w-full pl-4 pr-10 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none text-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 picker-white"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -837,12 +840,15 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
-                        <input
-                          type="datetime-local"
-                          value={e2t}
-                          onChange={(e) => setE2t(e.target.value)}
-                          className="w-full px-4 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none text-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 picker-white"
-                        />
+                        <div className="relative">
+                          <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
+                          <input
+                            type="datetime-local"
+                            value={e2t}
+                            onChange={(e) => setE2t(e.target.value)}
+                            className="w-full pl-4 pr-10 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none text-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 picker-white"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -863,12 +869,15 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       </div>
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
-                        <input
-                          type="datetime-local"
-                          value={e3t}
-                          onChange={(e) => setE3t(e.target.value)}
-                          className="w-full px-4 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none text-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 picker-white"
-                        />
+                        <div className="relative">
+                          <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
+                          <input
+                            type="datetime-local"
+                            value={e3t}
+                            onChange={(e) => setE3t(e.target.value)}
+                            className="w-full pl-4 pr-10 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none text-xs focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 picker-white"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

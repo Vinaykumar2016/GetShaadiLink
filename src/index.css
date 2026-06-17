@@ -449,3 +449,40 @@
   pointer-events: none;
 }
 
+/* ── Date & Time Picker Custom Styles for Cross-Device Consistency (iOS Safari, Chrome, Firefox) ── */
+input[type="date"],
+input[type="datetime-local"] {
+  position: relative;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  min-height: 42px; /* Touch target accessibility */
+  color: #8A3A1A !important; /* Force brand-rust color */
+  background-color: #ffffff !important; /* Force white background to prevent system dark-mode white-on-white text */
+}
+
+/* Force text visibility inside webkit inputs (especially iOS Safari) */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  color: #8A3A1A !important;
+  text-align: left;
+  min-height: 1.5em;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Style the default calendar/clock indicators to match brand copper/rust aesthetic */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.5;
+  filter: sepia(100%) saturate(300%) hue-rotate(330deg); /* Colorize indicator to rust/gold */
+  padding: 4px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.8;
+}
+
+

@@ -271,9 +271,18 @@ export default function OpeningThemes({
     tapPrompt: string,
     isDark: boolean
   ) => {
+    // Dynamic font size calculator for cursive wedding names to prevent wrap-induced layout overflow on mobile
+    const getFontSizeForName = (name: string) => {
+      const len = name ? name.length : 0;
+      if (len > 22) return "text-2xl sm:text-3xl";
+      if (len > 15) return "text-3xl sm:text-4xl";
+      if (len > 8) return "text-4xl sm:text-5xl";
+      return "text-5xl sm:text-6xl";
+    };
+
     return (
       <div 
-        className="relative w-full max-w-[390px] h-[86vh] max-h-[740px] min-h-[580px] rounded-[36px] flex flex-col justify-between p-6 overflow-hidden shadow-paper-deep border border-brand-rust/10 select-none text-center"
+        className="relative w-full max-w-[390px] h-[86vh] max-h-[740px] min-h-[480px] xs:min-h-[520px] rounded-[36px] flex flex-col justify-between p-4 xs:p-6 overflow-hidden shadow-paper-deep border border-brand-rust/10 select-none text-center"
         style={{ background: bgGradient }}
       >
         {/* Floating Sparks Layer */}
@@ -302,15 +311,15 @@ export default function OpeningThemes({
           ))}
         </div>
 
-        {/* Top Header Card Info */}
-        <div className="mt-8 z-10 flex flex-col items-center">
-          <h2 className="font-cursive font-normal text-6xl tracking-wide leading-tight" style={{ color: textColor }}>
+        {/* Top Header Card Info - pointer-events-none added to prevent blocking clicks on the interactive core below */}
+        <div className="mt-5 xs:mt-8 z-10 flex flex-col items-center pointer-events-none">
+          <h2 className={`font-cursive font-normal tracking-wide leading-tight ${getFontSizeForName(bride)}`} style={{ color: textColor }}>
             {bride}
           </h2>
-          <span className="font-cormorant italic text-2xl my-1.5 block" style={{ color: isDark ? "#FFE082" : "#8A3A1A" }}>
+          <span className="font-cormorant italic text-lg xs:text-xl my-1 block" style={{ color: isDark ? "#FFE082" : "#8A3A1A" }}>
             {t("weds")}
           </span>
-          <h2 className="font-cursive font-normal text-6xl tracking-wide leading-tight" style={{ color: textColor }}>
+          <h2 className={`font-cursive font-normal tracking-wide leading-tight ${getFontSizeForName(groom)}`} style={{ color: textColor }}>
             {groom}
           </h2>
           {renderCountdown(textColor)}
@@ -318,7 +327,7 @@ export default function OpeningThemes({
         </div>
 
         {/* Dynamic Theme Interactive Core */}
-        <div className="flex-1 flex items-center justify-center relative my-4 overflow-visible">
+        <div className="flex-1 flex items-center justify-center relative my-2 xs:my-4 overflow-visible">
           {interactiveEl}
         </div>
 
@@ -326,11 +335,11 @@ export default function OpeningThemes({
         <GiphyCoupleSticker />
 
         {/* Footer prompts */}
-        <div className="mb-6 z-10 flex flex-col items-center">
+        <div className="mb-4 xs:mb-6 z-10 flex flex-col items-center">
           <p className="text-[9.5px] font-marcellus tracking-widest uppercase font-bold" style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
             {niceDate} • {city}
           </p>
-          <div className="mt-5">
+          <div className="mt-4 xs:mt-5">
             <motion.span 
               animate={activated ? { opacity: [1, 0.3, 1] } : { scale: [1, 1.02, 1] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
