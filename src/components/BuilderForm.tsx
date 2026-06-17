@@ -285,7 +285,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         e2t: e2t.trim(),
         e3n: e3n.trim(),
         e3t: e3t.trim(),
-        razorpayPaymentId: razorpayPaymentId || null,
+        razorpayPaymentId: razorpayPaymentId || (initialData ? initialData.razorpayPaymentId : null),
         password: (initialData && initialData.editPassword) ? initialData.editPassword : editPassword.trim(),
       };
 

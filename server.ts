@@ -642,6 +642,7 @@ Instructions:
     const updatedRecord = {
       ...data,
       ...fields,
+      razorpayPaymentId: data.razorpayPaymentId || fields.razorpayPaymentId || null,
       slug,
       editPassword: editPassword !== undefined ? editPassword.trim() : storedPassword,
       ownerEmail: fields.ownerEmail !== undefined ? fields.ownerEmail.trim().toLowerCase() : data.ownerEmail,
