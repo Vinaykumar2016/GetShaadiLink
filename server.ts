@@ -883,6 +883,8 @@ app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
     let totalInvitations = 0;
     let totalViews = 0;
     let totalQueries = 0;
+    let websitePaidCount = 0;
+    let manualPaidCount = 0;
 
     if (fs.existsSync(INVITATIONS_DIR)) {
       const files = fs.readdirSync(INVITATIONS_DIR);
@@ -894,6 +896,15 @@ app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
             const raw = fs.readFileSync(path.join(INVITATIONS_DIR, file), "utf-8");
             const data = JSON.parse(raw);
             totalViews += (data.views || 0);
+            
+            const payId = data.razorpayPaymentId;
+            if (payId) {
+              if (payId.startsWith("pay_admin_unlock_")) {
+                manualPaidCount++;
+              } else {
+                websitePaidCount++;
+              }
+            }
           } catch (e) {
             // ignore malformed
           }
@@ -911,12 +922,17 @@ app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
       }
     }
 
+    const totalRevenue = websitePaidCount * 999;
+
     res.json({
       success: true,
       stats: {
         totalInvitations,
         totalViews,
-        totalQueries
+        totalQueries,
+        websitePaidCount,
+        manualPaidCount,
+        totalRevenue
       }
     });
   } catch (error) {
@@ -937,6 +953,7 @@ app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
             const raw = fs.readFileSync(path.join(INVITATIONS_DIR, file), "utf-8");
             const data = JSON.parse(raw);
             list.push({
+              ...data,
               slug: data.slug,
               bride: data.bride,
               groom: data.groom,
@@ -947,6 +964,7 @@ app.get("/api/admin/invitations", requireAdminAuth, (req, res) => {
               createdDate: data.createdDate || data.date || data.createdAt || "",
               razorpayPaymentId: data.razorpayPaymentId || null,
               editPassword: data.editPassword || "",
+              religion: data.religion || "other",
             });
           } catch (e) {
             // ignore

@@ -30,12 +30,24 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "queries" | "reviews">("dashboard");
 
   // Data states
-  const [stats, setStats] = useState({ totalInvitations: 0, totalViews: 0, totalQueries: 0, totalReviews: 0, pendingReviews: 0 });
+  const [stats, setStats] = useState({ 
+    totalInvitations: 0, 
+    totalViews: 0, 
+    totalQueries: 0, 
+    totalReviews: 0, 
+    pendingReviews: 0,
+    websitePaidCount: 0,
+    manualPaidCount: 0,
+    totalRevenue: 0
+  });
   const [invitations, setInvitations] = useState<any[]>([]);
   const [queries, setQueries] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
+  const [filterPayment, setFilterPayment] = useState<"all" | "paid" | "unpaid" | "website" | "manual">("all");
+  const [filterReligion, setFilterReligion] = useState<"all" | "hindu" | "muslim" | "christian" | "sikh" | "other">("all");
+  const [editingInvitation, setEditingInvitation] = useState<any | null>(null);
 
   // Fetch admin stats & tables
   const fetchAllData = async (authToken: string) => {
@@ -165,6 +177,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
       if (res.ok) {
         const result = await res.json();
         setInvitations(prev => prev.map(inv => inv.slug === slug ? { ...inv, razorpayPaymentId: result.razorpayPaymentId } : inv));
+        if (token) fetchAllData(token);
       } else {
         alert("Failed to update payment status on the server.");
       }
@@ -215,15 +228,35 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
     }
   };
 
-  // Filter invitations based on search
+  // Filter invitations based on search, payment, and religion
   const filteredInvitations = invitations.filter(inv => {
     const s = searchQuery.toLowerCase();
-    return (
+    const matchesSearch = (
       inv.slug.toLowerCase().includes(s) ||
       inv.bride.toLowerCase().includes(s) ||
       inv.groom.toLowerCase().includes(s) ||
-      inv.ownerEmail.toLowerCase().includes(s)
+      (inv.ownerEmail && inv.ownerEmail.toLowerCase().includes(s))
     );
+
+    // Payment filter
+    let matchesPayment = true;
+    if (filterPayment === "paid") {
+      matchesPayment = !!inv.razorpayPaymentId;
+    } else if (filterPayment === "unpaid") {
+      matchesPayment = !inv.razorpayPaymentId;
+    } else if (filterPayment === "website") {
+      matchesPayment = !!inv.razorpayPaymentId && !inv.razorpayPaymentId.startsWith("pay_admin_unlock_");
+    } else if (filterPayment === "manual") {
+      matchesPayment = !!inv.razorpayPaymentId && inv.razorpayPaymentId.startsWith("pay_admin_unlock_");
+    }
+
+    // Religion filter
+    let matchesReligion = true;
+    if (filterReligion !== "all") {
+      matchesReligion = inv.religion === filterReligion;
+    }
+
+    return matchesSearch && matchesPayment && matchesReligion;
   });
 
   // Render Login Panel
@@ -385,7 +418,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
             </div>
 
             {/* Stats Overview Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               
               {/* Stat card 1 */}
               <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
@@ -407,7 +440,29 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 </div>
               </div>
 
-              {/* Stat card 3 */}
+              {/* Stat card 3: Direct Website Revenue */}
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">💸</div>
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Direct Website Revenue</h3>
+                <p className="text-4xl font-bold mt-2 font-marcellus text-emerald-400">₹{(stats.totalRevenue || 0).toLocaleString("en-IN")}</p>
+                <p className="text-[10px] text-stone-400 mt-1">From {stats.websitePaidCount || 0} website payments (₹999 each)</p>
+                <div className="w-full h-1 bg-emerald-500/20 absolute bottom-0 inset-x-0">
+                  <div className="h-full bg-emerald-400" style={{ width: `${Math.min(100, (stats.websitePaidCount || 0) * 10)}%` }} />
+                </div>
+              </div>
+
+              {/* Stat card 4: Manual Overrides */}
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">🔑</div>
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Manual Overrides</h3>
+                <p className="text-4xl font-bold mt-2 font-marcellus text-sky-400">{stats.manualPaidCount || 0}</p>
+                <p className="text-[10px] text-stone-400 mt-1">Cards unlocked manually by Admin</p>
+                <div className="w-full h-1 bg-sky-500/20 absolute bottom-0 inset-x-0">
+                  <div className="h-full bg-sky-400" style={{ width: `${Math.min(100, (stats.manualPaidCount || 0) * 10)}%` }} />
+                </div>
+              </div>
+
+              {/* Stat card 5 - Queries */}
               <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
                 <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">✉️</div>
                 <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Support Queries</h3>
@@ -417,8 +472,8 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 </div>
               </div>
 
-              {/* Stat card 4 - Reviews */}
-              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg sm:col-span-3 lg:col-span-1">
+              {/* Stat card 6 - Reviews */}
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
                 <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">⭐</div>
                 <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Reviews</h3>
                 <p className="text-4xl font-bold mt-2 font-marcellus text-white">{stats.totalReviews}</p>
@@ -504,22 +559,58 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
         {/* TAB 2: INVITATIONS MANAGER VIEW */}
         {activeTab === "invitations" && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400">💍 Invitation Cards</h2>
-                <p className="text-xs text-stone-400 mt-1">Review and delete active invitation sites hosted on the platform.</p>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400">💍 Invitation Cards</h2>
+                  <p className="text-xs text-stone-400 mt-1">Review, edit, and toggle payment status for active invitations.</p>
+                </div>
+
+                {/* Search bar */}
+                <div className="w-full sm:w-80 relative">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search by slug, name, email..."
+                    className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-amber-400/40 text-xs text-white"
+                  />
+                </div>
               </div>
 
-              {/* Search bar */}
-              <div className="w-full sm:w-80 relative">
-                <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search by slug, name, email..."
-                  className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-amber-400/40 text-xs text-white"
-                />
+              {/* Filters Row */}
+              <div className="flex flex-wrap gap-4 p-3 bg-white/5 rounded-xl border border-white/5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold">Payment Status</span>
+                  <select
+                    value={filterPayment}
+                    onChange={(e) => setFilterPayment(e.target.value as any)}
+                    className="bg-stone-900 border border-white/10 text-stone-300 text-xs rounded-lg p-1.5 focus:border-amber-400 outline-none"
+                  >
+                    <option value="all">All Payments</option>
+                    <option value="paid">All Paid Statuses</option>
+                    <option value="unpaid">Unpaid Statuses</option>
+                    <option value="website">Website Paid (Direct)</option>
+                    <option value="manual">Manual Admin Unlock</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[9px] uppercase tracking-wider text-stone-400 font-bold">Religion / Style</span>
+                  <select
+                    value={filterReligion}
+                    onChange={(e) => setFilterReligion(e.target.value as any)}
+                    className="bg-stone-900 border border-white/10 text-stone-300 text-xs rounded-lg p-1.5 focus:border-amber-400 outline-none"
+                  >
+                    <option value="all">All Religions</option>
+                    <option value="hindu">Hindu</option>
+                    <option value="muslim">Muslim</option>
+                    <option value="christian">Christian</option>
+                    <option value="sikh">Sikh</option>
+                    <option value="other">Other / General</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -557,11 +648,17 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                             onClick={() => handleTogglePaymentStatus(inv.slug, inv.razorpayPaymentId)}
                             className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold tracking-wide uppercase transition-all cursor-pointer border ${
                               inv.razorpayPaymentId 
-                                ? "bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/20" 
+                                ? inv.razorpayPaymentId.startsWith("pay_admin_unlock_")
+                                  ? "bg-sky-500/10 hover:bg-sky-500/25 text-sky-400 border-sky-500/20"
+                                  : "bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/20" 
                                 : "bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border-rose-500/20"
                             }`}
                           >
-                            {inv.razorpayPaymentId ? "Paid" : "Unpaid"}
+                            {inv.razorpayPaymentId 
+                              ? inv.razorpayPaymentId.startsWith("pay_admin_unlock_")
+                                ? "Manual Unlock"
+                                : "Website Paid"
+                              : "Unpaid"}
                           </button>
                         </td>
                         <td className="p-4">{inv.wdate}</td>
@@ -573,6 +670,13 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                         </td>
                         <td className="p-4 text-center font-bold text-white">{inv.views}</td>
                         <td className="p-4 text-right space-x-2">
+                          <button
+                            onClick={() => { playClickSound(); setEditingInvitation(inv); }}
+                            title="Edit Card (Bypass Passcode)"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 hover:bg-[#10B981]/20 text-[#34D399] transition-colors cursor-pointer animate-none"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
                           <a
                             href={`/${inv.slug}`}
                             target="_blank"
@@ -819,8 +923,33 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
             )}
           </div>
         )}
-
       </main>
+
+      {/* Admin Edit Modal Overlay */}
+      {editingInvitation && (
+        <div className="fixed inset-0 z-50 bg-[#080518]/95 p-4 sm:p-8 overflow-y-auto flex justify-center items-start">
+          <div className="w-full max-w-4xl bg-[#120E2F] border border-white/10 rounded-3xl p-6 relative mt-10">
+            <button 
+              onClick={() => { playClickSound(); setEditingInvitation(null); }}
+              className="absolute top-4 right-4 text-stone-400 hover:text-white text-sm cursor-pointer transition-colors bg-white/5 hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center border border-white/10"
+              title="Close Editor"
+            >
+              ✕
+            </button>
+            <h2 className="font-marcellus text-xl text-amber-400 mb-6 uppercase tracking-wider">
+              Admin Edit Mode: {editingInvitation.bride} & {editingInvitation.groom} (/{editingInvitation.slug})
+            </h2>
+            <BuilderForm 
+              initialData={editingInvitation}
+              onSuccess={() => {
+                setEditingInvitation(null);
+                if (token) fetchAllData(token);
+              }}
+              onCancelEdit={() => setEditingInvitation(null)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
