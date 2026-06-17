@@ -78570,6 +78570,7 @@ app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
     let totalQueries = 0;
     let websitePaidCount = 0;
     let manualPaidCount = 0;
+    let totalRevenue = 0;
     if (import_fs2.default.existsSync(INVITATIONS_DIR)) {
       const files = import_fs2.default.readdirSync(INVITATIONS_DIR);
       totalInvitations = files.filter((f3) => f3.endsWith(".json")).length;
@@ -78581,11 +78582,14 @@ app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
             totalViews += data.views || 0;
             const payId = data.razorpayPaymentId;
             if (payId) {
-              if (payId.startsWith("pay_admin_unlock_")) {
+              const isManual = typeof payId === "string" && payId.startsWith("pay_admin_unlock_");
+              if (isManual) {
                 manualPaidCount++;
               } else {
                 websitePaidCount++;
               }
+              const amt = data.paymentAmount !== void 0 && data.paymentAmount !== null ? Number(data.paymentAmount) : isManual ? 0 : 999;
+              totalRevenue += amt;
             }
           } catch (e2) {
           }
@@ -78600,7 +78604,6 @@ app.get("/api/admin/stats", requireAdminAuth, (req, res) => {
       } catch (e2) {
       }
     }
-    const totalRevenue = websitePaidCount * 999;
     res.json({
       success: true,
       stats: {
@@ -78674,6 +78677,25 @@ app.post("/api/admin/invitations/:slug/payment", requireAdminAuth, (req, res) =>
   } catch (err) {
     console.error("Failed to update payment status:", err);
     res.status(500).json({ error: "Failed to update payment status" });
+  }
+});
+app.post("/api/admin/invitations/:slug/amount", requireAdminAuth, (req, res) => {
+  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const { paymentAmount } = req.body;
+  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
+  if (!import_fs2.default.existsSync(filePath)) {
+    res.status(404).json({ error: "Invitation not found" });
+    return;
+  }
+  try {
+    const raw = import_fs2.default.readFileSync(filePath, "utf-8");
+    const data = JSON.parse(raw);
+    data.paymentAmount = paymentAmount !== void 0 && paymentAmount !== null ? Number(paymentAmount) : null;
+    import_fs2.default.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    res.json({ success: true, slug, paymentAmount: data.paymentAmount });
+  } catch (err) {
+    console.error("Failed to update payment amount:", err);
+    res.status(500).json({ error: "Failed to update payment amount" });
   }
 });
 app.delete("/api/admin/invitations/:slug", requireAdminAuth, (req, res) => {

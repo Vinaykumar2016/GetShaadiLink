@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { playClickSound } from "../utils/soundUtils";
-import { LayoutDashboard, Mail, FileText, LogOut, Trash2, CheckCircle, Clock, Eye, ShieldAlert, ArrowLeft, Search, Star, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Mail, FileText, LogOut, Trash2, CheckCircle, Clock, Eye, ShieldAlert, ArrowLeft, Search, Star, MessageSquare, Edit, Coins } from "lucide-react";
+import BuilderForm from "./BuilderForm";
 
 const formatCreatedDate = (isoStr: string) => {
   if (!isoStr) return "-";
@@ -27,7 +28,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "queries" | "reviews">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "invitations" | "queries" | "reviews" | "revenue">("dashboard");
 
   // Data states
   const [stats, setStats] = useState({ 
@@ -48,6 +49,7 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
   const [filterPayment, setFilterPayment] = useState<"all" | "paid" | "unpaid" | "website" | "manual">("all");
   const [filterReligion, setFilterReligion] = useState<"all" | "hindu" | "muslim" | "christian" | "sikh" | "other">("all");
   const [editingInvitation, setEditingInvitation] = useState<any | null>(null);
+  const [editingAmounts, setEditingAmounts] = useState<Record<string, string>>({});
 
   // Fetch admin stats & tables
   const fetchAllData = async (authToken: string) => {
@@ -187,6 +189,34 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
     }
   };
 
+  const handleSaveAmount = async (slug: string) => {
+    const val = Number(editingAmounts[slug]);
+    if (isNaN(val)) {
+      alert("Please enter a valid number");
+      return;
+    }
+    playClickSound();
+    try {
+      const res = await fetch(`/api/admin/invitations/${slug}/amount`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ paymentAmount: val })
+      });
+      if (res.ok) {
+        alert("Amount saved successfully!");
+        if (token) fetchAllData(token);
+      } else {
+        alert("Failed to save amount.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error occurred while saving amount.");
+    }
+  };
+
   const handleToggleQueryStatus = async (id: string, currentStatus: string) => {
     playClickSound();
     const newStatus = currentStatus === "resolved" ? "pending" : "resolved";
@@ -232,9 +262,9 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
   const filteredInvitations = invitations.filter(inv => {
     const s = searchQuery.toLowerCase();
     const matchesSearch = (
-      inv.slug.toLowerCase().includes(s) ||
-      inv.bride.toLowerCase().includes(s) ||
-      inv.groom.toLowerCase().includes(s) ||
+      (inv.slug && inv.slug.toLowerCase().includes(s)) ||
+      (inv.bride && inv.bride.toLowerCase().includes(s)) ||
+      (inv.groom && inv.groom.toLowerCase().includes(s)) ||
       (inv.ownerEmail && inv.ownerEmail.toLowerCase().includes(s))
     );
 
@@ -245,9 +275,9 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
     } else if (filterPayment === "unpaid") {
       matchesPayment = !inv.razorpayPaymentId;
     } else if (filterPayment === "website") {
-      matchesPayment = !!inv.razorpayPaymentId && !inv.razorpayPaymentId.startsWith("pay_admin_unlock_");
+      matchesPayment = !!inv.razorpayPaymentId && (typeof inv.razorpayPaymentId === "string" && !inv.razorpayPaymentId.startsWith("pay_admin_unlock_"));
     } else if (filterPayment === "manual") {
-      matchesPayment = !!inv.razorpayPaymentId && inv.razorpayPaymentId.startsWith("pay_admin_unlock_");
+      matchesPayment = !!inv.razorpayPaymentId && (typeof inv.razorpayPaymentId === "string" && inv.razorpayPaymentId.startsWith("pay_admin_unlock_"));
     }
 
     // Religion filter
@@ -387,6 +417,16 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 </span>
               )}
             </button>
+            <button
+              onClick={() => { playClickSound(); setActiveTab("revenue"); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                activeTab === "revenue"
+                  ? "bg-amber-500/10 text-amber-400 border-l-2 border-amber-400 pl-3"
+                  : "text-stone-400 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Coins className="w-4 h-4" /> Revenue Sheet
+            </button>
           </nav>
         </div>
 
@@ -440,12 +480,12 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 </div>
               </div>
 
-              {/* Stat card 3: Direct Website Revenue */}
+              {/* Stat card 3: Website Paid Cards (Counts only) */}
               <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
-                <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">💸</div>
-                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Direct Website Revenue</h3>
-                <p className="text-4xl font-bold mt-2 font-marcellus text-emerald-400">₹{(stats.totalRevenue || 0).toLocaleString("en-IN")}</p>
-                <p className="text-[10px] text-stone-400 mt-1">From {stats.websitePaidCount || 0} website payments (₹999 each)</p>
+                <div className="absolute top-4 right-4 text-3xl opacity-20 select-none">💳</div>
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Website Paid Cards</h3>
+                <p className="text-4xl font-bold mt-2 font-marcellus text-emerald-400">{stats.websitePaidCount || 0}</p>
+                <p className="text-[10px] text-stone-400 mt-1">Direct website transactions</p>
                 <div className="w-full h-1 bg-emerald-500/20 absolute bottom-0 inset-x-0">
                   <div className="h-full bg-emerald-400" style={{ width: `${Math.min(100, (stats.websitePaidCount || 0) * 10)}%` }} />
                 </div>
@@ -648,14 +688,14 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                             onClick={() => handleTogglePaymentStatus(inv.slug, inv.razorpayPaymentId)}
                             className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold tracking-wide uppercase transition-all cursor-pointer border ${
                               inv.razorpayPaymentId 
-                                ? inv.razorpayPaymentId.startsWith("pay_admin_unlock_")
+                                ? (typeof inv.razorpayPaymentId === "string" && inv.razorpayPaymentId.startsWith("pay_admin_unlock_"))
                                   ? "bg-sky-500/10 hover:bg-sky-500/25 text-sky-400 border-sky-500/20"
                                   : "bg-emerald-500/10 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/20" 
                                 : "bg-rose-500/10 hover:bg-rose-500/25 text-rose-400 border-rose-500/20"
                             }`}
                           >
                             {inv.razorpayPaymentId 
-                              ? inv.razorpayPaymentId.startsWith("pay_admin_unlock_")
+                              ? (typeof inv.razorpayPaymentId === "string" && inv.razorpayPaymentId.startsWith("pay_admin_unlock_"))
                                 ? "Manual Unlock"
                                 : "Website Paid"
                               : "Unpaid"}
@@ -921,6 +961,131 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 5: REVENUE SHEET MANAGER */}
+        {activeTab === "revenue" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="font-marcellus text-2xl font-bold tracking-wider text-amber-400">💸 Revenue Sheet</h2>
+              <p className="text-xs text-stone-400 mt-1">Review and customize payment amounts for paid invitations on the platform.</p>
+            </div>
+
+            {/* Financial Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Website Direct Revenue</h3>
+                <p className="text-3xl font-bold mt-2 font-marcellus text-emerald-400">
+                  ₹{(invitations.reduce((sum, inv) => {
+                    if (inv.razorpayPaymentId && (typeof inv.razorpayPaymentId === "string" ? !inv.razorpayPaymentId.startsWith("pay_admin_unlock_") : true)) {
+                      return sum + (inv.paymentAmount !== undefined && inv.paymentAmount !== null ? inv.paymentAmount : 999);
+                    }
+                    return sum;
+                  }, 0)).toLocaleString("en-IN")}
+                </p>
+                <p className="text-[10px] text-stone-500 mt-1">Sum of organic checkouts</p>
+              </div>
+
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Manual Override Revenue</h3>
+                <p className="text-3xl font-bold mt-2 font-marcellus text-sky-400">
+                  ₹{(invitations.reduce((sum, inv) => {
+                    if (inv.razorpayPaymentId && (typeof inv.razorpayPaymentId === "string" && inv.razorpayPaymentId.startsWith("pay_admin_unlock_"))) {
+                      return sum + (inv.paymentAmount !== undefined && inv.paymentAmount !== null ? inv.paymentAmount : 0);
+                    }
+                    return sum;
+                  }, 0)).toLocaleString("en-IN")}
+                </p>
+                <p className="text-[10px] text-stone-500 mt-1">Sum of custom manual overrides</p>
+              </div>
+
+              <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl p-6 relative overflow-hidden shadow-lg">
+                <h3 className="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Total Revenue</h3>
+                <p className="text-3xl font-bold mt-2 font-marcellus text-white">
+                  ₹{(invitations.reduce((sum, inv) => {
+                    if (inv.razorpayPaymentId) {
+                      const isManual = typeof inv.razorpayPaymentId === "string" && inv.razorpayPaymentId.startsWith("pay_admin_unlock_");
+                      return sum + (inv.paymentAmount !== undefined && inv.paymentAmount !== null ? inv.paymentAmount : (isManual ? 0 : 999));
+                    }
+                    return sum;
+                  }, 0)).toLocaleString("en-IN")}
+                </p>
+                <p className="text-[10px] text-stone-500 mt-1">Total revenue collected on platform</p>
+              </div>
+            </div>
+
+            {/* Editable Spreadsheet Table */}
+            <div className="bg-[#120E2F]/65 border border-white/5 rounded-2xl shadow-lg overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-white/5 bg-white/5 text-stone-300 font-bold uppercase tracking-wider text-[10px]">
+                    <th className="p-4">Couple</th>
+                    <th className="p-4">Slug</th>
+                    <th className="p-4">Payment Source</th>
+                    <th className="p-4">Amount Charged (₹)</th>
+                    <th className="p-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 text-stone-300">
+                  {invitations.filter(inv => !!inv.razorpayPaymentId).length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-8 text-center text-stone-500 font-medium">No paid invitations found.</td>
+                    </tr>
+                  ) : (
+                    invitations.filter(inv => !!inv.razorpayPaymentId).map((inv) => {
+                      const isManual = typeof inv.razorpayPaymentId === "string" && inv.razorpayPaymentId.startsWith("pay_admin_unlock_");
+                      const defaultAmt = isManual ? 0 : 999;
+                      const currentAmt = inv.paymentAmount !== undefined && inv.paymentAmount !== null ? inv.paymentAmount : defaultAmt;
+                      const editingVal = editingAmounts[inv.slug] !== undefined ? editingAmounts[inv.slug] : String(currentAmt);
+
+                      return (
+                        <tr key={inv.slug} className="hover:bg-white/5 transition-colors">
+                          <td className="p-4">
+                            <span className="font-bold text-white">{inv.bride} & {inv.groom}</span>
+                            <span className="block text-[10px] text-stone-500">{inv.city}</span>
+                          </td>
+                          <td className="p-4 font-mono text-amber-400 font-semibold">/{inv.slug}</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold tracking-wide uppercase border ${
+                              isManual 
+                                ? "bg-sky-500/10 text-sky-400 border-sky-500/20"
+                                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                            }`}>
+                              {isManual ? "Manual Override" : "Website Paid"}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-stone-500 font-bold">₹</span>
+                              <input
+                                type="number"
+                                value={editingVal}
+                                onChange={(e) => setEditingAmounts(prev => ({ ...prev, [inv.slug]: e.target.value }))}
+                                className="w-24 px-2 py-1 bg-stone-950 border border-white/10 rounded-lg text-white font-mono text-xs focus:border-amber-400 outline-none"
+                              />
+                            </div>
+                          </td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => handleSaveAmount(inv.slug)}
+                              disabled={editingVal === String(currentAmt)}
+                              className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                                editingVal === String(currentAmt)
+                                  ? "bg-stone-500/10 text-stone-500 cursor-not-allowed"
+                                  : "bg-amber-500 text-stone-950 hover:bg-amber-400 shadow-md active:scale-95"
+                              }`}
+                            >
+                              Save
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </main>
