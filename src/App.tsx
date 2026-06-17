@@ -34,7 +34,7 @@ export default function App() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   // Account Dashboard upgraded states
-  const [loginMode, setLoginMode] = useState<"slug" | "email">("slug");
+  const [loginMode, setLoginMode] = useState<"slug" | "email">("email");
   const [loginEmail, setLoginEmail] = useState("");
   const [dashboardUserCards, setDashboardUserCards] = useState<any[]>([]);
   const [loggedInCardData, setLoggedInCardData] = useState<Invitation | null>(null);
@@ -857,20 +857,20 @@ export default function App() {
             {dashboardUserCards.length === 0 && (
               <div className="flex bg-white/5 p-1 rounded-xl mb-4 border border-white/10">
                 <button
-                  onClick={() => { playClickSound(); setLoginMode("slug"); }}
-                  className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer font-marcellus ${
-                    loginMode === "slug" ? "bg-amber-500 text-stone-950 shadow-sm" : "text-stone-300 hover:text-white"
-                  }`}
-                >
-                  Direct Link
-                </button>
-                <button
                   onClick={() => { playClickSound(); setLoginMode("email"); }}
                   className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer font-marcellus ${
                     loginMode === "email" ? "bg-amber-500 text-stone-950 shadow-sm" : "text-stone-300 hover:text-white"
                   }`}
                 >
                   Email Login
+                </button>
+                <button
+                  onClick={() => { playClickSound(); setLoginMode("slug"); }}
+                  className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer font-marcellus ${
+                    loginMode === "slug" ? "bg-amber-500 text-stone-950 shadow-sm" : "text-stone-300 hover:text-white"
+                  }`}
+                >
+                  Direct Link
                 </button>
               </div>
             )}
