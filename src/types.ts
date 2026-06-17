@@ -46,5 +46,6 @@ export interface Invitation {
   views?: number;
   openingTheme?: "elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland";
   razorpayPaymentId?: string | null;
+  religion?: "hindu" | "muslim" | "christian" | "sikh" | "other";
 }
 

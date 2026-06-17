@@ -1096,7 +1096,7 @@ app.post("/api/invitations/generate", async (req, res) => {
       bride, groom, wdate, city, vname, vaddr, lang, story, storyText,
       upiId, shagunOn, photos, e1n, e1t, e2n, e2t, e3n, e3t,
       slug, editPassword, groomParents, brideParents, familyBlessings,
-      postWeddingPhotosUrl, ownerEmail, openingTheme, razorpayPaymentId,
+      postWeddingPhotosUrl, ownerEmail, openingTheme, razorpayPaymentId, religion,
     } = req.body;
 
     const formattedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
@@ -1315,6 +1315,7 @@ Instructions:
       ownerEmail: (ownerEmail || "").trim().toLowerCase(),
       views: 0,
       openingTheme: openingTheme || "elephant",
+      religion: religion || "other",
       razorpayPaymentId: razorpayPaymentId || null,
       guestbookNotes: [],
       createdAt: new Date().toISOString(),

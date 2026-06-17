@@ -78769,7 +78769,8 @@ app.post("/api/invitations/generate", async (req, res) => {
       postWeddingPhotosUrl,
       ownerEmail,
       openingTheme,
-      razorpayPaymentId
+      razorpayPaymentId,
+      religion
     } = req.body;
     const formattedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
     if (!formattedSlug) {
@@ -78962,6 +78963,7 @@ Instructions:
       ownerEmail: (ownerEmail || "").trim().toLowerCase(),
       views: 0,
       openingTheme: openingTheme || "elephant",
+      religion: religion || "other",
       razorpayPaymentId: razorpayPaymentId || null,
       guestbookNotes: [],
       createdAt: (/* @__PURE__ */ new Date()).toISOString()

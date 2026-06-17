@@ -37,6 +37,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
   const [postWeddingPhotosUrl, setPostWeddingPhotosUrl] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [openingTheme, setOpeningTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland">("elephant");
+  const [religion, setReligion] = useState<"hindu" | "muslim" | "christian" | "sikh" | "other">("other");
 
   useEffect(() => {
     if (preselectedTheme) {
@@ -78,6 +79,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
       setStory(initialData.storyEnglish || "");
       setOwnerEmail(initialData.ownerEmail || "");
       setOpeningTheme(initialData.openingTheme || "elephant");
+      setReligion(initialData.religion || "other");
 
       if (initialData.events && initialData.events[0]) {
         setE1n(initialData.events[0].name || "Haldi Ceremony");
@@ -278,6 +280,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         storyText: story.trim(),
         ownerEmail: ownerEmail.trim().toLowerCase(),
         openingTheme,
+        religion,
         isEditMode: !!initialData,
         e1n: e1n.trim(),
         e1t: e1t.trim(),
@@ -567,6 +570,36 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         placeholder="e.g., With the blessings of the divine and the love of our families"
                         className="w-full px-4 py-3 bg-white border border-brand-rust/10 rounded-xl text-brand-rust outline-none focus:border-amber-500 focus:ring-3 focus:ring-amber-500/20 transition-all duration-200 text-xs"
                       />
+                    </div>
+                  </div>
+
+                  {/* RELIGION SELECTOR */}
+                  <div className="space-y-3 pt-2">
+                    <div className="border-t border-brand-rust/10 pt-4">
+                      <span className="text-xs font-cinzel tracking-widest text-brand-rust/40 block mb-1 uppercase font-bold">Religion / Wedding Style</span>
+                    </div>
+                    <p className="text-[10.5px] text-brand-rust/60 mb-3">Adjusts terminology throughout the invitation cards automatically (e.g. Lagna Patrika for Hindu, Nikah Nama for Muslim, etc.).</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { code: "hindu", label: "Hindu" },
+                        { code: "muslim", label: "Muslim" },
+                        { code: "christian", label: "Christian" },
+                        { code: "sikh", label: "Sikh" },
+                        { code: "other", label: "Other / General" },
+                      ].map((item) => (
+                        <button
+                          key={item.code}
+                          type="button"
+                          onClick={() => setReligion(item.code as any)}
+                          className={`px-4 py-2.5 rounded-xl text-xs font-medium border transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer ${
+                            religion === item.code
+                              ? "bg-brand-rust/10 border-brand-rust text-brand-rust font-bold"
+                              : "bg-white border-brand-rust/15 text-brand-rust/60"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 

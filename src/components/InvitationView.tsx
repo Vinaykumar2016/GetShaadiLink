@@ -2257,10 +2257,167 @@ export default function InvitationView({
     }
   };
 
+  const religionTranslations: Record<string, Record<string, Record<string, string>>> = {
+    hindu: {
+      en: {
+        lagnaPatrika: "Lagna Patrika",
+        blessingBlessings: "With the blessings of the divine and the love of our families"
+      },
+      hi: {
+        lagnaPatrika: "लग्न पत्रिका",
+        blessingBlessings: "दिव्य आशीर्वाद और हमारे परिवारों के स्नेह के साथ"
+      },
+      kn: {
+        lagnaPatrika: "ಲಗ್ನ ಪತ್ರಿಕೆ",
+        blessingBlessings: "ದೈವಿಕ ಆಶೀರ್ವಾದ ಮತ್ತು ನಮ್ಮ ಕುಟುಂಬಗಳ ಪ್ರೀತಿಯೊಂದಿಗೆ"
+      },
+      ta: {
+        lagnaPatrika: "லக்ன பத்திரிகை",
+        blessingBlessings: "இறைவனின் ஆசியோடும் மற்றும் எங்கள் குடும்பங்களின் அன்போடும்"
+      },
+      te: {
+        lagnaPatrika: "లగ్న పత్రిక",
+        blessingBlessings: "దైవిక ఆశీస్సులు మరియు మా కుటుంబాల ప్రేమతో"
+      },
+      ml: {
+        lagnaPatrika: "ലഗ്ന പത്രിക",
+        blessingBlessings: "ദൈവിക അനുഗ്രഹങ്ങളോടും ഞങ്ങളുടെ കുടുംബങ്ങളുടെ സ്നേഹത്തോടും കൂടി"
+      }
+    },
+    muslim: {
+      en: {
+        lagnaPatrika: "Nikah Nama",
+        blessingBlessings: "Bismillah-ir-Rahman-ir-Rahim — In the name of Allah, the Most Gracious, the Most Merciful"
+      },
+      hi: {
+        lagnaPatrika: "निकाह नामा",
+        blessingBlessings: "बिस्मिल्लाह-इर-रहमान-इर-रहीम — अल्लाह के नाम से जो अत्यंत दयालु और अत्यंत कृपालु है"
+      },
+      kn: {
+        lagnaPatrika: "ನಿಕಾಹ್ ನಾಮಾ",
+        blessingBlessings: "ಬಿಸ್ಮಿಲ್ಲಾ-ಇರ್-ರಹಮಾನ್-ಇರ್-ರಹೀಮ್ — ಅತ್ಯಂತ ಕರುಣಾಮಯಿ ಮತ್ತು ದಯಾಶಾಲಿಯಾದ ಅಲ್ಲಾಹನ ಹೆಸರಿನಲ್ಲಿ"
+      },
+      ta: {
+        lagnaPatrika: "நிக்காஹ் நாமா",
+        blessingBlessings: "பிஸ்மில்லாஹிர் ரஹ்மானிர் ரஹீம் — அளவற்ற அருளாளனும் நிகரற்ற அன்புடையோனுமாகிய அல்லாஹ்வின் பெயரால்"
+      },
+      te: {
+        lagnaPatrika: "నికా నామా",
+        blessingBlessings: "బిస్మిల్లా హిర్ రహ్మాన్ ఇర్ రహీమ్ — అత్యంత దయామయుడు మరియు కరుణామయుడైన అల్లాల్ పేరుతో"
+      },
+      ml: {
+        lagnaPatrika: "നിക്കാഹ് നാമ",
+        blessingBlessings: "ബിസ്മില്ലാഹിർ റഹ്മാനിർ റഹീം — പരമകാരുണികനും കരുണാനിധിയുമായ അല്ലാഹുവിന്റെ നാമത്തിൽ"
+      }
+    },
+    christian: {
+      en: {
+        lagnaPatrika: "Holy Matrimony",
+        blessingBlessings: "In the name of God, the Father, the Son, and the Holy Spirit"
+      },
+      hi: {
+        lagnaPatrika: "पवित्र विवाह",
+        blessingBlessings: "परमेश्वर, पिता, पुत्र और पवित्र आत्मा के नाम पर"
+      },
+      kn: {
+        lagnaPatrika: "ಪವಿತ್ರ ವಿವಾಹ",
+        blessingBlessings: "ದೇವರು, ತಂದೆ, ಮಗ ಮತ್ತು ಪವಿತ್ರ ಆತ್ಮನ ಹೆಸರಿನಲ್ಲಿ"
+      },
+      ta: {
+        lagnaPatrika: "புнить திருமணம்",
+        blessingBlessings: "பிதா, சுதன், பரிசுத்த ஆவியின் பெயரால்"
+      },
+      te: {
+        lagnaPatrika: "పరిశుద్ధ వివాహం",
+        blessingBlessings: "తండ్రి, కుమార, పరిశుద్ధాత్మ నామమున"
+      },
+      ml: {
+        lagnaPatrika: "വിശുദ്ധ വിവാഹം",
+        blessingBlessings: "പിതാവിന്റെയും പുത്രന്റെയും പരിശുദ്ധാത്മാവിന്റെയും നാമത്തിൽ"
+      }
+    },
+    sikh: {
+      en: {
+        lagnaPatrika: "Anand Karaj",
+        blessingBlessings: "Waheguru Ji Ka Khalsa, Waheguru Ji Ki Fateh"
+      },
+      hi: {
+        lagnaPatrika: "आनंद कारज",
+        blessingBlessings: "वाहेगुरु जी का खालसा, वाहेगुरु जी की फतेह"
+      },
+      kn: {
+        lagnaPatrika: "ಆನಂದ್ ಕಾರಜ್",
+        blessingBlessings: "ವಾಹೇಗುರು ಜಿ ಕಾ ಖಾಲ್ಸಾ, ವಾಹೇಗುರು ಜಿ ಕಿ ಫತೇಹ್"
+      },
+      ta: {
+        lagnaPatrika: "ஆனந்த் காரஜ்",
+        blessingBlessings: "வாஹೇகுரு ஜி கா கல்சா, வாஹೇகுரு ஜி கி ஃபதே"
+      },
+      te: {
+        lagnaPatrika: "ఆనంద్ కరాజ్",
+        blessingBlessings: "వాహేగురు జీ కా ఖాల్సా, వాహేగురు జీ కీ ఫతే"
+      },
+      ml: {
+        lagnaPatrika: "ആനന്ദ് കാരാജ്",
+        blessingBlessings: "വാഹೇಗುരു ജി കാ ഖൽസ, വാഹೇഗുരു ജി കി ഫത്തേ"
+      }
+    }
+  };
+
   const t = (key: string): string => {
     const langCode = data.lang || "en";
+    const religion = data.religion;
+    if (religion && religionTranslations[religion]) {
+      const relDict = religionTranslations[religion][langCode] || religionTranslations[religion].en;
+      if (relDict && relDict[key]) {
+        return relDict[key];
+      }
+    }
     const dict = uiTranslations[langCode] || uiTranslations.en;
     return dict[key] || uiTranslations.en[key] || "";
+  };
+
+  const renderReligionIcon = (religion?: string) => {
+    switch (religion) {
+      case "muslim":
+        return (
+          <svg viewBox="0 0 100 100" className="w-18 h-18 fill-none stroke-brand-rust/20 stroke-[1.2]">
+            <path d="M55,30 A 22 22 0 1 0 55,70 A 18 18 0 1 1 55,30 Z" />
+            <path d="M62,45 L65,49 L70,47 L68,52 L72,56 L66,56 L64,61 L62,56 L57,56 L60,52 Z" className="stroke-none fill-brand-rust/35" />
+          </svg>
+        );
+      case "christian":
+        return (
+          <svg viewBox="0 0 100 100" className="w-18 h-18 fill-none stroke-brand-rust/20 stroke-[1.2]">
+            <path d="M50,15 L50,85 M30,38 L70,38" />
+            <circle cx="50" cy="38" r="4" className="fill-brand-rust/10" />
+          </svg>
+        );
+      case "sikh":
+        return (
+          <svg viewBox="0 0 100 100" className="w-18 h-18 fill-none stroke-brand-rust/20 stroke-[1.2]">
+            <circle cx="50" cy="50" r="12" strokeWidth="1.5" />
+            <path d="M50,15 L50,85 M30,50 C30,30 45,25 50,25 C55,25 70,30 70,50 C70,70 55,75 50,75 C45,75 30,70 30,50 Z" />
+            <path d="M38,40 Q50,45 62,40" />
+          </svg>
+        );
+      case "other":
+        return (
+          <svg viewBox="0 0 100 100" className="w-18 h-18 fill-none stroke-brand-rust/20 stroke-[1.2]">
+            <path d="M38,50 C28,40 38,28 48,38 C58,28 68,40 58,50 L48,60 Z" />
+            <path d="M58,55 C48,45 58,33 68,43 C78,33 88,45 78,55 L68,65 Z" />
+          </svg>
+        );
+      case "hindu":
+      default:
+        return (
+          <svg viewBox="0 0 100 100" className="w-18 h-18 fill-none stroke-brand-rust/20 stroke-[1.2]">
+            <path d="M50,20 C40,20 38,32 38,40 C38,50 48,55 48,65 C48,70 42,75 42,80 C48,82 52,82 58,80 C58,75 52,70 52,65 C52,55 62,50 62,40 C62,32 60,20 50,20 Z" />
+            <path d="M44,45 Q50,48 56,45" />
+            <circle cx="50" cy="30" r="1.5" className="fill-brand-rust/40" />
+          </svg>
+        );
+    }
   };
 
   const handleAddNote = async (e: React.FormEvent) => {
@@ -2525,14 +2682,9 @@ export default function InvitationView({
         {/* 2. LAGNA PATRIKA CARD */}
         {(data.brideParents || data.groomParents || data.familyBlessings) && (
           <section className="w-full bg-white border border-brand-rust/10 rounded-[28px] p-6 sm:p-8 mb-8 shadow-paper text-center relative overflow-hidden">
-            {/* Embedded Ganesha graphic element (top) */}
-            <div className="w-full flex justify-center mb-6">
-              <svg viewBox="0 0 100 100" className="w-18 h-18 fill-none stroke-brand-rust/20 stroke-[1.2]">
-                {/* Ganesha paper-cut outlines */}
-                <path d="M50,20 C40,20 38,32 38,40 C38,50 48,55 48,65 C48,70 42,75 42,80 C48,82 52,82 58,80 C58,75 52,70 52,65 C52,55 62,50 62,40 C62,32 60,20 50,20 Z" />
-                <path d="M44,45 Q50,48 56,45" />
-                <circle cx="50" cy="30" r="1.5" className="fill-brand-rust/40" />
-              </svg>
+            {/* Embedded religion-specific graphic element (top) */}
+            <div className="w-full flex justify-center mb-6 text-brand-rust/20">
+              {renderReligionIcon(data.religion)}
             </div>
 
             <div className="flex items-center justify-center gap-2 mb-6">
