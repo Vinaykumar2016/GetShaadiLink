@@ -1,0 +1,30 @@
+# GetShaadiLink
+
+> An immersive, interactive digital wedding invitation platform tailored for modern Indian weddings. GetShaadiLink replaces traditional paper cards and passive PDFs with premium, mobile-first web invites featuring elegant introductory animations, background music, RSVP logging, and commission-free direct UPI cash gifts (Shagun).
+
+GetShaadiLink is designed to make wedding planning simpler, more eco-friendly, and highly personalized.
+
+## Key Features
+
+- **Premium Opening Themes**: Six cultural envelope opening animations (Jaipur Palace, Temple Lotus, Royal Elephant, Sacred Thread, Marigold Garland, Midnight Diya) that reveal the invitation details in a celebratory way.
+- **AI-Powered Love Story**: Write a basic outline of how you met, and our Google Gemini AI integration generates a polished, romantic story in English, auto-translating it into regional scripts.
+- **Regional Languages**: Native translation support for 6 languages: English, Hindi (हिंदी), Kannada (ಕನ್ನಡ), Tamil (தமிழ்), Telugu (తెలుగు), and Malayalam (മലയാളം).
+- **Direct-to-Bank Shagun (UPI)**: Generates secure UPI QR codes with custom blessing amounts, enabling guests to send monetary gifts directly to the couple's bank account with zero platform fees.
+- **Google Maps Directions**: Embedded venue map directions so guests can navigate directly.
+- **Blessing Guestbook**: A digital guestbook wall where friends and family can leave love notes and wedding blessings.
+- **Wedding Countdown**: A live countdown timer counting down the days, hours, and minutes to the main ceremony.
+
+## Pricing Model
+
+- **Free Draft Tier**: Build, customize, write your AI story, and preview your wedding card for free.
+- **Premium Activation (₹999 One-Time)**: Get a permanent shareable link (e.g., `getshaadilink.in/rohan-ananya`), remove draft banners, and unlock unlimited public guest views with lifetime free edits.
+
+## Navigation and Web Architecture
+
+- **Home Page**: [getshaadilink.in](https://getshaadilink.in) - Build your digital invitation card, choose background music, preview opening envelopes, and activate premium links.
+- **Admin Dashboard**: [/admin](https://getshaadilink.in/admin) - Secure admin dashboard for managing card records, verifying payments, and manual transaction email delivery.
+- **Legal and Policies**:
+  - [Pricing Details](https://getshaadilink.in#pricing)
+  - [Terms of Service](https://getshaadilink.in#terms)
+  - [Privacy Policy](https://getshaadilink.in#privacy)
+  - [Refund Policy](https://getshaadilink.in#refund)

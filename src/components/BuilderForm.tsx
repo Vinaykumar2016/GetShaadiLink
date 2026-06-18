@@ -428,8 +428,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Bride's First Name</label>
+                      <label htmlFor="bride-first-name" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Bride's First Name</label>
                       <input
+                        id="bride-first-name"
                         type="text"
                         value={bride}
                         onChange={(e) => setBride(e.target.value)}
@@ -438,8 +439,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Groom's First Name</label>
+                      <label htmlFor="groom-first-name" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Groom's First Name</label>
                       <input
+                        id="groom-first-name"
                         type="text"
                         value={groom}
                         onChange={(e) => setGroom(e.target.value)}
@@ -451,10 +453,11 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Wedding Date</label>
+                      <label htmlFor="wedding-date" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Wedding Date</label>
                       <div className="relative">
                         <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
                         <input
+                          id="wedding-date"
                           type="date"
                           value={wdate}
                           onChange={(e) => setWdate(e.target.value)}
@@ -463,8 +466,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Wedding City</label>
+                      <label htmlFor="wedding-city" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Wedding City</label>
                       <input
+                        id="wedding-city"
                         type="text"
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
@@ -476,12 +480,13 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
 
                   {/* CUSTOM PRETTY SUBDOMAIN-LIKE URL COMPONENT */}
                   <div className="flex flex-col gap-1.5 p-4 rounded-2xl bg-brand-rust/5 border border-brand-rust/10">
-                    <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Custom Link Webpath</label>
+                    <label htmlFor="link-slug" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Custom Link Webpath</label>
                     <div className="flex items-center bg-white border border-brand-rust/10 rounded-xl overflow-hidden focus-within:border-brand-rust/50 text-sm">
                       <span className="px-4 py-3 text-brand-rust/40 bg-brand-rust/5 border-r border-brand-rust/5 select-none font-mono text-xs font-semibold">
                         getshaadilink.in/
                       </span>
                       <input
+                        id="link-slug"
                         type="text"
                         value={slug}
                         onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
@@ -507,8 +512,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       <span className="text-xs font-cinzel tracking-widest text-brand-rust/40 block mb-3 uppercase font-bold">Venue details</span>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Hall / Venue Name</label>
+                      <label htmlFor="venue-name" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Hall / Venue Name</label>
                       <input
+                        id="venue-name"
                         type="text"
                         value={vname}
                         onChange={(e) => setVname(e.target.value)}
@@ -517,10 +523,11 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Full Address for Google Maps</label>
+                      <label htmlFor="venue-address" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Full Address for Google Maps</label>
                       <div className="relative">
                         <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
                         <input
+                          id="venue-address"
                           type="text"
                           value={vaddr}
                           onChange={(e) => setVaddr(e.target.value)}
@@ -541,8 +548,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Bride's Parents & Family</label>
+                        <label htmlFor="bride-parents" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Bride's Parents & Family</label>
                         <input
+                          id="bride-parents"
                           type="text"
                           value={brideParents}
                           onChange={(e) => setBrideParents(e.target.value)}
@@ -551,8 +559,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Groom's Parents & Family</label>
+                        <label htmlFor="groom-parents" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Groom's Parents & Family</label>
                         <input
+                          id="groom-parents"
                           type="text"
                           value={groomParents}
                           onChange={(e) => setGroomParents(e.target.value)}
@@ -562,8 +571,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Welcoming Families & Greetings</label>
+                      <label htmlFor="family-blessings" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Welcoming Families & Greetings</label>
                       <input
+                        id="family-blessings"
                         type="text"
                         value={familyBlessings}
                         onChange={(e) => setFamilyBlessings(e.target.value)}
@@ -642,8 +652,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Owner Email Address</label>
+                        <label htmlFor="owner-email" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Owner Email Address</label>
                         <input
+                          id="owner-email"
                           type="email"
                           required
                           value={ownerEmail}
@@ -653,8 +664,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Secret Edit Passcode</label>
+                        <label htmlFor="edit-passcode" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Secret Edit Passcode</label>
                         <input
+                          id="edit-passcode"
                           type="text"
                           required
                           value={editPassword}
@@ -665,8 +677,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Wedding Drive Link (Optional)</label>
+                      <label htmlFor="drive-link" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Wedding Drive Link (Optional)</label>
                       <input
+                        id="drive-link"
                         type="text"
                         value={postWeddingPhotosUrl}
                         onChange={(e) => setPostWeddingPhotosUrl(e.target.value)}
@@ -785,8 +798,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                           transition={{ duration: 0.2 }}
                           className="flex flex-col gap-1.5 p-4 rounded-xl bg-brand-rust/5 border border-brand-rust/10 overflow-hidden"
                         >
-                          <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Your Personal UPI ID</label>
+                          <label htmlFor="upi-id" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Your Personal UPI ID</label>
                           <input
+                            id="upi-id"
                             type="text"
                             value={upiId}
                             onChange={(e) => setUpiId(e.target.value)}
@@ -833,8 +847,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     <div className="absolute right-4 top-4 text-3xl opacity-10">💛</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Event 1 Name</label>
+                        <label htmlFor="event1-name" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Event 1 Name</label>
                         <input
+                          id="event1-name"
                           type="text"
                           value={e1n}
                           onChange={(e) => setE1n(e.target.value)}
@@ -843,10 +858,11 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
+                        <label htmlFor="event1-time" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
                         <div className="relative">
                           <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
                           <input
+                            id="event1-time"
                             type="datetime-local"
                             value={e1t}
                             onChange={(e) => setE1t(e.target.value)}
@@ -862,8 +878,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     <div className="absolute right-4 top-4 text-3xl opacity-10">💃</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Event 2 Name</label>
+                        <label htmlFor="event2-name" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Event 2 Name</label>
                         <input
+                          id="event2-name"
                           type="text"
                           value={e2n}
                           onChange={(e) => setE2n(e.target.value)}
@@ -872,10 +889,11 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
+                        <label htmlFor="event2-time" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
                         <div className="relative">
                           <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
                           <input
+                            id="event2-time"
                             type="datetime-local"
                             value={e2t}
                             onChange={(e) => setE2t(e.target.value)}
@@ -891,8 +909,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                     <div className="absolute right-4 top-4 text-3xl opacity-10">🌸</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Event 3 Name</label>
+                        <label htmlFor="event3-name" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Event 3 Name</label>
                         <input
+                          id="event3-name"
                           type="text"
                           value={e3n}
                           onChange={(e) => setE3n(e.target.value)}
@@ -901,10 +920,11 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
+                        <label htmlFor="event3-time" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Date &amp; Timing</label>
                         <div className="relative">
                           <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-rust/35 pointer-events-none" />
                           <input
+                            id="event3-time"
                             type="datetime-local"
                             value={e3t}
                             onChange={(e) => setE3t(e.target.value)}
@@ -947,8 +967,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">How did you meet? (Raw story detail)</label>
+                    <label htmlFor="how-we-met" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">How did you meet? (Raw story detail)</label>
                     <textarea
+                      id="how-we-met"
                       value={story}
                       onChange={(e) => setStory(e.target.value)}
                       placeholder="Write briefly in your own words — where you first crossed paths, what made you click, or when you decided to spend the rest of your lives together. Our design engine will refine it into a beautiful, poetic narrative script!"

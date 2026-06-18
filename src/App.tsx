@@ -864,6 +864,7 @@ export default function App() {
               type="button"
               onClick={() => { playClickSound(); setLoginOpen(false); }}
               className="absolute top-4 right-4 text-stone-400 hover:text-white text-sm cursor-pointer font-bold"
+              aria-label="Close card management portal"
             >
               ✕
             </button>
@@ -924,10 +925,11 @@ export default function App() {
                 <>
                   {loginMode === "slug" ? (
                     <div className="flex flex-col text-left gap-1">
-                      <label className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Invitation Link Path Name</label>
+                      <label htmlFor="login-slug" className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Invitation Link Path Name</label>
                       <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden text-sm focus-within:border-amber-400/40">
                         <span className="px-3.5 py-2.5 text-stone-400 bg-white/5 border-r border-white/5 select-none font-mono font-bold">/</span>
                         <input
+                          id="login-slug"
                           type="text"
                           value={loginSlug}
                           onChange={(e) => setLoginSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
@@ -938,8 +940,9 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="flex flex-col text-left gap-1">
-                      <label className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Owner Email Address</label>
+                      <label htmlFor="login-email" className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Owner Email Address</label>
                       <input
+                        id="login-email"
                         type="email"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
@@ -950,9 +953,10 @@ export default function App() {
                   )}
 
                   <div className="flex flex-col text-left gap-1">
-                    <label className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Secret Passcode / Password</label>
+                    <label htmlFor="login-password" className="text-[10px] font-marcellus tracking-widest text-stone-400 uppercase font-semibold">Secret Passcode / Password</label>
                     <div className="relative w-full">
                       <input
+                        id="login-password"
                         type={showLoginPassword ? "text" : "password"}
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
@@ -963,6 +967,7 @@ export default function App() {
                         type="button"
                         onClick={() => { playClickSound(); setShowLoginPassword(!showLoginPassword); }}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-white transition-colors cursor-pointer select-none"
+                        aria-label={showLoginPassword ? "Hide password" : "Show password"}
                       >
                         {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -1714,6 +1719,7 @@ export default function App() {
               <button
                 onClick={() => { playClickSound(); setActivePolicyModal(null); }}
                 className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer font-bold text-xs"
+                aria-label="Close policy modal"
               >
                 ✕
               </button>
@@ -1822,6 +1828,7 @@ export default function App() {
               <button
                 onClick={() => { playClickSound(); setContactOpen(false); }}
                 className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer font-bold text-xs"
+                aria-label="Close contact modal"
               >
                 ✕
               </button>
@@ -1856,8 +1863,9 @@ export default function App() {
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Name</label>
+                        <label htmlFor="contact-name" className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Name</label>
                         <input
+                          id="contact-name"
                           type="text"
                           required
                           value={contactForm.name}
@@ -1867,8 +1875,9 @@ export default function App() {
                         />
                       </div>
                       <div className="flex flex-col gap-1">
-                        <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Email</label>
+                        <label htmlFor="contact-email" className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Email</label>
                         <input
+                          id="contact-email"
                           type="email"
                           required
                           value={contactForm.email}
@@ -1879,8 +1888,9 @@ export default function App() {
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Subject</label>
+                      <label htmlFor="contact-subject" className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Subject</label>
                       <input
+                        id="contact-subject"
                         type="text"
                         required
                         value={contactForm.subject}
@@ -1890,8 +1900,9 @@ export default function App() {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Message</label>
+                      <label htmlFor="contact-message" className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Message</label>
                       <textarea
+                        id="contact-message"
                         required
                         rows={3}
                         value={contactForm.message}
@@ -1933,6 +1944,7 @@ export default function App() {
               <button
                 onClick={() => { playClickSound(); setReviewOpen(false); }}
                 className="absolute top-5 right-5 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer font-bold text-xs"
+                aria-label="Close review modal"
               >
                 ✕
               </button>
@@ -1959,8 +1971,9 @@ export default function App() {
                 <form onSubmit={handleReviewSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Your Name *</label>
+                      <label htmlFor="review-name" className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Your Name *</label>
                       <input
+                        id="review-name"
                         type="text"
                         required
                         value={reviewForm.name}
@@ -1970,8 +1983,9 @@ export default function App() {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">City</label>
+                      <label htmlFor="review-location" className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">City</label>
                       <input
+                        id="review-location"
                         type="text"
                         value={reviewForm.location}
                         onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}

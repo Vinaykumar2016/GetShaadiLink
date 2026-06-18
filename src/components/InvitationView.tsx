@@ -178,12 +178,14 @@ function PhotoCarousel({ photos, themeAccent, themeType }: PhotoCarouselProps) {
             <button 
               onClick={prevSlide}
               className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white/70 hover:bg-white border border-brand-rust/10 text-brand-rust transition-all active:scale-90 cursor-pointer z-20"
+              aria-label="Previous slide"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={nextSlide}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white/70 hover:bg-white border border-brand-rust/10 text-brand-rust transition-all active:scale-90 cursor-pointer z-20"
+              aria-label="Next slide"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -197,6 +199,7 @@ function PhotoCarousel({ photos, themeAccent, themeType }: PhotoCarouselProps) {
                   className={`h-1.5 rounded-full transition-all cursor-pointer ${
                     currentIndex === i ? "w-4 bg-brand-rust" : "w-1.5 bg-brand-rust/30"
                   }`}
+                  aria-label={`Go to slide ${i + 1}`}
                 />
               ))}
             </div>
