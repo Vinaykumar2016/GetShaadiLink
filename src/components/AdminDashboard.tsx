@@ -161,6 +161,34 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
     }
   };
 
+  const handleSendEmail = async (slug: string, ownerEmail: string) => {
+    if (!ownerEmail) {
+      alert("This card does not have an owner email configured.");
+      return;
+    }
+    if (!confirm(`Are you sure you want to send the confirmation email to ${ownerEmail}?`)) {
+      return;
+    }
+    playClickSound();
+    try {
+      const res = await fetch(`/api/admin/invitations/${slug}/send-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        alert("Confirmation email sent successfully!");
+      } else {
+        const err = await res.json();
+        alert("Failed to send email: " + (err.error || "Unknown error"));
+      }
+    } catch (e) {
+      alert("Error triggering email: " + e);
+    }
+  };
+
   const handleTogglePaymentStatus = async (slug: string, currentPaymentId: string | null) => {
     playClickSound();
     const newPaymentId = currentPaymentId ? null : `pay_admin_unlock_${Date.now()}`;
@@ -725,6 +753,13 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </a>
+                          <button
+                            onClick={() => handleSendEmail(inv.slug, inv.ownerEmail)}
+                            title="Send Confirmation Email"
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 transition-colors cursor-pointer"
+                          >
+                            <Mail className="w-3.5 h-3.5" />
+                          </button>
                           <button
                             onClick={() => handleDeleteInvitation(inv.slug)}
                             className="w-8 h-8 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors cursor-pointer inline-flex items-center justify-center"

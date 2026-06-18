@@ -468,11 +468,29 @@ export default function App() {
 
     const fetchInvitation = async () => {
       try {
-        const passcode = localStorage.getItem("shaadi_auth_" + slug) || "";
+        const urlParams = new URLSearchParams(window.location.search);
+        const editParam = urlParams.get("edit") === "true";
+        let passcode = urlParams.get("passcode") || "";
+        if (!passcode) {
+          passcode = localStorage.getItem("shaadi_auth_" + slug) || "";
+        }
+
         const res = await fetch(`/api/invitations/${slug}?passcode=${encodeURIComponent(passcode)}`);
         if (res.ok) {
           const parsed = await res.json();
-          setInvitationData(parsed);
+          
+          if (editParam && parsed.editPassword && passcode.trim() === parsed.editPassword.trim()) {
+            // Store valid passcode in localStorage
+            localStorage.setItem("shaadi_auth_" + slug, passcode.trim());
+            // Open card in editor
+            setEditingData(parsed);
+            // Revert slug to null so we render the landing page editor
+            setSlug(null);
+            // Clean URL query parameters
+            window.history.replaceState({}, "", "/");
+          } else {
+            setInvitationData(parsed);
+          }
         } else {
           setSlug(null);
         }

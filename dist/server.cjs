@@ -78698,6 +78698,28 @@ app.post("/api/admin/invitations/:slug/amount", requireAdminAuth, (req, res) => 
     res.status(500).json({ error: "Failed to update payment amount" });
   }
 });
+app.post("/api/admin/invitations/:slug/send-email", requireAdminAuth, async (req, res) => {
+  const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+  const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
+  if (!import_fs2.default.existsSync(filePath)) {
+    res.status(404).json({ error: "Invitation not found" });
+    return;
+  }
+  try {
+    const raw = import_fs2.default.readFileSync(filePath, "utf-8");
+    const data = JSON.parse(raw);
+    if (!data.ownerEmail) {
+      res.status(400).json({ error: "Owner email is not configured for this card." });
+      return;
+    }
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+    await sendConfirmationEmail(data, appUrl);
+    res.json({ success: true, message: `Email sent to ${data.ownerEmail}` });
+  } catch (err) {
+    console.error("Failed to trigger email from admin panel:", err);
+    res.status(500).json({ error: err.message || "Failed to trigger email notification." });
+  }
+});
 app.delete("/api/admin/invitations/:slug", requireAdminAuth, (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
@@ -78778,6 +78800,266 @@ app.delete("/api/admin/queries/:id", requireAdminAuth, (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+function getEmailHtmlTemplate(invitation, liveLink, editLink, passcode) {
+  const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Digital Wedding Invitation is Live!</title>
+  <style>
+    body {
+      background-color: #FAF6F0;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #FFFFFF;
+      border: 1px solid #E8DFD3;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(112, 66, 20, 0.05);
+    }
+    .header-banner {
+      background-color: #704214; /* Sepia */
+      background: linear-gradient(135deg, #704214 0%, #8A521E 100%);
+      padding: 35px 20px;
+      text-align: center;
+      border-bottom: 3px solid #D4A878; /* Copper Accent */
+    }
+    .header-banner h1 {
+      color: #FAF6F0;
+      margin: 0;
+      font-size: 26px;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+    .header-banner p {
+      color: #E8DFD3;
+      margin: 5px 0 0 0;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    .content-body {
+      padding: 40px 30px;
+      color: #332211;
+      line-height: 1.6;
+    }
+    .greeting {
+      font-size: 18px;
+      font-weight: bold;
+      color: #704214;
+      margin-bottom: 20px;
+    }
+    .details-box {
+      background-color: #FAF6F0;
+      border-left: 4px solid #D4A878; /* Copper */
+      padding: 20px;
+      margin: 25px 0;
+      border-radius: 4px;
+    }
+    .details-row {
+      margin-bottom: 12px;
+    }
+    .details-row:last-child {
+      margin-bottom: 0;
+    }
+    .details-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8A735E;
+      margin-bottom: 2px;
+    }
+    .details-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #4D3319;
+    }
+    .details-value a {
+      color: #D48C6F; /* Copper link */
+      text-decoration: none;
+      border-bottom: 1px dashed #D48C6F;
+    }
+    .passcode-badge {
+      display: inline-block;
+      background-color: #E8DFD3;
+      color: #704214;
+      font-family: monospace;
+      font-size: 16px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .features-list {
+      margin: 25px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .feature-item {
+      font-size: 14px;
+      color: #4D3319;
+      margin-bottom: 10px;
+      padding-left: 25px;
+      position: relative;
+    }
+    .feature-item::before {
+      content: "\u2713";
+      position: absolute;
+      left: 0;
+      color: #D48C6F; /* Copper check */
+      font-weight: bold;
+    }
+    .cta-upgrade {
+      background-color: #FCF9F2;
+      border: 1px dashed #D48C6F;
+      border-radius: 8px;
+      padding: 25px;
+      text-align: center;
+      margin-top: 30px;
+    }
+    .cta-upgrade h3 {
+      margin: 0 0 10px 0;
+      color: #704214;
+      font-size: 18px;
+    }
+    .cta-upgrade p {
+      font-size: 13px;
+      color: #8A735E;
+      margin: 0 0 20px 0;
+    }
+    .btn-upgrade {
+      display: inline-block;
+      background-color: #D48C6F; /* Copper */
+      color: #FFFFFF !important;
+      text-decoration: none !important;
+      padding: 12px 30px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 6px rgba(212, 140, 111, 0.2);
+    }
+    .btn-edit {
+      display: inline-block;
+      background-color: #704214; /* Sepia */
+      color: #FFFFFF !important;
+      text-decoration: none !important;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      margin-right: 10px;
+    }
+    .footer {
+      background-color: #FAF6F0;
+      border-top: 1px solid #E8DFD3;
+      padding: 25px;
+      text-align: center;
+      font-size: 12px;
+      color: #8A735E;
+    }
+    .footer a {
+      color: #704214;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header-banner">
+      <h1>GetShaadiLink</h1>
+      <p>BEAUTIFUL DIGITAL INVITATIONS</p>
+    </div>
+    
+    <div class="content-body">
+      <div class="greeting">Congratulations, ${invitation.bride} & ${invitation.groom}!</div>
+      <p>Your beautiful digital wedding invitation is successfully generated and live on the internet! You can now share it with your family and guests.</p>
+      
+      <div class="details-box">
+        <div class="details-row">
+          <div class="details-label">Live Invitation Link</div>
+          <div class="details-value"><a href="${liveLink}" target="_blank">${liveLink}</a></div>
+        </div>
+        <div class="details-row">
+          <div class="details-label">Editing Passcode / Password</div>
+          <div class="details-value"><span class="passcode-badge">${passcode}</span></div>
+        </div>
+      </div>
+
+      <p style="margin-top: 25px; font-weight: bold; color: #704214;">Your card includes these active features:</p>
+      <ul class="features-list">
+        <li class="feature-item"><strong>Envelope Animation Cover</strong> \u2014 Elegant custom-themed entrance animation.</li>
+        <li class="feature-item"><strong>Instrumental Background Music</strong> \u2014 Soothing, premium backing audio tracks.</li>
+        <li class="feature-item"><strong>RSVP blessing wall</strong> \u2014 Real-time blessings and wishes submitted by guests.</li>
+        <li class="feature-item"><strong>UPI Shagun Gifts</strong> \u2014 Integrated gift payments direct to your bank account.</li>
+        <li class="feature-item"><strong>Event Venue Directions</strong> \u2014 Direct navigation buttons with integrated maps.</li>
+      </ul>
+
+      <div style="margin: 30px 0; text-align: center;">
+        <a href="${editLink}" target="_blank" class="btn-edit">Edit Wedding Details</a>
+      </div>
+
+      <!-- Free Tier Activation CTA -->
+      <div class="cta-upgrade">
+        <h3>Upgrade to Premium Card</h3>
+        <p>Unlock unlimited public views, lifetime invitation hosting, remove free-tier draft labels, and gain full priority support for just a single payment of <strong>\u20B9999</strong>.</p>
+        <a href="${liveLink}?pay=true" class="btn-upgrade">Activate Premium Now</a>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>Have questions or need assistance? We are here to help.</p>
+      <p>Contact Support at <a href="mailto:support@getshaadilink.in">support@getshaadilink.in</a></p>
+      <p style="margin-top: 15px; font-size: 10px;">&copy; ${currentYear} GetShaadiLink. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+async function sendConfirmationEmail(invitation, appUrl) {
+  const smtpHost = process.env.SMTP_HOST || "smtp.hostinger.com";
+  const smtpPort = parseInt(process.env.SMTP_PORT || "465", 10);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  if (!smtpUser || !smtpPass) {
+    console.warn("[Email] Warning: SMTP credentials are not configured in environment variables. Email skipped.");
+    return;
+  }
+  if (!invitation.ownerEmail) {
+    console.log("[Email] Skipping confirmation email: No owner email specified.");
+    return;
+  }
+  const transporter = import_nodemailer.default.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpPort === 465,
+    auth: {
+      user: smtpUser,
+      pass: smtpPass
+    }
+  });
+  const liveLink = `${appUrl}/${invitation.slug}`;
+  const passcode = invitation.editPassword || "N/A";
+  const editLink = `${appUrl}/${invitation.slug}?edit=true&passcode=${encodeURIComponent(passcode)}`;
+  const mailOptions = {
+    from: `"GetShaadiLink Invitations" <${smtpUser}>`,
+    to: invitation.ownerEmail,
+    subject: `Your Digital Wedding Invitation is Live! \u{1F48D} (${invitation.bride} & ${invitation.groom})`,
+    html: getEmailHtmlTemplate(invitation, liveLink, editLink, passcode)
+  };
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[Email] Confirmation sent successfully to ${invitation.ownerEmail}: ${info.messageId}`);
+  } catch (err) {
+    console.error(`[Email] Failed to send confirmation to ${invitation.ownerEmail}:`, err);
+  }
+}
 app.post("/api/invitations/generate", async (req, res) => {
   try {
     const {
@@ -79008,6 +79290,10 @@ Instructions:
     };
     const targetFilePath = import_path.default.join(INVITATIONS_DIR, `${formattedSlug}.json`);
     import_fs2.default.writeFileSync(targetFilePath, JSON.stringify(invitationRecord, null, 2), "utf-8");
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+    sendConfirmationEmail(invitationRecord, appUrl).catch((err) => {
+      console.error("[Email] Async sendConfirmationEmail failed:", err);
+    });
     res.json({ success: true, slug: formattedSlug });
   } catch (error) {
     console.error("AI Generation & storage failed:", error);
