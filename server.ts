@@ -138,6 +138,54 @@ function getGeminiClient(): GoogleGenAI {
   return aiClient;
 }
 
+// Helper: Translate event names in fallback templates to selected regional language
+function translateEventName(name: string, lang: string): string {
+  if (!name) return "";
+  const lower = name.toLowerCase();
+  
+  if (lang === "hi") {
+    if (lower.includes("haldi")) return "हल्दी रस्म";
+    if (lower.includes("sangeet")) return "संगीत संध्या";
+    if (lower.includes("wedding") || lower.includes("marriage") || lower.includes("ceremony") || lower.includes("phera") || lower.includes("lagna") || lower.includes("shubh")) return "शुभ विवाह";
+    if (lower.includes("reception")) return "प्रीतिभोज / रिसेप्शन";
+    if (lower.includes("mehendi") || lower.includes("mehndi")) return "मेहंदी रस्म";
+    return name;
+  }
+  if (lang === "kn") {
+    if (lower.includes("haldi")) return "ಹಳದಿ ಶಾಸ್ತ್ರ";
+    if (lower.includes("sangeet")) return "ಸಂಗೀತ ಸಂಜೆ";
+    if (lower.includes("wedding") || lower.includes("marriage") || lower.includes("ceremony") || lower.includes("phera") || lower.includes("lagna") || lower.includes("shubh") || lower.includes("maduve")) return "ಶುಭ ವಿವಾಹ";
+    if (lower.includes("reception")) return "ಸ್ವಾಗತ ಸಮಾರಂಭ";
+    if (lower.includes("mehendi") || lower.includes("mehndi")) return "ಮೆಹೆಂದಿ ಶಾಸ್ತ್ರ";
+    return name;
+  }
+  if (lang === "ta") {
+    if (lower.includes("haldi")) return "நலங்கு / மஞ்சள் நீராட்டு";
+    if (lower.includes("sangeet")) return "சங்கீத் விழா";
+    if (lower.includes("wedding") || lower.includes("marriage") || lower.includes("ceremony") || lower.includes("phera") || lower.includes("lagna") || lower.includes("shubh") || lower.includes("muhurtham")) return "திருமணம் / சுப முகூர்த்தம்";
+    if (lower.includes("reception")) return "வரவேற்பு நிகழ்ச்சி";
+    if (lower.includes("mehendi") || lower.includes("mehndi")) return "மெஹந்தி விழா";
+    return name;
+  }
+  if (lang === "te") {
+    if (lower.includes("haldi")) return "హల్దీ వేడుక";
+    if (lower.includes("sangeet")) return "సంగీత్ సంధ్యా";
+    if (lower.includes("wedding") || lower.includes("marriage") || lower.includes("ceremony") || lower.includes("phera") || lower.includes("lagna") || lower.includes("shubh") || lower.includes("kalyanam")) return "శుభ కళ్యాణం";
+    if (lower.includes("reception")) return "విందు / రిసెప్షన్";
+    if (lower.includes("mehendi") || lower.includes("mehndi")) return "మెహందీ వేడుక";
+    return name;
+  }
+  if (lang === "ml") {
+    if (lower.includes("haldi")) return "ഹൽദി ചടങ്ങ്";
+    if (lower.includes("sangeet")) return "സംഗീത് സന്ധ്യ";
+    if (lower.includes("wedding") || lower.includes("marriage") || lower.includes("ceremony") || lower.includes("phera") || lower.includes("lagna") || lower.includes("shubh") || lower.includes("mangalyam")) return "മംഗല്യ ചടങ്ങ്";
+    if (lower.includes("reception")) return "വിരുന്ന് / റിസപ്ഷൻ";
+    if (lower.includes("mehendi") || lower.includes("mehndi")) return "മെഹന്തി ചടങ്ങ്";
+    return name;
+  }
+  return name;
+}
+
 // API: Dynamic sitemap.xml for SEO search engines
 app.get("/sitemap.xml", (req, res) => {
   try {
@@ -485,7 +533,10 @@ app.post("/api/invitations/:slug/update", async (req, res) => {
       fields.bride !== undefined || 
       fields.groom !== undefined || 
       fields.wdate !== undefined || 
-      fields.city !== undefined
+      fields.city !== undefined ||
+      fields.e1n !== undefined ||
+      fields.e2n !== undefined ||
+      fields.e3n !== undefined
     ) {
       const langMap: Record<string, string> = {
         en: "English",
@@ -512,11 +563,20 @@ Target Regional Language: ${targetLangName}
 Couple's raw story: "${rawStory}"
 Random seed for design variant: ${seed}
 
+Input Event Names to Translate:
+- Event 1: "${e1n || 'Haldi Ceremony'}"
+- Event 2: "${e2n || 'Sangeet Night'}"
+- Event 3: "${e3n || 'Wedding Ceremony'}"
+
 Instructions:
 1. Write storyEnglish: Read the couple's raw story, correct any spelling, grammatical, or phrasing errors, and rewrite it into a beautifully polished, elegant, and romantic story of 3-4 sentences in perfect English. Keep all names, dates, and locations, but make it sound premium and warm.
 2. Write storyRegional: Translate ONLY the polished storyEnglish version you created in Step 1 into the script of the target regional language (${targetLangName}) (e.g. if target is Kannada write in Kannada script, if Hindi write in Devanagari script). Do NOT directly translate the unpolished raw story, and ensure no raw English words or grammatical errors are carried over.
 3. Create tagline: A short romantic heading (8-12 words).
-4. Translate e1n, e2n, e3n into ${targetLangName} script for eventRegional strings (event1Regional, event2Regional, event3Regional).
+4. Translate the Input Event Names into the target regional language (${targetLangName}) script:
+   - Translate Event 1 Name ("${e1n || 'Haldi Ceremony'}") -> save as event1Regional
+   - Translate Event 2 Name ("${e2n || 'Sangeet Night'}") -> save as event2Regional
+   - Translate Event 3 Name ("${e3n || 'Wedding Ceremony'}") -> save as event3Regional
+   If the target regional language is English, make sure event1Regional, event2Regional, event3Regional match the input event names exactly.
 5. Create a gorgeous, warm Indian wedding palette for the UI:
    - primary: deep celebratory hex (e.g., silk magenta #9B1B6A, ruby #BA1A4B, crimson)
    - secondary: royal gold lustre hex (e.g., #D4A843, #E6C252)
@@ -579,54 +639,35 @@ Instructions:
           ` Guided by trust and shared dreams, we are taking our next beautiful step together on ${niceDate} in ${city}.`;
 
         let polishedRegional = polishedEnglish;
-        let ev1Reg = e1n || "Haldi Ceremony";
-        let ev2Reg = e2n || "Sangeet Night";
-        let ev3Reg = e3n || "Wedding Ceremony";
-
         if (lang === "hi") {
           polishedRegional = `${bride} और ${groom} का यह सफर प्यार, अटूट विश्वास और साझेदारी की एक सुंदर कहानी है। ` +
             `हम मिले, हमें एक-दूसरे से लगाव हुआ, और हमने हमेशा के लिए एक होने का फैसला किया। ` +
             `अपने सुंदर सपनों और अपनों के आशीर्वाद के साथ, हम ${niceDate} को ${city} में अपने जीवन के इस नए और पावन सफर की शुरुआत कर रहे हैं।`;
-          ev1Reg = e1n === "Haldi Ceremony" ? "हल्दी रस्म" : e1n;
-          ev2Reg = e2n === "Sangeet Night" ? "संगीत संध्या" : e2n;
-          ev3Reg = e3n === "Wedding Ceremony" ? "शुभ विवाह" : e3n;
         } else if (lang === "kn") {
           polishedRegional = `${bride} ಮತ್ತು ${groom} ರವರ ಈ ಪಯಣವು ಪ್ರೀತಿ, ಪರಸ್ಪರ ನಂಬಿಕೆ ಮತ್ತು ಸುಂದರ ಒಡನಾಟದ ಕಥೆಯಾಗಿದೆ. ` +
             `ನಾವು ಭೇಟಿಯಾದೆವು, ಪ್ರೀತಿಯಲ್ಲಿ ಬಿದ್ದೆವು ಮತ್ತು ನಮ್ಮ ಜೀವನವನ್ನು ಎಂದೆಂದಿಗೂ ಒಟ್ಟಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ನಿರ್ಧರಿಸಿದೆವು. ` +
             `ಹಿರಿಯರ ಆಶೀರ್ವಾದ ಮತ್ತು ಹಂಚಿಕೊಂಡ ಕನಸುಗಳೊಂದಿಗೆ, ನಾವು ${niceDate} ರಂದು ${city} ನಲ್ಲಿ ನಮ್ಮ ಜೀವನದ ಹೊಸ ಹೆಜ್ಜೆಯನ್ನು ಇಡುತ್ತಿದ್ದೇವೆ.`;
-          ev1Reg = e1n === "Haldi Ceremony" ? "ಹಳದಿ ಶಾಸ್ತ್ರ" : e1n;
-          ev2Reg = e2n === "Sangeet Night" ? "ಸಂಗೀತ ಸಂಜೆ" : e2n;
-          ev3Reg = e3n === "Wedding Ceremony" ? "ಶುಭ ವಿವಾಹ" : e3n;
         } else if (lang === "ta") {
-          polishedRegional = `${bride} மற்றும் ${groom} இன் இந்த பயணம் காதல், பரஸ்பர நம்பிக்கை மற்றும் துணையின் அழகான கதையாகும். ` +
+          polishedRegional = `${bride} மற்றும் ${groom} இன் இந்த பயணம் காதல், பரಸ್ಪர நம்பிக்கை மற்றும் துணையின் அழகான கதையாகும். ` +
             `நாங்கள் சந்தித்தோம், காதலித்தோம், எங்கள் வாழ்க்கையை என்றென்றும் பகிர்ந்து கொள்ள முடிவு செய்தோம். ` +
             `அன்பானவர்களின் ஆசி மற்றும் பகிரப்பட்ட கனவுகளுடன், நாம் ${niceDate} அன்று ${city} இல் எங்கள் புதிய வாழ்க்கையைத் தொடங்குகிறோம்.`;
-          ev1Reg = e1n === "Haldi Ceremony" ? "நலங்கு / மஞ்சள் நீராட்டு" : e1n;
-          ev2Reg = e2n === "Sangeet Night" ? "சங்கீத் விழா" : e2n;
-          ev3Reg = e3n === "Wedding Ceremony" ? "திருமணம் / சுப முகூர்த்தம்" : e3n;
         } else if (lang === "te") {
           polishedRegional = `${bride} మరియు ${groom} ల ఈ ప్రయాణం ప్రేమ, నమ్మకం మరియు బంధానికి ఒక అందమైన నిదర్శనం. ` +
             `మేము కలుసుకున్నాము, ప్రేమలో పడ్డాము మరియు మా జీవితాలను ఎప్పటికీ పంచుకోవాలని నిర్ణయించుకున్నాము. ` +
             `పెద్దల ఆశీస్సులు మరియు కలలతో, మేము ${niceDate} న ${city} లో మా జీవిత కొత్త అధ్యాయాన్ని ప్రారంభిస్తున్నాము.`;
-          ev1Reg = e1n === "Haldi Ceremony" ? "హల్దీ వేడుక" : e1n;
-          ev2Reg = e2n === "Sangeet Night" ? "సంగీత్ సంధ్యా" : e2n;
-          ev3Reg = e3n === "Wedding Ceremony" ? "శుభ కళ్యాణం" : e3n;
         } else if (lang === "ml") {
           polishedRegional = `${bride} യുടെയും ${groom} ന്റെയും ഈ യാത്ര സ്നേഹത്തിന്റെയും പരസ്പര വിശ്വാസത്തിന്റെയും മനോഹരമായ കഥയാണ്. ` +
             `ഞങ്ങൾ കണ്ടുമുട്ടി, പ്രണയത്തിലായി, ഞങ്ങളുടെ ജീവിതം എന്നെന്നേക്കുമായി പങ്കിടാൻ തീരുമാനിച്ചു. ` +
             `പ്രിയപ്പെട്ടവരുടെ അനുഗ്രഹത്തോടെയും സ്വപ്നങ്ങളോടെയും, ഞങ്ങൾ ${niceDate}-ൽ ${city}-ൽ ഞങ്ങളുടെ പുതിയ ജീവിതം ആരംഭിക്കുന്നു.`;
-          ev1Reg = e1n === "Haldi Ceremony" ? "ഹൽദി ചടങ്ങ്" : e1n;
-          ev2Reg = e2n === "Sangeet Night" ? "സംഗീത് സന്ധ്യ" : e2n;
-          ev3Reg = e3n === "Wedding Ceremony" ? "മംഗല്യ ചടങ്ങ്" : e3n;
         }
 
         parsedAiResult = {
           storyEnglish: polishedEnglish,
           storyRegional: polishedRegional,
           tagline: `${bride} & ${groom}'s Sacred Wedding Celebration`,
-          event1Regional: ev1Reg,
-          event2Regional: ev2Reg,
-          event3Regional: ev3Reg,
+          event1Regional: translateEventName(e1n || "Haldi Ceremony", lang),
+          event2Regional: translateEventName(e2n || "Sangeet Night", lang),
+          event3Regional: translateEventName(e3n || "Wedding Ceremony", lang),
           theme: data.theme || {
             name: "Standard Saffron",
             primary: "#8A3A1A",
@@ -649,26 +690,55 @@ Instructions:
       openingTheme: fields.openingTheme !== undefined ? fields.openingTheme : data.openingTheme,
       views: data.views || 0,
       guestbookNotes: fields.guestbookNotes !== undefined ? fields.guestbookNotes : (data.guestbookNotes || []),
-    };
-
-    if (parsedAiResult) {
-      updatedRecord.storyEnglish = parsedAiResult.storyEnglish;
-      updatedRecord.storyRegional = parsedAiResult.storyRegional;
-      updatedRecord.tagline = parsedAiResult.tagline;
-      updatedRecord.niceDate = niceDate;
-      updatedRecord.langNative = {
+      niceDate,
+      langNative: {
         en: "English",
         kn: "ಕನ್ನಡ",
         hi: "हिंदी",
         ta: "தமிழ்",
         te: "ತೆಲುಗು",
         ml: "മലയാളം",
-      }[lang] || "English";
-      updatedRecord.events = [
-        { name: e1n, regional: parsedAiResult.event1Regional, time: e1t, emoji: "💛" },
-        { name: e2n, regional: parsedAiResult.event2Regional, time: e2t, emoji: "💃" },
-        { name: e3n, regional: parsedAiResult.event3Regional, time: e3t, emoji: "🌸" },
-      ];
+      }[lang] || "English",
+    };
+
+    // Reconstruct regional translations for events.
+    // If AI was triggered and succeeded, we use its translations.
+    // Otherwise, we reuse existing translation if the event name and language haven't changed,
+    // or fall back to local translation helper.
+    const getEventRegional = (index: number, newName: string, aiReg?: string) => {
+      if (aiReg) return aiReg;
+      const oldEv = data.events && data.events[index];
+      if (lang === data.lang && oldEv && oldEv.name === newName && oldEv.regional) {
+        return oldEv.regional;
+      }
+      return translateEventName(newName, lang);
+    };
+
+    updatedRecord.events = [
+      {
+        name: e1n,
+        regional: getEventRegional(0, e1n, parsedAiResult?.event1Regional),
+        time: e1t,
+        emoji: (data.events && data.events[0]?.emoji) || "💛"
+      },
+      {
+        name: e2n,
+        regional: getEventRegional(1, e2n, parsedAiResult?.event2Regional),
+        time: e2t,
+        emoji: (data.events && data.events[1]?.emoji) || "💃"
+      },
+      {
+        name: e3n,
+        regional: getEventRegional(2, e3n, parsedAiResult?.event3Regional),
+        time: e3t,
+        emoji: (data.events && data.events[2]?.emoji) || "🌸"
+      },
+    ];
+
+    if (parsedAiResult) {
+      updatedRecord.storyEnglish = parsedAiResult.storyEnglish;
+      updatedRecord.storyRegional = parsedAiResult.storyRegional;
+      updatedRecord.tagline = parsedAiResult.tagline;
       updatedRecord.theme = data.theme || parsedAiResult.theme;
     }
 
@@ -1490,11 +1560,20 @@ Target Regional Language: ${targetLangName}
 Couple's raw story: "${rawStory}"
 Random seed for design variant: ${seed}
 
+Input Event Names to Translate:
+- Event 1: "${e1n || 'Haldi Ceremony'}"
+- Event 2: "${e2n || 'Sangeet Night'}"
+- Event 3: "${e3n || 'Wedding Ceremony'}"
+
 Instructions:
 1. Write storyEnglish: Read the couple's raw story, correct any spelling, grammatical, or phrasing errors, and rewrite it into a beautifully polished, elegant, and romantic story of 3-4 sentences in perfect English. Keep all names, dates, and locations, but make it sound premium and warm.
 2. Write storyRegional: Translate ONLY the polished storyEnglish version you created in Step 1 into the script of the target regional language (${targetLangName}) (e.g. if target is Kannada write in Kannada script, if Hindi write in Devanagari script). Do NOT directly translate the unpolished raw story, and ensure no raw English words or grammatical errors are carried over.
 3. Create tagline: A short romantic heading (8-12 words).
-4. Translate e1n, e2n, e3n into ${targetLangName} script for eventRegional strings (event1Regional, event2Regional, event3Regional).
+4. Translate the Input Event Names into the target regional language (${targetLangName}) script:
+   - Translate Event 1 Name ("${e1n || 'Haldi Ceremony'}") -> save as event1Regional
+   - Translate Event 2 Name ("${e2n || 'Sangeet Night'}") -> save as event2Regional
+   - Translate Event 3 Name ("${e3n || 'Wedding Ceremony'}") -> save as event3Regional
+   If the target regional language is English, make sure event1Regional, event2Regional, event3Regional match the input event names exactly.
 5. Create a gorgeous, warm Indian wedding palette for the UI:
    - primary: deep celebratory hex (e.g., silk magenta #9B1B6A, ruby #BA1A4B, crimson)
    - secondary: royal gold lustre hex (e.g., #D4A843, #E6C252)
@@ -1502,7 +1581,7 @@ Instructions:
    - bg: deep cosmic backdrop hex (e.g., #08000F, #0E001A, #120124)
    - heroEmoji: selection of romantic flower or accessory emoji (e.g., 🌸, 🌺, 💍, 🪔)`;
 
-        const geminiRes = await ai.models.generateContent({
+const geminiRes = await ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: promptText,
           config: {
@@ -1557,54 +1636,35 @@ Instructions:
         ` Guided by trust and shared dreams, we are taking our next beautiful step together on ${niceDate} in ${city}.`;
 
       let polishedRegional = polishedEnglish;
-      let ev1Reg = e1n || "Haldi Ceremony";
-      let ev2Reg = e2n || "Sangeet Night";
-      let ev3Reg = e3n || "Wedding Ceremony";
-
       if (lang === "hi") {
         polishedRegional = `${bride} और ${groom} का यह सफर प्यार, अटूट विश्वास और साझेदारी की एक सुंदर कहानी है। ` +
           `हम मिले, हमें एक-दूसरे से लगाव हुआ, और हमने हमेशा के लिए एक होने का फैसला किया। ` +
           `अपने सुंदर सपनों और अपनों के आशीर्वाद के साथ, हम ${niceDate} को ${city} में अपने जीवन के इस नए और पावन सफर की शुरुआत कर रहे हैं।`;
-        ev1Reg = e1n === "Haldi Ceremony" ? "हल्दी रस्म" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "संगीत संध्या" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "शुभ विवाह" : e3n;
       } else if (lang === "kn") {
         polishedRegional = `${bride} ಮತ್ತು ${groom} ರವರ ಈ ಪಯಣವು ಪ್ರೀತಿ, ಪರಸ್ಪರ ನಂಬಿಕೆ ಮತ್ತು ಸುಂದರ ಒಡನಾಟದ ಕಥೆಯಾಗಿದೆ. ` +
           `ನಾವು ಭೇಟಿಯಾದೆವು, ಪ್ರೀತಿಯಲ್ಲಿ ಬಿದ್ದೆವು ಮತ್ತು ನಮ್ಮ ಜೀವನವನ್ನು ಎಂದೆಂದಿಗೂ ಒಟ್ಟಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ನಿರ್ಧರಿಸಿದೆವು. ` +
           `ಹಿರಿಯರ ಆಶೀರ್ವಾದ ಮತ್ತು ಹಂಚಿಕೊಂಡ ಕನಸುಗಳೊಂದಿಗೆ, ನಾವು ${niceDate} ರಂದು ${city} ನಲ್ಲಿ ನಮ್ಮ ಜೀವನದ ಹೊಸ ಹೆಜ್ಜೆಯನ್ನು ಇಡುತ್ತಿದ್ದೇವೆ.`;
-        ev1Reg = e1n === "Haldi Ceremony" ? "ಹಳದಿ ಶಾಸ್ತ್ರ" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "ಸಂಗೀತ ಸಂಜೆ" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "ಶುಭ ವಿವಾಹ" : e3n;
       } else if (lang === "ta") {
         polishedRegional = `${bride} மற்றும் ${groom} இன் இந்த பயணம் காதல், பரஸ்பர நம்பிக்கை மற்றும் துணையின் அழகான கதையாகும். ` +
           `நாங்கள் சந்தித்தோம், காதலித்தோம், எங்கள் வாழ்க்கையை என்றென்றும் பகிர்ந்து கொள்ள முடிவு செய்தோம். ` +
           `அன்பானவர்களின் ஆசி மற்றும் பகிரப்பட்ட கனவுகளுடன், நாம் ${niceDate} அன்று ${city} இல் எங்கள் புதிய வாழ்க்கையைத் தொடங்குகிறோம்.`;
-        ev1Reg = e1n === "Haldi Ceremony" ? "நலங்கு / மஞ்சள் நீராட்டு" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "சங்கீத் விழா" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "திருமணம் / சுப முகூர்த்தம்" : e3n;
       } else if (lang === "te") {
         polishedRegional = `${bride} మరియు ${groom} ల ఈ ప్రయాణం ప్రేమ, నమ్మకం మరియు బంధానికి ఒక అందమైన నిదర్శనం. ` +
           `మేము కలుసుకున్నాము, ప్రేమలో పడ్డాము మరియు మా జీవితాలను ఎప్పటికీ పంచుకోవాలని నిర్ణయించుకున్నాము. ` +
           `పెద్దల ఆశీస్సులు మరియు కలలతో, మేము ${niceDate} న ${city} లో మా జీవిత కొత్త అధ్యాయాన్ని ప్రారంభిస్తున్నాము.`;
-        ev1Reg = e1n === "Haldi Ceremony" ? "హల్దీ వేడుక" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "సంగీత్ సంధ్యా" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "శుభ కళ్యాణం" : e3n;
       } else if (lang === "ml") {
         polishedRegional = `${bride} യുടെയും ${groom} ന്റെയും ഈ യാത്ര സ്നേഹത്തിന്റെയും പരസ്പര വിശ്വാസത്തിന്റെയും മനോഹരമായ കഥയാണ്. ` +
           `ഞങ്ങൾ കണ്ടുമുട്ടി, പ്രണയത്തിലായി, ഞങ്ങളുടെ ജീവിതം എന്നെന്നേക്കുമായി പങ്കിടാൻ തീരുമാനിച്ചു. ` +
           `പ്രിയപ്പെട്ടവരുടെ അനുഗ്രഹത്തോടെയും സ്വപ്നങ്ങളോടെയും, ഞങ്ങൾ ${niceDate}-ൽ ${city}-ൽ ഞങ്ങളുടെ പുതിയ ജീവിതം ആരംഭിക്കുന്നു.`;
-        ev1Reg = e1n === "Haldi Ceremony" ? "ഹൽദി ചടങ്ങ്" : e1n;
-        ev2Reg = e2n === "Sangeet Night" ? "സംഗീത് സന്ധ്യ" : e2n;
-        ev3Reg = e3n === "Wedding Ceremony" ? "മംഗല്യ ചടങ്ങ്" : e3n;
       }
 
       parsedAiResult = {
         storyEnglish: polishedEnglish,
         storyRegional: polishedRegional,
         tagline: `${bride} & ${groom}'s Sacred Wedding Celebration`,
-        event1Regional: ev1Reg,
-        event2Regional: ev2Reg,
-        event3Regional: ev3Reg,
+        event1Regional: translateEventName(e1n || "Haldi Ceremony", lang),
+        event2Regional: translateEventName(e2n || "Sangeet Night", lang),
+        event3Regional: translateEventName(e3n || "Wedding Ceremony", lang),
         theme: {
           name: "Standard Saffron",
           primary: "#8A3A1A",
