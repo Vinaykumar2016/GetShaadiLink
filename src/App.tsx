@@ -1013,15 +1013,17 @@ export default function App() {
               </div>
 
               <h1 className="font-marcellus font-medium text-3xl sm:text-5xl lg:text-7xl leading-tight text-white">
-                Create & Preview
+                Create a Beautiful
                 <span className="block mt-1 font-cursive text-amber-400 font-normal normal-case text-4xl sm:text-6xl lg:text-8xl">
-                  Bespoke & Beautiful
+                  Digital Wedding Card
                 </span>
-                Invitations for Free
+                in 2 Minutes for Free
               </h1>
 
-              <p className="text-sm sm:text-base text-stone-300/80 tracking-wide leading-relaxed max-w-xl font-cormorant">
-                Design a gorgeous, premium mobile-first wedding website for your big day. Enclose your details in elegant traditional covers, play instrumental background melodies, enable a live blessings guestbook wall, and collect shagun gifts. Preview your full invitation for free, and pay ₹999 once to activate your live link. Includes lifetime hosting with unlimited edits—change themes, update details, or add Google Drive links anytime, as many times as you want!
+              <p className="text-sm sm:text-base text-stone-300/90 tracking-wide leading-relaxed max-w-xl font-cormorant">
+                Make a premium mobile-friendly wedding website to share with your guests. It comes with beautiful opening cover animations, traditional background music, Google Maps venue directions, RSVP forms, a live blessings wall, and direct UPI Shagun gift collections.
+                <br /><br />
+                It is <strong>100% free to build and preview</strong>. You only pay a one-time activation fee of ₹999 when you are ready to publish it. Includes lifetime hosting with unlimited edits so you can change dates or themes anytime for free!
               </p>
 
               {/* Quick Feature highlights */}
@@ -1032,15 +1034,15 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">Interactive Cover Animations</span>
+                  <span className="text-xs font-semibold">Music, RSVP, Venue Maps & UPI</span>
                 </div>
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">Polished Dual-Language Stories</span>
+                  <span className="text-xs font-semibold">No Ads or Company Branding</span>
                 </div>
                 <div className="flex items-center gap-2 text-stone-200">
                   <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">✓</div>
-                  <span className="text-xs font-semibold">No Ads or ShaadiLink Branding</span>
+                  <span className="text-xs font-semibold">Pay ₹999 Once for Lifetime Access</span>
                 </div>
               </div>
 
@@ -1155,6 +1157,39 @@ export default function App() {
             />
           </motion.section>
 
+          {/* Unified Creation Form */}
+          <section id="form-container" className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24 z-10">
+            <div className="relative p-6 sm:p-10 rounded-[36px] bg-gradient-to-r from-brand-rust/20 to-[#120E2B]/95 border border-amber-500/20 backdrop-blur-md shadow-2xl shadow-amber-500/5 overflow-hidden">
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-amber-400/35 rounded-tl-2xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-amber-400/35 rounded-tr-2xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-amber-400/35 rounded-bl-2xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-400/35 rounded-br-2xl pointer-events-none" />
+              
+              <div className="text-center space-y-2 mb-10 max-w-md mx-auto">
+                <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase">
+                  ✨ WEDDING CARD CREATOR
+                </span>
+                <h2 className="font-marcellus text-2xl sm:text-3xl font-bold tracking-wider text-white">
+                  Enter Details & Preview Instantly
+                </h2>
+                <p className="text-xs text-stone-400 font-cormorant leading-relaxed">
+                  Fill in your details below. Your beautiful digital wedding invitation website will be ready to preview instantly in real-time.
+                </p>
+              </div>
+
+              <BuilderForm
+                onSuccess={(updatedSlug) => {
+                  setEditingData(null);
+                  handleCreateSuccess(updatedSlug);
+                }}
+                initialData={editingData}
+                onCancelEdit={() => { playClickSound(); setEditingData(null); }}
+                preselectedTheme={preselectedFormTheme}
+              />
+            </div>
+          </section>
+
           {/* SALES FEATURES PERSUASIVE GRID */}
           <motion.section
             initial={{ opacity: 0, y: 40 }}
@@ -1165,7 +1200,7 @@ export default function App() {
           >
             <div className="text-center space-y-2 mb-12">
               <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase">
-                👑 BESPOKE SCRAPBOOK SPECIFICATIONS
+                🌸 EVERYTHING INCLUDED IN YOUR CARD
               </span>
               <h2 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
                 Everything Included For ₹999
@@ -1642,18 +1677,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Unified Creation Form */}
-          <section id="form-container" className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 pb-24 scroll-mt-24 z-10">
-            <BuilderForm
-              onSuccess={(updatedSlug) => {
-                setEditingData(null);
-                handleCreateSuccess(updatedSlug);
-              }}
-              initialData={editingData}
-              onCancelEdit={() => { playClickSound(); setEditingData(null); }}
-              preselectedTheme={preselectedFormTheme}
-            />
-          </section>
+
         </main>
       )}
 
