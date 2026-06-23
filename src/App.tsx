@@ -10,6 +10,70 @@ import { playClickSound } from "./utils/soundUtils";
 import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote, ChevronDown, Minus } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "motion/react";
 
+
+const landingTranslations = {
+  en: {
+    heroParagraph: "Make a premium mobile-friendly wedding website to share with your guests. It comes with beautiful opening cover animations, traditional background music, Google Maps venue directions, RSVP forms, a live blessings wall, and direct UPI Shagun gift collections.\n\nIt is 100% free to build and preview. You only pay a one-time activation fee of ₹999 when you are ready to publish it. Includes lifetime hosting with unlimited edits so you can change dates or themes anytime for free!",
+    stepsTitle: "How It Works — Get Your Live Card",
+    stepsSub: "EASY 3-STEP PROCESS",
+    steps: [
+      { step: "01", title: "Enter Wedding Details", desc: "Fill out names, dates, venue map links, and upload your beautiful gallery photos." },
+      { step: "02", title: "Preview & Customize", desc: "Instantly see your live mobile wedding website with cover animations and romantic music." },
+      { step: "03", title: "Share with Guests", desc: "Pay ₹999 once to activate your permanent link, share on WhatsApp, and collect RSVPs and gifts." }
+    ]
+  },
+  kn: {
+    heroParagraph: "ನಿಮ್ಮ ಅತಿಥಿಗಳೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ಪ್ರೀಮಿಯಂ ಮೊಬೈಲ್-ಸ್ನೇಹಿ ವೆಡ್ಡಿಂಗ್ ವೆಬ್‌ಸೈಟ್ ರಚಿಸಿ. ಇದು ಸುಂದರವಾದ ಲಕೋಟೆ ತೆರೆಯುವ ಅನಿಮೇಷನ್‌ಗಳು, ಸಾಂಪ್ರದಾಯಿಕ ಹಿನ್ನೆಲೆ ಸಂಗೀತ, ಗೂಗಲ್ ಮ್ಯಾಪ್ಸ್ ಸ್ಥಳ ನಿರ್ದೇಶನಗಳು, ಆರ್ಎಸ್ವಿಪಿ ಫಾರ್ಮ್‌ಗಳು, ಲೈವ್ ಆಶೀರ್ವಾದಗಳ ಗೋಡೆ ಮತ್ತು ನೇರ ಯುಪಿಐ ಶಗುನ್ ಉಡುಗೊರೆ ಸಂಗ್ರಹಣೆಗಳನ್ನು ಒಳಗೊಂಡಿದೆ.\n\nಇದನ್ನು ರಚಿಸಲು ಮತ್ತು ಮುನ್ನೋಟ ವೀಕ್ಷಿಸಲು 100% ಉಚಿತವಾಗಿದೆ. ನೀವು ಪ್ರಕಟಿಸಲು ಸಿದ್ಧರಾದಾಗ ಒಮ್ಮೆ ಮಾತ್ರ ₹999 ಪಾವತಿಸಬೇಕಾಗುತ್ತದೆ. ಜೀವಿತಾವಧಿಯ ಹೋಸ್ಟಿಂಗ್ ಜೊತೆಗೆ ಅನಿಯಮಿತ ಸಂಪಾದನೆಗಳು ಉಚಿತ!",
+    stepsTitle: "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ — ನಿಮ್ಮ ಲೈವ್ ಕಾರ್ಡ್ ಪಡೆಯಿರಿ",
+    stepsSub: "ಸುಲಭವಾದ 3 ಹಂತಗಳು",
+    steps: [
+      { step: "01", title: "ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ", desc: "ಹೆಸರುಗಳು, ದಿನಾಂಕಗಳು, ಗೂಗಲ್ ಮ್ಯಾಪ್ ಲಿಂಕ್‌ಗಳು ಮತ್ತು ಸುಂದರ ಫೋಟೋಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ." },
+      { step: "02", title: "ಮುನ್ನೋಟ ಮತ್ತು ಬದಲಾವಣೆ", desc: "ಅನಿಮೇಷನ್‌ಗಳು ಮತ್ತು ಸಂಗೀತದೊಂದಿಗೆ ನಿಮ್ಮ ಲೈವ್ ವೆಬ್‌ಸೈಟ್ ಅನ್ನು ತಕ್ಷಣವೇ ವೀಕ್ಷಿಸಿ." },
+      { step: "03", title: "ಅತಿಥಿಗಳಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ", desc: "ಲಿಂಕ್ ಸಕ್ರಿಯಗೊಳಿಸಲು ಒಮ್ಮೆ ₹999 ಪಾವತಿಸಿ, ವಾಟ್ಸಾಪ್‌ನಲ್ಲಿ ಹಂಚಿಕೊಳ್ಳಿ ಮತ್ತು ಉಡುಗೊರೆಗಳನ್ನು ಸಂಗ್ರಹಿಸಿ." }
+    ]
+  },
+  hi: {
+    heroParagraph: "अपने मेहमानों के साथ साझा करने के लिए एक प्रीमियम मोबाइल-फ्रेंडली वेडिंग वेबसाइट बनाएं। यह सुंदर लिफाफा खुलने वाले एनिमेशन, पारंपरिक पृष्ठभूमि संगीत, गूगल मैप्स स्थान निर्देश, आरएसवीपी फॉर्म, लाइव आशीर्वाद दीवार और सीधे यूपीआई शगुन उपहार संग्रह के साथ आता है।\n\nइसे बनाना और पूर्वावलोकन करना 100% मुफ्त है। जब आप इसे लाइव करने के लिए तैयार हों, तो केवल ₹999 का एक बार भुगतान करें। आजीवन होस्टिंग और असीमित बदलाव मुफ्त!",
+    stepsTitle: "यह कैसे काम करता है — अपना लाइव कार्ड प्राप्त करें",
+    stepsSub: "आसान 3-चरण प्रक्रिया",
+    steps: [
+      { step: "01", title: "विवरण दर्ज करें", desc: "नाम, तिथियां, स्थान लिंक भरें और सुंदर गैलरी तस्वीरें अपलोड करें।" },
+      { step: "02", title: "पूर्वालोकन और अनुकूलन", desc: "एनिमेशन और संगीत के साथ अपनी लाइव मोबाइल वेडिंग वेबसाइट को तुरंत देखें।" },
+      { step: "03", title: "मेहमानों से साझा करें", desc: "लिंक सक्रिय करने के लिए एक बार ₹999 भुगतान करें, व्हाट्सएप पर साझा करें और उपहार एकत्र करें।" }
+    ]
+  },
+  ta: {
+    heroParagraph: "உங்கள் விருந்தினர்களுடன் பகிர்ந்து கொள்ள பிரீமியம் மொபைல்-நண்பன் திருமண வலைத்தளத்தை உருவாக்குங்கள். இது அழகான உறை திறக்கும் அனிமேஷன்கள், பாரம்பரிய பின்னணி இசை, கூகுள் மேப்ஸ் இருப்பிட வழிகாட்டுதல்கள், ஆர்எஸ்விபி படிவங்கள், நேரடி வாழ்த்து சுவர் மற்றும் நேரடி யுபிഐ ஷகன் பரிசு சேகரிப்புகளுடன் வருகிறது.\n\nஇதை உருவாக்குவதும் முன்னோட்டம் பார்ப்பதும் 100% இலவசம். நீங்கள் வெளியிட தயாராக இருக்கும்போது ஒரு முறை மட்டும் ₹999 செலுத்தினால் போதும். வாழ்நாள் ஹோஸ்டிங் மற்றும் வரம்பற்ற திருத்தங்கள் இலவசம்!",
+    stepsTitle: "எவ்வாறு செயல்படுகிறது — உங்கள் நேரடி கார்டைப் பெறுங்கள்",
+    stepsSub: "எளிதான 3-படி செயல்முறை",
+    steps: [
+      { step: "01", title: "விவரங்களை உள்ளிடவும்", desc: "பெயர்கள், தேதிகள், இருப்பிட இணைப்புகளை நிரப்பவும் மற்றும் புகைப்படங்களை பதிவேற்றவும்." },
+      { step: "02", title: "முன்னோட்டம் மற்றும் தனிப்பயனாக்கு", desc: "அனிமேஷன்கள் மற்றும் இசையுடன் உங்கள் நேரடி வலைத்தளத்தை உடனடியாகப் பாருங்கள்." },
+      { step: "03", title: "விருந்தினர்களுடன் பகிர்ந்து கொள்ளுங்கள்", desc: "இணைப்பைச் செயல்படுத்த ஒரு முறை ₹999 செலுத்தி, வாட்ஸ்அப்பில் பகிர்ந்து வாழ்த்துக்களைப் பெறுங்கள்." }
+    ]
+  },
+  te: {
+    heroParagraph: "మీ అతిథులతో పంచుకోవడానికి ప్రీమియం మొబైల్-ఫ్రెండ్లీ వెడ్డింగ్ వెబ్‌సైట్‌ను తయారు చేయండి. ఇది అందమైన కవరు తెరుచుకునే యానిమేషన్‌లు, సాంప్రదాయ నేపథ్య సంగీతం, గూగుల్ మ్యాప్స్ వేదిక దిశలు, RSVP ఫారమ్‌లు, లైవ్ ఆశీర్వాదాల గోడ మరియు నేరుగా UPI షగున్ బహుమతి సేకరణలతో వస్తుంది.\n\nఇది తయారు చేయడానికి మరియు ప్రివ్యూ చూడటానికి 100% ఉచితం. మీరు ప్రచురించడానికి సిద్ధంగా ఉన్నప్పుడు ఒకే ఒక్కసారి ₹999 చెల్లిస్తే సరిపోతుంది. అపరిమిత మార్పులతో లైఫ్‌టైమ్ హోస్టింగ్ ఉచితం!",
+    stepsTitle: "ఎలా పనిచేస్తుంది — మీ లైవ్ కార్డ్ పొందండి",
+    stepsSub: "సులువైన 3-దశల ప్రక్రియ",
+    steps: [
+      { step: "01", title: "ವಿವರాలను నమోదు చేయండి", desc: "పేర్లు, తేదీలు, వేదిక లింక్‌లను పూరించండి మరియు ఫోటోలను అప్‌లోడ్ చేయండి." },
+      { step: "02", title: "ప్రివ్యూ మరియు అనుకూలీకరణ", desc: "యానిమేషన్‌లు మరియు సంగీతంతో మీ లైవ్ వెబ్‌సైట్‌ను తక్షణమే చూడండి." },
+      { step: "03", title: "అతిథులతో పంచుకోండి", desc: "లింక్‌ను సక్రియం చేయడానికి ఒకసారి ₹999 చెల్లించి, వాట్సాప్‌లో పంచుకోండి మరియు బహుమతులు సేకరించండి." }
+    ]
+  },
+  ml: {
+    heroParagraph: "നിങ്ങളുടെ അതിഥികളുമായി പങ്കിടാൻ ഒരു പ്രീമിയം മൊബൈൽ ഫ്രണ്ട്‌ലി വെഡ്ഡിംഗ് വെബ്സൈറ്റ് നിർമ്മിക്കുക. ഇത് മനോഹരമായ കവർ ആനിമേഷനുകൾ, പരമ്പരാഗത പശ്ചാത്തല സംഗീതം, ഗൂഗിൾ മാപ്‌സ് ലൊക്കേഷൻ നിർദ്ദേശങ്ങൾ, RSVP ഫോമുകൾ, തത്സമയ അനുഗ്രഹ മതിൽ, നേരിട്ടുള്ള UPI ഷഗുൺ സമ്മാന ശേഖരണം എന്നിവയോടെയാണ് വരുന്നത്.\n\nഇത് നിർമ്മിക്കുന്നതും പ്രിവ്യൂ കാണുന്നതും 100% സൌജന്യമാണ്. പ്രസിദ്ധീകരിക്കാൻ തയ്യാറാകുമ്പോൾ ₹999 ഒരു തവണ മാത്രം നൽകുക. അൺലിമിറ്റഡ് എഡിറ്റുകളോടെ ലൈഫ് ടൈം ഹോസ്റ്റിംഗ് സൌയന്യമാണ്!",
+    stepsTitle: "എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത് — നിങ്ങളുടെ ലൈവ് കാർഡ് സ്വന്തമാക്കൂ",
+    stepsSub: "ലളിതമായ 3 ഘട്ടങ്ങൾ",
+    steps: [
+      { step: "01", title: "വിവരങ്ങൾ നൽകുക", desc: "പേരുകൾ, തീയതികൾ, ലൊക്കേഷൻ ലിങ്കുകൾ എന്നിവ നൽകി ഫോട്ടോകൾ അപ്‌ലോഡ് ചെയ്യുക." },
+      { step: "02", title: "പ്രിവ്യൂ കസ്റ്റമൈസ് ചെയ്യുക", desc: "ആനിമേഷനുകളും സംഗീതവുമായി നിങ്ങളുടെ തത്സമയ വെബ്‌സൈറ്റ് ഉടൻ തന്നെ കാണുക." },
+      { step: "03", title: "അതിഥികളുമായി പങ്കിടുക", desc: "ലിങ്ക് ആക്റ്റിവേറ്റ് ചെയ്യാൻ ഒരു തവണ ₹999 നൽകി വാട്സാപ്പിൽ പങ്കിടുക, സമ്മാനങ്ങൾ സ്വീകരിക്കുക." }
+    ]
+  }
+};
+
 export default function App() {
   // Simple state-based router based on location path
   const [slug, setSlug] = useState<string | null>(null);
@@ -60,6 +124,7 @@ export default function App() {
 
   // Hero interactive simulator selected theme
   const [heroActiveTheme, setHeroActiveTheme] = useState<"elephant" | "thread" | "diya" | "lotus" | "jaipur" | "garland">("jaipur");
+  const [landingLang, setLandingLang] = useState<string>("en");
 
   // Falling petals canvas ref on landing page
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1020,11 +1085,44 @@ export default function App() {
                 in 2 Minutes for Free
               </h1>
 
-              <p className="text-sm sm:text-base text-stone-300/90 tracking-wide leading-relaxed max-w-xl font-cormorant">
-                Make a premium mobile-friendly wedding website to share with your guests. It comes with beautiful opening cover animations, traditional background music, Google Maps venue directions, RSVP forms, a live blessings wall, and direct UPI Shagun gift collections.
-                <br /><br />
-                It is <strong>100% free to build and preview</strong>. You only pay a one-time activation fee of ₹999 when you are ready to publish it. Includes lifetime hosting with unlimited edits so you can change dates or themes anytime for free!
+              
+              <p className="text-sm sm:text-base text-stone-300/90 tracking-wide leading-relaxed max-w-xl font-cormorant whitespace-pre-line">
+                {landingTranslations[landingLang as keyof typeof landingTranslations].heroParagraph}
               </p>
+
+              {/* Landing Page Language Selector Toggle */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-white/5 select-none">
+                <span className="text-[9.5px] font-marcellus tracking-widest text-amber-400/60 uppercase font-bold">
+                  Read Info & Steps in:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { code: "en", label: "🇬🇧 English" },
+                    { code: "kn", label: "ಕನ್ನಡ (Kannada)" },
+                    { code: "hi", label: "हिंदी (Hindi)" },
+                    { code: "ta", label: "தமிழ் (Tamil)" },
+                    { code: "te", label: "తెలుగు (Telugu)" },
+                    { code: "ml", label: "മലയാളം (Malayalam)" },
+                  ].map((item) => (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => {
+                        playClickSound();
+                        setLandingLang(item.code);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-medium border transition-all duration-200 cursor-pointer ${
+                        landingLang === item.code
+                          ? "bg-amber-400/10 border-amber-400 text-amber-300 font-bold scale-[1.02]"
+                          : "bg-white/5 border-white/10 text-stone-350 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
 
               {/* Quick Feature highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md pt-2 select-none">
@@ -1110,6 +1208,79 @@ export default function App() {
             </div>
           </section>
 
+          {/* STEP-BY-STEP INTERACTIVE WORKFLOW */}
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-12 z-10 select-none"
+          >
+            <div className="p-6 sm:p-10 rounded-[36px] bg-gradient-to-r from-brand-rust/20 to-[#120E2B]/95 border border-brand-rust/20 relative overflow-hidden backdrop-blur-md">
+              <div className="absolute right-0 top-0 w-44 h-44 bg-brand-rust/10 filter blur-[80px] rounded-full pointer-events-none" />
+              
+              <div className="text-center max-w-sm mx-auto mb-10">
+                <span className="text-[10px] font-marcellus text-amber-400 font-bold uppercase tracking-widest block mb-1">
+                  {landingTranslations[landingLang as keyof typeof landingTranslations].stepsSub}
+                </span>
+                <h2 className="font-marcellus text-2xl sm:text-3xl font-bold tracking-wider text-white">
+                  {landingTranslations[landingLang as keyof typeof landingTranslations].stepsTitle}
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {landingTranslations[landingLang as keyof typeof landingTranslations].steps.map((item, idx) => (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: idx * 0.15 }}
+                    className="flex flex-col gap-2.5 relative"
+                  >
+                    <span className="font-marcellus text-4xl text-amber-400/40 font-bold leading-none">{item.step}</span>
+                    <h4 className="text-sm font-bold tracking-wider text-white font-marcellus">{item.title}</h4>
+                    <p className="text-xs text-stone-400 leading-relaxed font-cormorant">{item.desc}</p>
+                    {idx < 2 && <div className="hidden md:block absolute top-4 right-[-20px] text-amber-400/20 text-xl font-bold font-mono">→</div>}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
+          {/* Unified Creation Form */}
+          <section id="form-container" className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24 z-10">
+            <div className="relative p-6 sm:p-10 rounded-[36px] bg-gradient-to-r from-brand-rust/20 to-[#120E2B]/95 border border-amber-500/20 backdrop-blur-md shadow-2xl shadow-amber-500/5 overflow-hidden">
+              {/* Decorative corner accents */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-amber-400/35 rounded-tl-2xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-amber-400/35 rounded-tr-2xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-amber-400/35 rounded-bl-2xl pointer-events-none" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-400/35 rounded-br-2xl pointer-events-none" />
+              
+              <div className="text-center space-y-2 mb-10 max-w-md mx-auto">
+                <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase">
+                  ✨ WEDDING CARD CREATOR
+                </span>
+                <h2 className="font-marcellus text-2xl sm:text-3xl font-bold tracking-wider text-white">
+                  Enter Details & Preview Instantly
+                </h2>
+                <p className="text-xs text-stone-400 font-cormorant leading-relaxed">
+                  Fill in your details below. Your beautiful digital wedding invitation website will be ready to preview instantly in real-time.
+                </p>
+              </div>
+
+              <BuilderForm
+                onSuccess={(updatedSlug) => {
+                  setEditingData(null);
+                  handleCreateSuccess(updatedSlug);
+                }}
+                initialData={editingData}
+                onCancelEdit={() => { playClickSound(); setEditingData(null); }}
+                preselectedTheme={preselectedFormTheme}
+              />
+            </div>
+          </section>
+
           {/* SOCIAL PROOF MARQUEE TICKER */}
           <section className="w-full overflow-hidden border-y border-amber-500/10 bg-amber-500/5 py-3 mb-8 z-10 select-none">
             <div className="animate-marquee gap-0">
@@ -1156,39 +1327,6 @@ export default function App() {
               onLaunchDemo={handleLaunchDemo}
             />
           </motion.section>
-
-          {/* Unified Creation Form */}
-          <section id="form-container" className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-16 scroll-mt-24 z-10">
-            <div className="relative p-6 sm:p-10 rounded-[36px] bg-gradient-to-r from-brand-rust/20 to-[#120E2B]/95 border border-amber-500/20 backdrop-blur-md shadow-2xl shadow-amber-500/5 overflow-hidden">
-              {/* Decorative corner accents */}
-              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-amber-400/35 rounded-tl-2xl pointer-events-none" />
-              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-amber-400/35 rounded-tr-2xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-amber-400/35 rounded-bl-2xl pointer-events-none" />
-              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-amber-400/35 rounded-br-2xl pointer-events-none" />
-              
-              <div className="text-center space-y-2 mb-10 max-w-md mx-auto">
-                <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase">
-                  ✨ WEDDING CARD CREATOR
-                </span>
-                <h2 className="font-marcellus text-2xl sm:text-3xl font-bold tracking-wider text-white">
-                  Enter Details & Preview Instantly
-                </h2>
-                <p className="text-xs text-stone-400 font-cormorant leading-relaxed">
-                  Fill in your details below. Your beautiful digital wedding invitation website will be ready to preview instantly in real-time.
-                </p>
-              </div>
-
-              <BuilderForm
-                onSuccess={(updatedSlug) => {
-                  setEditingData(null);
-                  handleCreateSuccess(updatedSlug);
-                }}
-                initialData={editingData}
-                onCancelEdit={() => { playClickSound(); setEditingData(null); }}
-                preselectedTheme={preselectedFormTheme}
-              />
-            </div>
-          </section>
 
           {/* SALES FEATURES PERSUASIVE GRID */}
           <motion.section
@@ -1246,46 +1384,6 @@ export default function App() {
                   </div>
                 </motion.div>
               ))}
-            </div>
-          </motion.section>
-
-          {/* STEP-BY-STEP INTERACTIVE WORKFLOW */}
-          <motion.section
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-12 z-10 select-none"
-          >
-            <div className="p-6 sm:p-10 rounded-[36px] bg-gradient-to-r from-brand-rust/20 to-[#120E2B]/95 border border-brand-rust/20 relative overflow-hidden backdrop-blur-md">
-              <div className="absolute right-0 top-0 w-44 h-44 bg-brand-rust/10 filter blur-[80px] rounded-full pointer-events-none" />
-              
-              <div className="text-center max-w-sm mx-auto mb-10">
-                <span className="text-[10px] font-marcellus text-amber-400 font-bold uppercase tracking-widest block mb-1">EASY 3-STEP PROCESS</span>
-                <h2 className="font-marcellus text-2xl sm:text-3xl font-bold tracking-wider text-white">How It Works — Get Your Live Card</h2>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  { step: "01", title: "Design for Free", desc: "Enter your wedding details, upload gallery photos, and write down your raw love story." },
-                  { step: "02", title: "Preview Invitation", desc: "Instantly view your complete, interactive invitation page with polished stories, countdowns, and music." },
-                  { step: "03", title: "One-Time Activation", desc: "Pay ₹999 once. Unlock your live link, share on WhatsApp, and edit your theme, drive link, or details anytime for free." }
-                ].map((item, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: idx * 0.15 }}
-                    className="flex flex-col gap-2.5 relative"
-                  >
-                    <span className="font-marcellus text-4xl text-amber-400/40 font-bold leading-none">{item.step}</span>
-                    <h4 className="text-sm font-bold tracking-wider text-white font-marcellus">{item.title}</h4>
-                    <p className="text-xs text-stone-400 leading-relaxed font-cormorant">{item.desc}</p>
-                    {idx < 2 && <div className="hidden md:block absolute top-4 right-[-20px] text-amber-400/20 text-xl font-bold font-mono">→</div>}
-                  </motion.div>
-                ))}
-              </div>
             </div>
           </motion.section>
 
