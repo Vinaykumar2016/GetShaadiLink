@@ -383,6 +383,39 @@ app.get("/api/invitations/:slug", (req, res) => {
     // Increment view count unless requested by dashboard/admin/owner preview
     if (req.query.admin !== "true" && !isOwner) {
       parsed.views = (parsed.views || 0) + 1;
+      
+      // Update dailyViews
+      const todayStr = new Date().toISOString().split("T")[0];
+      parsed.dailyViews = parsed.dailyViews || {};
+      parsed.dailyViews[todayStr] = (parsed.dailyViews[todayStr] || 0) + 1;
+      
+      // Update trafficSources
+      let source = (req.query.source || "").toString().trim().toLowerCase();
+      if (!source) {
+        const referer = req.headers["referer"] || "";
+        if (referer.includes("wa.me") || referer.includes("whatsapp")) {
+          source = "whatsapp";
+        } else if (referer.includes("instagram.com") || referer.includes("instagram")) {
+          source = "instagram";
+        } else if (referer.includes("facebook.com") || referer.includes("facebook")) {
+          source = "facebook";
+        } else if (referer.includes("google.com") || referer.includes("google")) {
+          source = "google";
+        } else if (referer) {
+          try {
+            const urlObj = new URL(referer);
+            source = urlObj.hostname.replace("www.", "");
+          } catch (e) {
+            source = "other";
+          }
+        } else {
+          source = "direct";
+        }
+      }
+      source = source.replace(/[^a-z0-9.-]/g, "") || "direct";
+      parsed.trafficSources = parsed.trafficSources || {};
+      parsed.trafficSources[source] = (parsed.trafficSources[source] || 0) + 1;
+
       fs.writeFileSync(filePath, JSON.stringify(parsed, null, 2), "utf-8");
     }
 
@@ -680,10 +713,22 @@ Instructions:
       }
     }
 
+    const oldPaid = !!data.razorpayPaymentId;
+    const newPaidId = data.razorpayPaymentId || fields.razorpayPaymentId || null;
+    const newPaid = !!newPaidId;
+    let paidAt = data.paidAt || null;
+    if (newPaid && !oldPaid) {
+      paidAt = new Date().toISOString();
+    }
+
     const updatedRecord = {
       ...data,
       ...fields,
-      razorpayPaymentId: data.razorpayPaymentId || fields.razorpayPaymentId || null,
+      razorpayPaymentId: newPaidId,
+      paidAt: paidAt,
+      agency: data.agency !== undefined ? data.agency : (fields.agency || null),
+      dailyViews: data.dailyViews || {},
+      trafficSources: data.trafficSources || {},
       slug,
       editPassword: editPassword !== undefined ? editPassword.trim() : storedPassword,
       ownerEmail: fields.ownerEmail !== undefined ? fields.ownerEmail.trim().toLowerCase() : data.ownerEmail,
@@ -934,6 +979,130 @@ app.delete("/api/admin/reviews/:id", requireAdminAuth, (req, res) => {
   }
 });
 
+// API: Agency Dashboard Stats (Read-Only)
+app.get("/api/agency/:agencyId/stats", (req, res) => {
+  const { agencyId } = req.params;
+  const passcode = (req.query.password || req.headers["x-passcode"] || "").toString().trim();
+
+  // Validate credentials specifically for maddozcreative
+  if (agencyId.trim().toLowerCase() === "maddozcreative") {
+    if (passcode !== "maddoz@vishwas2026") {
+      res.status(401).json({ error: "Invalid agency credentials" });
+      return;
+    }
+  } else {
+    // For safety, require a passcode for other custom agencies or block them
+    res.status(404).json({ error: "Agency not found or not configured" });
+    return;
+  }
+
+  try {
+    let createdCount = 0;
+    let paidCount = 0;
+    let salesThisMonth = 0;
+    let revenueThisMonth = 0;
+
+    const now = new Date();
+    // YYYY-MM in local/server time
+    const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    const trafficSourcesAggregate: Record<string, number> = {};
+    const dailyViewsAggregate: Record<string, number> = {};
+    const agencyCards: any[] = [];
+
+    if (fs.existsSync(INVITATIONS_DIR)) {
+      const files = fs.readdirSync(INVITATIONS_DIR);
+      for (const file of files) {
+        if (file.endsWith(".json")) {
+          try {
+            const raw = fs.readFileSync(path.join(INVITATIONS_DIR, file), "utf-8");
+            const data = JSON.parse(raw);
+
+            // Filter cards matching this agency
+            if (data.agency && data.agency.trim().toLowerCase() === agencyId.trim().toLowerCase()) {
+              createdCount++;
+
+              const isPaid = !!data.razorpayPaymentId;
+              if (isPaid) {
+                paidCount++;
+              }
+
+              // Aggregate traffic sources
+              if (data.trafficSources) {
+                for (const [source, count] of Object.entries(data.trafficSources)) {
+                  trafficSourcesAggregate[source] = (trafficSourcesAggregate[source] || 0) + (count as number);
+                }
+              }
+
+              // Aggregate daily views
+              if (data.dailyViews) {
+                for (const [dateStr, count] of Object.entries(data.dailyViews)) {
+                  dailyViewsAggregate[dateStr] = (dailyViewsAggregate[dateStr] || 0) + (count as number);
+                }
+              }
+
+              // Determine if paid this month and calculate amount
+              let amt = 0;
+              if (isPaid) {
+                const isManual = typeof data.razorpayPaymentId === "string" && data.razorpayPaymentId.startsWith("pay_admin_unlock_");
+                amt = data.paymentAmount !== undefined && data.paymentAmount !== null 
+                  ? Number(data.paymentAmount) 
+                  : (isManual ? 0 : 999);
+
+                // Use paidAt timestamp, falling back to createdAt
+                const paidDateStr = data.paidAt || data.createdAt;
+                if (paidDateStr && paidDateStr.startsWith(currentYearMonth)) {
+                  salesThisMonth++;
+                  revenueThisMonth += amt;
+                }
+              }
+
+              agencyCards.push({
+                slug: data.slug,
+                bride: data.bride,
+                groom: data.groom,
+                createdAt: data.createdAt,
+                paidAt: data.paidAt || null,
+                isPaid,
+                views: data.views || 0,
+                paymentAmount: amt
+              });
+            }
+          } catch (e) {
+            // ignore malformed
+          }
+        }
+      }
+    }
+
+    // Format aggregates
+    const dailyViewsArray = Object.entries(dailyViewsAggregate)
+      .map(([date, views]) => ({ date, views }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const trafficSourcesArray = Object.entries(trafficSourcesAggregate)
+      .map(([source, count]) => ({ source, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const cardConversionRate = createdCount > 0 ? (paidCount / createdCount) * 100 : 0;
+
+    res.json({
+      agencyId,
+      createdCount,
+      paidCount,
+      salesThisMonth,
+      revenueThisMonth,
+      cardConversionRate,
+      dailyViews: dailyViewsArray,
+      trafficSources: trafficSourcesArray,
+      cards: agencyCards.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    });
+  } catch (error) {
+    console.error("Error generating agency stats:", error);
+    res.status(500).json({ error: "Failed to generate agency stats report" });
+  }
+});
+
 // API: Admin Login
 app.post("/api/admin/login", (req, res) => {
   const { username, password } = req.body;
@@ -1075,9 +1244,14 @@ app.post("/api/admin/invitations/:slug/payment", requireAdminAuth, (req, res) =>
   try {
     const raw = fs.readFileSync(filePath, "utf-8");
     const data = JSON.parse(raw);
+    const oldPaid = !!data.razorpayPaymentId;
     data.razorpayPaymentId = razorpayPaymentId || null;
+    const newPaid = !!data.razorpayPaymentId;
+    if (newPaid && !oldPaid) {
+      data.paidAt = new Date().toISOString();
+    }
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
-    res.json({ success: true, slug, razorpayPaymentId: data.razorpayPaymentId });
+    res.json({ success: true, slug, razorpayPaymentId: data.razorpayPaymentId, paidAt: data.paidAt || null });
   } catch (err: any) {
     console.error("Failed to update payment status:", err);
     res.status(500).json({ error: "Failed to update payment status" });
@@ -1512,7 +1686,7 @@ app.post("/api/invitations/generate", async (req, res) => {
       bride, groom, wdate, city, vname, vaddr, lang, story, storyText,
       upiId, shagunOn, photos, e1n, e1t, e2n, e2t, e3n, e3t,
       slug, editPassword, groomParents, brideParents, familyBlessings,
-      postWeddingPhotosUrl, ownerEmail, openingTheme, razorpayPaymentId, religion,
+      postWeddingPhotosUrl, ownerEmail, openingTheme, razorpayPaymentId, religion, agency,
     } = req.body;
 
     const formattedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
@@ -1723,6 +1897,10 @@ const geminiRes = await ai.models.generateContent({
       openingTheme: openingTheme || "elephant",
       religion: religion || "other",
       razorpayPaymentId: razorpayPaymentId || null,
+      agency: agency || null,
+      paidAt: razorpayPaymentId ? new Date().toISOString() : null,
+      dailyViews: {},
+      trafficSources: {},
       guestbookNotes: [],
       createdAt: new Date().toISOString(),
     };

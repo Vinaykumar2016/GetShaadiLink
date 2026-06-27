@@ -290,6 +290,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         e3t: e3t.trim(),
         razorpayPaymentId: razorpayPaymentId || (initialData ? initialData.razorpayPaymentId : null),
         password: (initialData && initialData.editPassword) ? initialData.editPassword : editPassword.trim(),
+        agency: localStorage.getItem("agency_ref") || null,
       };
 
       const endpoint = initialData ? `/api/invitations/${initialData.slug}/update` : "/api/invitations/generate";

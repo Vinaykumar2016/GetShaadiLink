@@ -5,6 +5,7 @@ import InvitationView from "./components/InvitationView";
 import ThemeShowroom from "./components/ThemeShowroom";
 import UserDashboard from "./components/UserDashboard";
 import AdminDashboard from "./components/AdminDashboard";
+import AgencyDashboard from "./components/AgencyDashboard";
 import RestrictedPaywall from "./components/RestrictedPaywall";
 import { playClickSound } from "./utils/soundUtils";
 import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote, ChevronDown, Minus } from "lucide-react";
@@ -78,6 +79,7 @@ export default function App() {
   // Simple state-based router based on location path
   const [slug, setSlug] = useState<string | null>(null);
   const [adminActive, setAdminActive] = useState(false);
+  const [activeAgencyId, setActiveAgencyId] = useState<string | null>(null);
   const [activePolicyModal, setActivePolicyModal] = useState<"pricing" | "terms" | "privacy" | "refund" | null>(null);
   const [invitationData, setInvitationData] = useState<Invitation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -505,12 +507,28 @@ export default function App() {
 
   // Determine path on startup & support direct URL access to /demo-preview
   useEffect(() => {
+    // Capture referral code if present
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get("ref") || urlParams.get("agency");
+    if (refCode) {
+      try {
+        localStorage.setItem("agency_ref", refCode.trim());
+      } catch (e) {
+        console.warn("Failed to save agency_ref:", e);
+      }
+    }
+
     const path = window.location.pathname;
     const cleanSlug = path.split("/").filter(Boolean)[0];
-    const ignoredSlugs = ["index.html", "index", "api", "assets", "favicon.ico", "vite", "admin"];
+    const ignoredSlugs = ["index.html", "index", "api", "assets", "favicon.ico", "vite", "admin", "agency"];
 
     if (cleanSlug && cleanSlug.toLowerCase() === "admin") {
       setAdminActive(true);
+      setLoading(false);
+    } else if (cleanSlug && cleanSlug.toLowerCase() === "agency") {
+      const parts = path.split("/").filter(Boolean);
+      const agencyIdVal = parts[1] || "";
+      setActiveAgencyId(agencyIdVal);
       setLoading(false);
     } else if (cleanSlug && !ignoredSlugs.includes(cleanSlug.toLowerCase()) && !cleanSlug.includes(".")) {
       const slugVal = cleanSlug.toLowerCase();
@@ -797,6 +815,19 @@ export default function App() {
       <AdminDashboard 
         onClose={() => {
           setAdminActive(false);
+          window.history.pushState({}, "", "/");
+        }}
+      />
+    );
+  }
+
+  // Agency View
+  if (activeAgencyId) {
+    return (
+      <AgencyDashboard 
+        agencyId={activeAgencyId}
+        onClose={() => {
+          setActiveAgencyId(null);
           window.history.pushState({}, "", "/");
         }}
       />
