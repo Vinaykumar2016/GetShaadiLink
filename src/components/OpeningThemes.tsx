@@ -198,7 +198,7 @@ export default function OpeningThemes({
   };
   // Giphy couple sticker cutout overlay component
   const GiphyCoupleSticker = () => {
-    const activePhoto = photo || "/samples/couple1.jpg";
+    const activePhoto = photo || "/samples/couple_realistic.png";
     return (
       <motion.div
         className="absolute z-30 pointer-events-none"
@@ -273,7 +273,7 @@ export default function OpeningThemes({
     tapPrompt: string,
     isDark: boolean
   ) => {
-    const activeCoverPhoto = heroPhoto || photo || "/samples/couple1.jpg";
+    const activeCoverPhoto = heroPhoto || photo || "/samples/couple_realistic.png";
 
     // Dynamic font size calculator for cursive wedding names
     const getFontSizeForName = (name: string) => {

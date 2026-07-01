@@ -2533,7 +2533,7 @@ export default function InvitationView({
           opacity: bgOpacity,
           backgroundImage: data.heroPhoto
             ? `url(${data.heroPhoto})`
-            : (data.photos && data.photos.length > 0 ? `url(${data.photos[0]})` : `url('/samples/couple1.jpg')`)
+            : (data.photos && data.photos.length > 0 ? `url(${data.photos[0]})` : `url('/samples/couple_realistic.png')`)
         }} 
       />
 
