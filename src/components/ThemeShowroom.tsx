@@ -88,8 +88,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -205,8 +205,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#FFD700", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -322,8 +322,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -464,8 +464,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -592,8 +592,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#991B1B", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -724,8 +724,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#065F46", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 

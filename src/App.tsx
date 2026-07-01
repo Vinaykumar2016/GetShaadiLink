@@ -290,38 +290,38 @@ export default function App() {
             </div>
 
             {/* Theme-Specific Interactive Core (Mini Mockup) */}
-            <div className="z-10 flex items-center justify-center relative my-1 overflow-visible h-16">
+            <div className="z-10 flex items-center justify-center relative my-1 overflow-visible h-28">
               {heroActiveTheme === "jaipur" && (
-                <div className="w-full flex items-center justify-center relative overflow-hidden h-16">
+                <div className="w-full flex items-center justify-center relative overflow-hidden h-28">
                   {/* Left Door */}
                   <motion.div 
-                    animate={{ x: [0, -20, 0] }} 
+                    animate={{ x: [0, -35, 0] }} 
                     transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} 
-                    className="absolute left-1/2 -translate-x-[100%] z-10 w-8 h-14 border border-amber-500/20 rounded-l-lg bg-[#8A3A1A] flex items-center justify-end pr-0.5 shadow-md overflow-hidden"
+                    className="absolute left-1/2 -translate-x-[100%] z-10 w-12 h-24 border border-amber-500/20 rounded-l-lg bg-[#8A3A1A] flex items-center justify-end pr-0.5 shadow-md overflow-hidden"
                   >
                     <svg viewBox="0 0 50 100" className="w-full h-full">
                       <path d="M 0,100 L 50,100 L 50,0 C 35,15 15,20 0,25 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
-                      <path d="M 4,92 L 46,92 L 46,6 C 32,20 18,22 4,28 Z" fill="none" stroke="#FFD54F" strokeWidth="1" strokeDasharray="2,2" />
+                      <path d="M 4,92 L 46,92 L 46,6 C 32,20 18,22 4,28 Z" fill="none" stroke="#FFD54F" strokeWidth="1.2" strokeDasharray="2,2" />
                     </svg>
                   </motion.div>
                   {/* Right Door */}
                   <motion.div 
-                    animate={{ x: [0, 20, 0] }} 
+                    animate={{ x: [0, 35, 0] }} 
                     transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} 
-                    className="absolute right-1/2 translate-x-[100%] z-10 w-8 h-14 border border-amber-500/20 rounded-r-lg bg-[#8A3A1A] flex items-center justify-start pl-0.5 shadow-md overflow-hidden"
+                    className="absolute right-1/2 translate-x-[100%] z-10 w-12 h-24 border border-amber-500/20 rounded-r-lg bg-[#8A3A1A] flex items-center justify-start pl-0.5 shadow-md overflow-hidden"
                   >
                     <svg viewBox="0 0 50 100" className="w-full h-full">
                       <path d="M 50,100 L 0,100 L 0,0 C 15,15 35,20 50,25 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
-                      <path d="M 46,92 L 4,92 L 4,6 C 18,20 32,22 46,28 Z" fill="none" stroke="#FFD54F" strokeWidth="1" strokeDasharray="2,2" />
+                      <path d="M 46,92 L 4,92 L 4,6 C 18,20 32,22 46,28 Z" fill="none" stroke="#FFD54F" strokeWidth="1.2" strokeDasharray="2,2" />
                     </svg>
                   </motion.div>
                   <span className="text-[6.5px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-0 animate-pulse">🚪 OPEN DOOR</span>
                 </div>
               )}
               {heroActiveTheme === "diya" && (
-                <div className="w-full flex items-center justify-center relative h-16">
-                  <div className="absolute w-8 h-8 rounded-full border border-amber-400/20 bg-amber-400/5 animate-pulse" />
-                  <svg viewBox="0 0 40 30" className="w-8 h-6 overflow-visible">
+                <div className="w-full flex items-center justify-center relative h-28">
+                  <div className="absolute w-14 h-14 rounded-full border border-amber-400/20 bg-amber-400/5 animate-pulse" />
+                  <svg viewBox="0 0 40 30" className="w-16 h-12 overflow-visible">
                     <motion.path 
                       d="M20,0 C23,8 24,12 20,16 C16,12 17,8 20,0 Z" 
                       fill="url(#diya-flame-grad)" 
@@ -341,10 +341,10 @@ export default function App() {
                 </div>
               )}
               {heroActiveTheme === "lotus" && (
-                <div className="w-full flex items-center justify-center relative h-16">
+                <div className="w-full flex items-center justify-center relative h-28">
                   <motion.svg 
                     viewBox="0 0 40 40" 
-                    className="w-8 h-8 fill-none stroke-rose-400/90 stroke-[1.2] overflow-visible"
+                    className="w-16 h-16 fill-none stroke-rose-400/90 stroke-[1.2] overflow-visible"
                     animate={{ scale: [0.95, 1.03, 0.95] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   >
@@ -357,11 +357,11 @@ export default function App() {
                 </div>
               )}
               {heroActiveTheme === "elephant" && (
-                <div className="w-full flex items-center justify-center gap-4 relative h-16">
+                <div className="w-full flex items-center justify-center gap-4 relative h-28">
                   <motion.div 
                     animate={{ x: [-2, 0, -2], rotate: [0, -2, 0] }} 
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} 
-                    className="w-10 h-10 scale-x-[-1]"
+                    className="w-14 h-14 scale-x-[-1]"
                   >
                     <svg viewBox="0 0 120 100" className="w-full h-full">
                       <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#D49A6A" stroke="#825229" strokeWidth="0.8" />
@@ -372,7 +372,7 @@ export default function App() {
                   <motion.div 
                     animate={{ x: [2, 0, 2], rotate: [0, 2, 0] }} 
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} 
-                    className="w-10 h-10"
+                    className="w-14 h-14"
                   >
                     <svg viewBox="0 0 120 100" className="w-full h-full">
                       <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#D49A6A" stroke="#825229" strokeWidth="0.8" />
@@ -383,13 +383,13 @@ export default function App() {
                 </div>
               )}
               {heroActiveTheme === "thread" && (
-                <div className="w-full flex flex-col items-center justify-start relative h-16">
-                  <div className="w-0.5 h-3 bg-red-600/60" />
+                <div className="w-full flex flex-col items-center justify-start relative h-28">
+                  <div className="w-0.5 h-6 bg-red-600/60" />
                   <motion.div 
                     animate={{ rotate: [-6, 6, -6] }} 
                     transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} 
                     style={{ transformOrigin: "top center" }} 
-                    className="w-6 h-8"
+                    className="w-10 h-14"
                   >
                     <svg viewBox="0 0 100 140" className="w-full h-full">
                       <circle cx="50" cy="8" r="4" fill="none" stroke="#FFB300" strokeWidth="2" />
@@ -401,11 +401,11 @@ export default function App() {
                 </div>
               )}
               {heroActiveTheme === "garland" && (
-                <div className="w-full flex items-center justify-center relative overflow-hidden h-16">
+                <div className="w-full flex items-center justify-center relative overflow-hidden h-28">
                   <motion.div 
                     animate={{ y: [-2, 0, -2] }} 
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} 
-                    className="absolute top-0 w-full h-8"
+                    className="absolute top-0 w-full h-12"
                   >
                     <svg viewBox="0 0 200 100" className="w-full h-full">
                       <path d="M 0,10 Q 50,60 100,60 Q 150,60 200,10" fill="none" stroke="#FF8F00" strokeWidth="4" strokeLinecap="round" />
@@ -902,8 +902,8 @@ export default function App() {
       upiId: "wedding@upi",
       dateRaw: "2026-12-11",
       photos: [
-        "/samples/couple1.jpg",
-        "/samples/couple2.jpg",
+        "/samples/couple_realistic.png",
+        "/samples/couple_realistic.png",
         "/samples/mandap.jpg",
         "/samples/flowers.jpg"
       ],
@@ -1013,12 +1013,12 @@ export default function App() {
   }
   // Simulator themes config for Hero Interactive mockup
   const heroSimulatorConfig = {
-    jaipur: { name: "Karan & Aditi", photo: "/samples/couple1.jpg", tag: "Royal Palace", detail: "Traditional arches with soft sunset glow.", style: "bg-rose-100/70 text-amber-900 border-amber-700/20" },
-    diya: { name: "Kabir & Riya", photo: "/samples/couple2.jpg", tag: "Midnight Diya", detail: "Celestial stars and floating orange sky lanterns.", style: "bg-indigo-950/80 text-amber-200 border-indigo-700/30" },
-    lotus: { name: "Dev & Ishika", photo: "/samples/couple1.jpg", tag: "Temple Lotus", detail: "Blooming lotuses and falling pink rose petals.", style: "bg-orange-50/50 text-[#8A3A1A] border-[#8A3A1A]/10" },
-    elephant: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Royal Elephant", detail: "Sandstone carvings with marigold curtains.", style: "bg-amber-50/65 text-[#8A3A1A] border-amber-800/10" },
-    thread: { name: "Vikram & Pooja", photo: "/samples/couple1.jpg", tag: "Sacred Knot", detail: "Cotton tassels with swinging golden bells.", style: "bg-yellow-50/60 text-[#8B0000] border-[#8B0000]/10" },
-    garland: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Marigold Garland", detail: "Orange-yellow flowers and mango leaves.", style: "bg-emerald-50/60 text-[#FFA500] border-emerald-800/10" },
+    jaipur: { name: "Karan & Aditi", photo: "/samples/couple_realistic.png", tag: "Royal Palace", detail: "Traditional arches with soft sunset glow.", style: "bg-rose-100/70 text-amber-900 border-amber-700/20" },
+    diya: { name: "Kabir & Riya", photo: "/samples/couple_realistic.png", tag: "Midnight Diya", detail: "Celestial stars and floating orange sky lanterns.", style: "bg-indigo-950/80 text-amber-200 border-indigo-700/30" },
+    lotus: { name: "Dev & Ishika", photo: "/samples/couple_realistic.png", tag: "Temple Lotus", detail: "Blooming lotuses and falling pink rose petals.", style: "bg-orange-50/50 text-[#8A3A1A] border-[#8A3A1A]/10" },
+    elephant: { name: "Arjun & Priyanka", photo: "/samples/couple_realistic.png", tag: "Royal Elephant", detail: "Sandstone carvings with marigold curtains.", style: "bg-amber-50/65 text-[#8A3A1A] border-amber-800/10" },
+    thread: { name: "Vikram & Pooja", photo: "/samples/couple_realistic.png", tag: "Sacred Knot", detail: "Cotton tassels with swinging golden bells.", style: "bg-yellow-50/60 text-[#8B0000] border-[#8B0000]/10" },
+    garland: { name: "Arjun & Priyanka", photo: "/samples/couple_realistic.png", tag: "Marigold Garland", detail: "Orange-yellow flowers and mango leaves.", style: "bg-emerald-50/60 text-[#FFA500] border-emerald-800/10" },
   };
   const activeSim = heroSimulatorConfig[heroActiveTheme as keyof typeof heroSimulatorConfig] || heroSimulatorConfig.jaipur;
 
