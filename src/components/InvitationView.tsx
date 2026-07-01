@@ -2531,9 +2531,9 @@ export default function InvitationView({
         className="fixed inset-0 z-0 pointer-events-none select-none bg-cover bg-center bg-no-repeat"
         style={{ 
           opacity: bgOpacity,
-          backgroundImage: data.photos && data.photos.length > 0 
-            ? `url(${data.photos[0]})` 
-            : `url('/samples/couple1.jpg')`
+          backgroundImage: data.heroPhoto
+            ? `url(${data.heroPhoto})`
+            : (data.photos && data.photos.length > 0 ? `url(${data.photos[0]})` : `url('/samples/couple1.jpg')`)
         }} 
       />
 
@@ -2610,6 +2610,7 @@ export default function InvitationView({
             onOpen={handleOpenEnvelope}
             lang={data.lang || "en"}
             photo={data.photos && data.photos[0]}
+            heroPhoto={data.heroPhoto}
           />
         )}
       </AnimatePresence>
@@ -2915,9 +2916,9 @@ export default function InvitationView({
       </section>
 
       {/* 3D Popout Photo Frame Showcase */}
-      {data.photos && data.photos.length > 0 && (
+      {(data.heroPhoto || (data.photos && data.photos.length > 0)) && (
         <PopoutPhotoFrame 
-          photo={data.photos[0]} 
+          photo={data.heroPhoto || data.photos[0]} 
           themeType={data.openingTheme || "elephant"} 
           themeAccent={themeAccent} 
         />

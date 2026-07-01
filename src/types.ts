@@ -34,6 +34,7 @@ export interface Invitation {
   upiId: string;
   dateRaw: string;
   photos: string[]; // Base64 data strings
+  heroPhoto?: string;
   theme: WeddingTheme;
   postWeddingPhotosUrl?: string;
   editPassword?: string;

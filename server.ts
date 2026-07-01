@@ -1684,7 +1684,7 @@ app.post("/api/invitations/generate", async (req, res) => {
   try {
     const {
       bride, groom, wdate, city, vname, vaddr, lang, story, storyText,
-      upiId, shagunOn, photos, e1n, e1t, e2n, e2t, e3n, e3t,
+      upiId, shagunOn, photos, heroPhoto, e1n, e1t, e2n, e2t, e3n, e3t,
       slug, editPassword, groomParents, brideParents, familyBlessings,
       postWeddingPhotosUrl, ownerEmail, openingTheme, razorpayPaymentId, religion, agency,
     } = req.body;
@@ -1903,6 +1903,7 @@ const geminiRes = await ai.models.generateContent({
       trafficSources: {},
       guestbookNotes: [],
       createdAt: new Date().toISOString(),
+      heroPhoto: heroPhoto || null,
     };
 
     const targetFilePath = path.join(INVITATIONS_DIR, `${formattedSlug}.json`);

@@ -222,6 +222,7 @@ export default function App() {
 
   const renderSimSlide = () => {
     const activeStyle = themeStyles[heroActiveTheme as keyof typeof themeStyles] || themeStyles.jaipur;
+    const activeSim = heroSimulatorConfig[heroActiveTheme as keyof typeof heroSimulatorConfig] || heroSimulatorConfig.jaipur;
     const brideName = "Aditi";
     const groomName = "Karan";
     const dateStr = "11 December 2026";
@@ -235,68 +236,113 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             key="slide1"
-            className="absolute inset-0 bg-[#FFF9F2] flex flex-col justify-between p-4 pt-10 text-center select-none"
+            className="absolute inset-0 flex flex-col justify-between p-3.5 pt-8 text-center select-none bg-stone-950"
           >
-            <div className="mt-2">
-              <span className="text-[7px] tracking-[3px] uppercase block font-marcellus text-[#8A3A1A]/60">Together Forever</span>
-              <h4 className="text-xl font-cursive font-normal text-[#8A3A1A] mt-1">{brideName} &amp; {groomName}</h4>
-            </div>
+            {/* Full-bleed background photo layer */}
+            <motion.div
+              className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url(${activeSim.photo})` }}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+            />
 
-            <div className="relative w-56 h-36 border-[4px] border-[#D7CCC8] bg-white rounded-t-full shadow-inner overflow-hidden flex items-end justify-center mx-auto my-2">
-              <div className="absolute inset-0 border-2 border-dashed border-[#A1887F]/30 rounded-t-full pointer-events-none" />
+            {/* Multiply theme gradient overlay */}
+            <div 
+              className="absolute inset-0 z-0 opacity-75 mix-blend-multiply"
+              style={{ background: activeStyle.bg }}
+            />
+
+            {/* Glassmorphism Name Card */}
+            <div className="z-10 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-2.5 shadow-md flex flex-col items-center mt-1">
+              <h4 className="text-xl font-great-vibes font-normal text-white leading-none tracking-wide drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.5)]">
+                {brideName}
+              </h4>
+              <span className="font-cormorant italic text-xs my-0.5 block text-amber-300 font-bold leading-none">
+                {landingLang === "kn" ? "ಸಂಗ" : landingLang === "hi" ? "संग" : landingLang === "ta" ? "உடன்" : landingLang === "te" ? "తో" : landingLang === "ml" ? "ഒപ്പം" : "weds"}
+              </span>
+              <h4 className="text-xl font-great-vibes font-normal text-white leading-none tracking-wide drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.5)]">
+                {groomName}
+              </h4>
+              <div className="w-8 h-[0.8px] my-1 bg-white/20" />
               
-              <motion.div
-                animate={{ x: [-45, -5, -45], y: [0, -1, 0, -1, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-0 z-10 w-10 h-18"
-              >
-                <svg viewBox="0 0 100 150" className="w-full h-full text-[#8A3A1A] fill-current">
-                  <path d="M42,28 C28,45 20,80 20,130 C28,135 38,135 45,130 C43,90 41,55 48,44 Z" opacity="0.6" />
-                  <circle cx="45" cy="32" r="5" />
-                  <circle cx="50" cy="27" r="1.5" fill="#FFE082" />
-                  <path d="M54,34 Q57,35 55,38 Z" fill="#FFE082" />
-                  <path d="M48,30 C53,30 55,33 53,37 C51,39 52,43 49,43 L47,43 Z" />
-                  <path d="M47,51 C45,55 44,60 45,65 L54,65 C55,60 54,55 51,51 Z" />
-                  <path d="M45,65 C41,75 30,105 24,130 C35,135 65,135 76,130 C70,105 59,75 54,65 Z" />
-                  <path d="M44,65 Q49,67 55,65" stroke="#FFE082" strokeWidth="2.5" fill="none" />
-                </svg>
-              </motion.div>
-
-              <motion.div
-                animate={{ x: [45, 5, 45], y: [0, -1, 0, -1, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-0 z-10 w-10 h-18"
-                style={{ scaleX: -1 }}
-              >
-                <svg viewBox="0 0 100 150" className="w-full h-full text-[#5D4037] fill-current">
-                  <path d="M42,22 C42,15 58,15 58,22 C59,25 57,28 50,28 C43,28 41,25 42,22 Z" />
-                  <path d="M50,15 Q52,6 54,12 Q52,15 50,15 Z" fill="#FFE082" />
-                  <circle cx="50" cy="33" r="7.5" />
-                  <path d="M47,40 Q50,42 53,40 L51,48 L49,48 Z" />
-                  <path d="M44,48 C40,52 38,62 38,72 L38,125 C45,127 55,127 62,125 L62,72 Z" />
-                  <path d="M40,78 Q50,80 60,78" stroke="#FFE082" strokeWidth="2" fill="none" />
-                </svg>
-              </motion.div>
-
-              <motion.div
-                animate={{ opacity: [0, 1, 0], scale: [0.6, 1.2, 0.6], y: [-10, -40, -10] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-8 z-20 text-xl"
-              >
-                💖
-              </motion.div>
-
-              <div className="absolute bottom-0 inset-x-0 h-6 bg-[#E0D8D0] border-t-2 border-[#A1887F] z-25 flex items-center justify-around px-2">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="w-1.5 h-4 border-x border-[#A1887F]/40 bg-[#FAF6F0]/20 rounded-sm" />
-                ))}
+              {/* Mini Countdown */}
+              <div className="flex gap-2 justify-center text-white leading-none mt-0.5">
+                <div className="flex flex-col items-center">
+                  <span className="text-[11px] font-cormorant font-bold leading-none">190</span>
+                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Days</span>
+                </div>
+                <span className="text-[10px] font-bold font-mono">:</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-[11px] font-cormorant font-bold leading-none">07</span>
+                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Hrs</span>
+                </div>
+                <span className="text-[10px] font-bold font-mono">:</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-[11px] font-cormorant font-bold leading-none">45</span>
+                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Min</span>
+                </div>
               </div>
             </div>
 
-            <div className="mb-10 text-center">
-              <span className="text-[7.5px] font-marcellus tracking-[2px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 uppercase">
-                Walk Closer Walk Together
-              </span>
+            {/* Theme-Specific Interactive Core (Mini Mockup) */}
+            <div className="z-10 flex items-center justify-center relative my-1 overflow-visible h-20">
+              {heroActiveTheme === "jaipur" && (
+                <div className="w-full flex items-center justify-center relative overflow-hidden h-20">
+                  <motion.div animate={{ x: [0, -32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-6 z-10 w-9 h-16 bg-[#8A3A1A] border-r-2 border-amber-400 rounded-l-md shadow flex items-center justify-end pr-0.5"><span className="text-[6px] text-amber-400/40">囍</span></motion.div>
+                  <motion.div animate={{ x: [0, 32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-6 z-10 w-9 h-16 bg-[#8A3A1A] border-l-2 border-amber-400 rounded-r-md shadow flex items-center justify-start pl-0.5"><span className="text-[6px] text-amber-400/40">囍</span></motion.div>
+                  <span className="text-[7.5px] font-marcellus text-amber-300/80 tracking-widest font-bold uppercase drop-shadow">🚪 OPEN DOOR</span>
+                </div>
+              )}
+              {heroActiveTheme === "diya" && (
+                <div className="w-full flex items-center justify-center relative h-20">
+                  <div className="absolute w-10 h-10 rounded-full border border-amber-400/10 bg-amber-400/5 animate-pulse" />
+                  <div className="w-7 h-5.5 bg-[#170C2A] rounded-b-full relative border border-amber-400/20 flex items-center justify-center">
+                    <motion.div animate={{ scale: [1, 1.15, 0.95, 1.05, 1] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-2 h-3.5 bg-gradient-to-t from-orange-500 to-amber-300 rounded-t-full absolute -top-3 shadow-[0_0_8px_#f59e0b]" />
+                  </div>
+                </div>
+              )}
+              {heroActiveTheme === "lotus" && (
+                <div className="w-full flex items-center justify-center relative h-20">
+                  <motion.div animate={{ scale: [0.95, 1.03, 0.95], rotate: [0, 2, 0, -2, 0] }} transition={{ duration: 4, repeat: Infinity }} className="relative select-none text-3.5xl drop-shadow-md">
+                    🪷
+                  </motion.div>
+                </div>
+              )}
+              {heroActiveTheme === "elephant" && (
+                <div className="w-full flex items-center justify-center gap-1.5 relative h-20">
+                  <motion.span animate={{ x: [-4, 0, -4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-2xl drop-shadow-sm scale-x-[-1] select-none block">🐘</motion.span>
+                  <motion.span animate={{ x: [4, 0, 4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-2xl drop-shadow-sm select-none block">🐘</motion.span>
+                </div>
+              )}
+              {heroActiveTheme === "thread" && (
+                <div className="w-full flex flex-col items-center justify-start relative h-20">
+                  <div className="w-0.5 h-6 bg-red-600/60" />
+                  <motion.div animate={{ rotate: [-10, 10, -10] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} style={{ transformOrigin: "top center" }} className="text-2xl drop-shadow-md select-none">
+                    🔔
+                  </motion.div>
+                </div>
+              )}
+              {heroActiveTheme === "garland" && (
+                <div className="w-full flex items-center justify-center relative overflow-hidden h-20">
+                  <motion.div animate={{ x: [0, -28, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-4 z-10 w-10 h-16 bg-[#8B0000] border-r border-amber-400 rounded-l shadow" />
+                  <motion.div animate={{ x: [0, 28, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-4 z-10 w-10 h-16 bg-[#8B0000] border-l border-amber-400 rounded-r shadow" />
+                  <span className="text-2xl z-0 select-none block animate-bounce">🌸</span>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom prompts */}
+            <div className="mb-4 z-10 flex flex-col items-center">
+              <div className="backdrop-blur-md bg-white/10 border border-white/20 px-3 py-1 rounded-full shadow">
+                <span className="text-[7.5px] font-marcellus tracking-[2px] text-white uppercase font-bold leading-none">
+                  {dateStr} • {cityStr}
+                </span>
+              </div>
+              <div className="mt-3">
+                <span className="font-marcellus text-[9px] tracking-widest block uppercase font-bold text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] animate-pulse">
+                  {activeSim.tag} Template
+                </span>
+              </div>
             </div>
           </motion.div>
         );
@@ -308,60 +354,72 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             key="slide2"
-            className="absolute inset-0 bg-[#FAF6F0] flex flex-col justify-between p-4 pt-10 select-none text-left"
+            className="absolute inset-0 flex flex-col justify-between p-3.5 pt-8 select-none text-left bg-stone-950 overflow-hidden"
           >
-            <div className="text-center">
-              <span className="text-[7px] tracking-[3px] uppercase block font-marcellus text-amber-950/60">CELEBRATION TIME</span>
+            {/* Blurred couple background matching inside card preview */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center filter blur-[6px] scale-[1.1] z-0 opacity-30 pointer-events-none"
+              style={{ backgroundImage: `url(${activeSim.photo})` }}
+            />
+            
+            {/* Color tint matching theme */}
+            <div 
+              className="absolute inset-0 z-0 opacity-70 mix-blend-multiply"
+              style={{ background: activeStyle.bg }}
+            />
+
+            <div className="text-center z-10 mt-1">
+              <span className="text-[7.5px] tracking-[2.5px] uppercase block font-marcellus text-amber-300 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">CELEBRATION TIME</span>
               
-              <div className="flex gap-2 justify-center my-2.5 text-brand-rust">
+              <div className="flex gap-2 justify-center my-2 text-white font-semibold">
                 <div className="flex flex-col items-center">
-                  <span className="text-base font-bold leading-none font-mono">190</span>
-                  <span className="text-[5.5px] uppercase tracking-wider font-semibold opacity-70 mt-0.5">Days</span>
+                  <span className="text-sm font-bold leading-none font-mono">190</span>
+                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Days</span>
                 </div>
                 <span className="text-xs font-bold leading-none font-mono">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-base font-bold leading-none font-mono">07</span>
-                  <span className="text-[5.5px] uppercase tracking-wider font-semibold opacity-70 mt-0.5">Hrs</span>
+                  <span className="text-sm font-bold leading-none font-mono">07</span>
+                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Hrs</span>
                 </div>
                 <span className="text-xs font-bold leading-none font-mono">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-base font-bold leading-none font-mono">45</span>
-                  <span className="text-[5.5px] uppercase tracking-wider font-semibold opacity-70 mt-0.5">Min</span>
+                  <span className="text-sm font-bold leading-none font-mono">45</span>
+                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Min</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 max-w-[210px] mx-auto relative pl-4 pr-1 py-1 space-y-3 mt-1 overflow-hidden">
-              <div className="absolute left-1.5 top-0 bottom-4 w-[1px] bg-brand-rust/20" />
+            <div className="flex-1 max-w-[210px] mx-auto relative pl-4 pr-1 py-1 space-y-2.5 mt-0.5 overflow-hidden z-10">
+              <div className="absolute left-1.5 top-0 bottom-4 w-[1px] bg-white/20" />
               
               <motion.div 
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-brand-rust/5 border border-brand-rust/10 rounded-xl p-2 relative text-[7.5px]"
+                className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-2 relative text-[7.5px] shadow"
               >
-                <div className="absolute left-[-15.5px] top-2.5 w-2 h-2 rounded-full bg-yellow-500 border border-brand-rust" />
-                <h5 className="font-bold font-marcellus text-brand-rust text-[8.5px]">Haldi Ceremony</h5>
-                <p className="text-[#8A3A1A] font-medium font-marcellus mt-0.5">Dec 11, 10:00 AM</p>
-                <p className="text-stone-500 font-cormorant leading-tight mt-0.5">Golden saffron paste and family laughter.</p>
+                <div className="absolute left-[-15.5px] top-2.5 w-2 h-2 rounded-full bg-amber-400 border border-white shadow" />
+                <h5 className="font-bold font-marcellus text-amber-300 text-[8.5px]">Haldi Ceremony</h5>
+                <p className="text-white font-medium font-marcellus mt-0.5">Dec 11, 10:00 AM</p>
+                <p className="text-stone-300 font-cormorant leading-tight mt-0.5">Golden saffron paste and family laughter.</p>
               </motion.div>
 
               <motion.div 
                 initial={{ opacity: 0, x: 10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-brand-rust/5 border border-brand-rust/10 rounded-xl p-2 relative text-[7.5px]"
+                className="backdrop-blur-md bg-white/10 border border-white/20 rounded-xl p-2 relative text-[7.5px] shadow"
               >
-                <div className="absolute left-[-15.5px] top-2.5 w-2 h-2 rounded-full bg-red-600 border border-brand-rust" />
-                <h5 className="font-bold font-marcellus text-brand-rust text-[8.5px]">Wedding Muhurtham</h5>
-                <p className="text-[#8A3A1A] font-medium font-marcellus mt-0.5">Dec 12, 06:30 PM</p>
-                <p className="text-stone-500 font-cormorant leading-tight mt-0.5">Sacred vows and Shehnai under the stars.</p>
+                <div className="absolute left-[-15.5px] top-2.5 w-2 h-2 rounded-full bg-red-400 border border-white shadow" />
+                <h5 className="font-bold font-marcellus text-amber-300 text-[8.5px]">Wedding Muhurtham</h5>
+                <p className="text-white font-medium font-marcellus mt-0.5">Dec 12, 06:30 PM</p>
+                <p className="text-stone-300 font-cormorant leading-tight mt-0.5">Sacred vows and Shehnai under the stars.</p>
               </motion.div>
             </div>
 
-            <div className="mb-6 text-center select-none">
-              <span className="text-[7.5px] font-marcellus tracking-[1.5px] text-stone-400 font-bold uppercase">
-                Add Maps and Guestbook Wall
+            <div className="mb-4 text-center select-none z-10">
+              <span className="text-[7.5px] font-marcellus tracking-[1.5px] text-white/60 font-bold uppercase block">
+                RSVP, Maps, Music & Shagun
               </span>
             </div>
           </motion.div>

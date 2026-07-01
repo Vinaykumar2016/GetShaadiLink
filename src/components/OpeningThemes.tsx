@@ -17,6 +17,7 @@ interface OpeningThemesProps {
   onOpen: () => void;
   lang?: string;
   photo?: string;
+  heroPhoto?: string;
 }
 
 export default function OpeningThemes({
@@ -33,6 +34,7 @@ export default function OpeningThemes({
   onOpen,
   lang = "en",
   photo,
+  heroPhoto,
 }: OpeningThemesProps) {
   const [activated, setActivated] = useState(false);
   const [animState, setAnimState] = useState<string>("idle");
@@ -271,80 +273,93 @@ export default function OpeningThemes({
     tapPrompt: string,
     isDark: boolean
   ) => {
-    // Dynamic font size calculator for cursive wedding names to prevent wrap-induced layout overflow on mobile
+    const activeCoverPhoto = heroPhoto || photo || "/samples/couple1.jpg";
+
+    // Dynamic font size calculator for cursive wedding names
     const getFontSizeForName = (name: string) => {
       const len = name ? name.length : 0;
-      if (len > 22) return "text-2xl sm:text-3xl";
-      if (len > 15) return "text-3xl sm:text-4xl";
-      if (len > 8) return "text-4xl sm:text-5xl";
-      return "text-5xl sm:text-6xl";
+      if (len > 22) return "text-2xl xs:text-3xl sm:text-4xl";
+      if (len > 15) return "text-3xl xs:text-4xl sm:text-5xl";
+      if (len > 8) return "text-4xl xs:text-5xl sm:text-6xl";
+      return "text-5xl xs:text-6xl sm:text-7xl";
     };
 
     return (
       <div 
-        className="relative w-full max-w-[390px] h-[86vh] max-h-[740px] min-h-[480px] xs:min-h-[520px] rounded-[36px] flex flex-col justify-between p-4 xs:p-6 overflow-hidden shadow-paper-deep border border-brand-rust/10 select-none text-center"
-        style={{ background: bgGradient }}
+        className="relative w-full max-w-[390px] h-[86vh] max-h-[740px] min-h-[480px] xs:min-h-[520px] rounded-[36px] flex flex-col justify-between p-4 xs:p-6 overflow-hidden shadow-paper-deep border border-white/10 select-none text-center bg-stone-950"
       >
-        {/* Floating Sparks Layer */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(6)].map((_, i) => (
+        {/* Full-bleed background photo layer with slow Ken Burns zoom */}
+        <motion.div
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${activeCoverPhoto})` }}
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Color overlay matching theme gradient */}
+        <div 
+          className="absolute inset-0 z-0 opacity-80 mix-blend-multiply transition-all duration-300"
+          style={{ background: bgGradient }}
+        />
+
+        {/* Floating Ambient Sparks / Fireflies Layer */}
+        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+          {[...Array(8)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 rounded-full"
+              className="absolute w-1 h-1 rounded-full bg-amber-200/50 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
               style={{
-                backgroundColor: isDark ? "rgba(255,224,130,0.3)" : "rgba(138,58,26,0.1)",
-                top: `${15 + i * 14}%`,
-                left: `${10 + (i * 29) % 80}%`,
+                top: `${20 + i * 11}%`,
+                left: `${15 + (i * 27) % 70}%`,
                 willChange: "transform, opacity",
               }}
               animate={{
-                y: [0, -35, 0],
-                opacity: [0.1, 0.7, 0.1],
+                y: [0, -40, 0],
+                opacity: [0.2, 0.9, 0.2],
+                scale: [0.8, 1.3, 0.8],
               }}
               transition={{
-                duration: 4 + i,
+                duration: 5 + i,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: i * 0.4,
+                delay: i * 0.3,
               }}
             />
           ))}
         </div>
 
-        {/* Top Header Card Info - pointer-events-none added to prevent blocking clicks on the interactive core below */}
-        <div className="mt-5 xs:mt-8 z-10 flex flex-col items-center pointer-events-none">
-          <h2 className={`font-cursive font-normal tracking-wide leading-tight ${getFontSizeForName(bride)}`} style={{ color: textColor }}>
+        {/* Top Header Card Info: Glassmorphic panel with Great Vibes cursive */}
+        <div className="mt-4 xs:mt-5 z-20 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-[28px] p-4 xs:p-5 shadow-2xl flex flex-col items-center pointer-events-none">
+          <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${getFontSizeForName(bride)}`} style={{ color: "#ffffff" }}>
             {bride}
           </h2>
-          <span className="font-cormorant italic text-lg xs:text-xl my-1 block" style={{ color: isDark ? "#FFE082" : "#8A3A1A" }}>
+          <span className="font-cormorant italic text-xl xs:text-2xl my-0.5 block text-amber-300/90 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             {t("weds")}
           </span>
-          <h2 className={`font-cursive font-normal tracking-wide leading-tight ${getFontSizeForName(groom)}`} style={{ color: textColor }}>
+          <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${getFontSizeForName(groom)}`} style={{ color: "#ffffff" }}>
             {groom}
           </h2>
-          {renderCountdown(textColor)}
-          <div className="w-10 h-[1.5px] mt-1 opacity-20" style={{ backgroundColor: textColor }} />
+          <div className="w-12 h-[1px] my-2 bg-white/20" />
+          {renderCountdown("#ffffff")}
         </div>
 
         {/* Dynamic Theme Interactive Core */}
-        <div className="flex-1 flex items-center justify-center relative my-2 xs:my-4 overflow-visible">
+        <div className="flex-1 flex items-center justify-center relative my-2 xs:my-3 overflow-visible z-20">
           {interactiveEl}
         </div>
 
-        {/* Floating Giphy Couple Sticker */}
-        <GiphyCoupleSticker />
-
-        {/* Footer prompts */}
-        <div className="mb-4 xs:mb-6 z-10 flex flex-col items-center">
-          <p className="text-[9.5px] font-marcellus tracking-widest uppercase font-bold" style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}>
-            {niceDate} • {city}
-          </p>
-          <div className="mt-4 xs:mt-5">
+        {/* Footer prompts: Glassmorphic date badge */}
+        <div className="mb-2 xs:mb-4 z-20 flex flex-col items-center">
+          <div className="backdrop-blur-md bg-white/10 border border-white/20 px-4 py-1.5 rounded-full shadow-lg">
+            <p className="text-[10px] font-marcellus tracking-[2.5px] uppercase font-bold text-white leading-none">
+              {niceDate} • {city}
+            </p>
+          </div>
+          <div className="mt-3.5">
             <motion.span 
-              animate={activated ? { opacity: [1, 0.3, 1] } : { scale: [1, 1.02, 1] }}
+              animate={activated ? { opacity: [1, 0.3, 1] } : { scale: [1, 1.03, 1] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
-              className="font-marcellus text-[10.5px] tracking-widest block uppercase font-bold"
-              style={{ color: isDark ? "#FFE082" : "#8A3A1A" }}
+              className="font-marcellus text-[11px] tracking-[2px] block uppercase font-bold text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
             >
               {activated ? t("unveilingInvite") : tapPrompt}
             </motion.span>
@@ -357,7 +372,7 @@ export default function OpeningThemes({
   // 1. JAIPUR PALACE COVER: Pastels, arches, sliding doors
   const renderJaipurTheme = () => {
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #FFD5B4 0%, #FFB3A7 50%, #FAF6F0 100%)",
+      "linear-gradient(to bottom, rgba(138,58,26,0.3) 0%, rgba(138,58,26,0.7) 60%, rgba(20,0,0,0.9) 100%)",
       <div className="w-full flex items-center justify-center overflow-hidden relative h-56">
         {/* Left Palace Door */}
         <motion.div
@@ -509,7 +524,7 @@ export default function OpeningThemes({
     );
 
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #0A0413 0%, #170C2A 70%, #0F091E 100%)",
+      "linear-gradient(to bottom, rgba(10,4,19,0.5) 0%, rgba(23,12,42,0.8) 70%, rgba(15,9,30,0.95) 100%)",
       interactiveDiya,
       "#F4EFE6",
       t("mandalaSealPrompt"),
@@ -669,7 +684,7 @@ export default function OpeningThemes({
     );
 
     return renderEnvelopeFrame(
-      "linear-gradient(160deg, #FFF0F5 0%, #FCE4EC 40%, #F8EFF8 70%, #FFF8F0 100%)",
+      "linear-gradient(to bottom, rgba(255,182,193,0.3) 0%, rgba(194,24,91,0.6) 60%, rgba(121,12,56,0.9) 100%)",
       interactiveLotus,
       "#880E4F",
       t("archwayPrompt"),
@@ -680,7 +695,7 @@ export default function OpeningThemes({
   // 4. ROYAL ELEPHANT COVER: Splitting face-to-face decorated elephants
   const renderElephantTheme = () => {
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #FAF6F0 0%, #F5EFEB 60%, #E8D8CC 100%)",
+      "linear-gradient(to bottom, rgba(138,58,26,0.2) 0%, rgba(232,216,204,0.5) 60%, rgba(40,20,10,0.85) 100%)",
       <div className="w-full h-56 relative flex items-center justify-center overflow-hidden">
         {/* Rotating gold mandala sun behind text (revealed on open) — smooth linear rotation */}
         <motion.svg
@@ -807,7 +822,7 @@ export default function OpeningThemes({
     };
 
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, #FFF8EE 0%, #FFF3E0 50%, #FAF6F0 100%)",
+      "linear-gradient(to bottom, rgba(255,152,0,0.15) 0%, rgba(255,243,224,0.4) 60%, rgba(139,0,0,0.85) 100%)",
       <div className="w-full h-56 relative flex flex-col items-center justify-start pt-0 overflow-visible">
         {/* Decorative Toran arch at top — flowers sway gently */}
         <div className="w-48 flex justify-center items-center gap-0 absolute top-0">
@@ -927,7 +942,7 @@ export default function OpeningThemes({
   // 6. TORAN GARLAND COVER: Grand silk curtain reveal with animated toran
   const renderGarlandTheme = () => {
     return renderEnvelopeFrame(
-      "linear-gradient(160deg, #E8F5E9 0%, #F1F8E9 30%, #FAF6F0 100%)",
+      "linear-gradient(to bottom, rgba(27,94,32,0.25) 0%, rgba(241,248,233,0.4) 60%, rgba(10,35,12,0.85) 100%)",
       <div className="w-full h-56 relative flex flex-col items-center justify-center overflow-hidden">
         {/* Hanging toran row — staggered bounce + rises on activate */}
         <motion.div

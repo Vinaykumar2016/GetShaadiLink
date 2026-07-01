@@ -26,6 +26,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
   const [lang, setLang] = useState("en");
   const [slug, setSlug] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
+  const [heroPhoto, setHeroPhoto] = useState<string>("");
   const [shagunOn, setShagunOn] = useState(false);
   const [upiId, setUpiId] = useState("");
 
@@ -69,6 +70,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
       setLang(initialData.lang || "en");
       setSlug(initialData.slug || "");
       setPhotos(initialData.photos || []);
+      setHeroPhoto(initialData.heroPhoto || "");
       setShagunOn(!!initialData.shagunOn);
       setUpiId(initialData.upiId || "");
       setEditPassword(initialData.editPassword || "");
@@ -199,6 +201,57 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
     setPhotos((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const [isHeroPhotoProcessing, setIsHeroPhotoProcessing] = useState(false);
+
+  const handleHeroPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    playClickSound();
+
+    const file = files[0];
+    setIsHeroPhotoProcessing(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.75);
+        setHeroPhoto(compressedBase64);
+        setIsHeroPhotoProcessing(false);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeHeroPhoto = () => {
+    playClickSound();
+    setHeroPhoto("");
+  };
+
   const handleNextStep = () => {
     playClickSound();
     setErrorMessage("");
@@ -291,6 +344,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         razorpayPaymentId: razorpayPaymentId || (initialData ? initialData.razorpayPaymentId : null),
         password: (initialData && initialData.editPassword) ? initialData.editPassword : editPassword.trim(),
         agency: localStorage.getItem("agency_ref") || null,
+        heroPhoto: heroPhoto || null,
       };
 
       const endpoint = initialData ? `/api/invitations/${initialData.slug}/update` : "/api/invitations/generate";
@@ -719,6 +773,50 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* HERO COVER PHOTO UPLOADER */}
+                  <div className="space-y-4 pt-2">
+                    <div className="border-t border-brand-rust/10 pt-4">
+                      <span className="text-xs font-cinzel tracking-widest text-brand-rust/40 block mb-3 uppercase font-bold">Hero Cover Photo (Highly Recommended)</span>
+                    </div>
+                    <div className="relative border-2 border-dashed border-brand-rust/15 hover:border-brand-rust/35 rounded-2xl p-6 text-center bg-brand-rust/5 transition-all cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleHeroPhotoUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center bg-brand-rust/10">
+                          <ImageIcon className="w-5 h-5 text-brand-rust" />
+                        </div>
+                        <p className="text-sm font-semibold text-brand-rust">Upload Hero Cover Photo</p>
+                        <p className="text-[10px] text-brand-rust/40">Main background image for your cover page</p>
+                      </div>
+                    </div>
+
+                    {isHeroPhotoProcessing && (
+                      <div className="text-center text-xs text-brand-rust flex items-center justify-center gap-2 font-medium">
+                        <div className="w-4 h-4 border-2 border-brand-rust/20 border-t-brand-rust animate-spin rounded-full" />
+                        <span>Processing cover photo...</span>
+                      </div>
+                    )}
+
+                    {heroPhoto && (
+                      <div className="flex flex-wrap gap-2.5 pt-1">
+                        <div className="relative w-28 h-20 rounded-xl overflow-hidden border border-brand-rust/10">
+                          <img src={heroPhoto} alt="Hero Cover Thumbnail" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={removeHeroPhoto}
+                            className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full flex items-center justify-center bg-red-600 text-white hover:bg-red-500 transition-colors shadow"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* MULTIIMAGE PHOTO UPLOADER */}
