@@ -258,93 +258,182 @@ export default function App() {
             />
 
             {/* Glassmorphism Name Card */}
-            <div className="z-10 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-2.5 shadow-md flex flex-col items-center mt-1">
-              <h4 className="text-xl font-great-vibes font-normal text-white leading-none tracking-wide drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.5)]">
+            <div className="z-10 w-[90%] mx-auto backdrop-blur-md bg-stone-900/40 border border-white/10 rounded-xl p-2 shadow flex flex-col items-center mt-1">
+              <h4 className="text-lg font-great-vibes font-normal text-white leading-tight tracking-wide drop-shadow">
                 {brideName}
               </h4>
-              <span className="font-cormorant italic text-xs my-0.5 block text-amber-300 font-bold leading-none">
-                {landingLang === "kn" ? "ಸಂಗ" : landingLang === "hi" ? "संग" : landingLang === "ta" ? "உடன்" : landingLang === "te" ? "తో" : landingLang === "ml" ? "ഒപ്പം" : "weds"}
+              <span className="font-cormorant italic text-[10px] my-0.5 block text-amber-400 font-bold leading-none">
+                {landingLang === "kn" ? "ಸಂಗ" : landingLang === "hi" ? "संग" : landingLang === "ta" ? "உடன்" : landingLang === "te" ? "తో" : landingLang === "ml" ? "ಒപ്പം" : "weds"}
               </span>
-              <h4 className="text-xl font-great-vibes font-normal text-white leading-none tracking-wide drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.5)]">
+              <h4 className="text-lg font-great-vibes font-normal text-white leading-tight tracking-wide drop-shadow">
                 {groomName}
               </h4>
-              <div className="w-8 h-[0.8px] my-1 bg-white/20" />
+              <div className="w-6 h-[0.5px] my-1 bg-white/15" />
               
               {/* Mini Countdown */}
-              <div className="flex gap-2 justify-center text-white leading-none mt-0.5">
+              <div className="flex gap-2 justify-center text-white leading-none">
                 <div className="flex flex-col items-center">
-                  <span className="text-[11px] font-cormorant font-bold leading-none">190</span>
-                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Days</span>
+                  <span className="text-[10px] font-cormorant font-bold leading-none text-amber-300">190</span>
+                  <span className="text-[5px] uppercase tracking-wider font-marcellus font-bold opacity-60 mt-0.5">Days</span>
                 </div>
-                <span className="text-[10px] font-bold font-mono">:</span>
+                <span className="text-[8px] font-bold font-mono text-white/50">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-[11px] font-cormorant font-bold leading-none">07</span>
-                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Hrs</span>
+                  <span className="text-[10px] font-cormorant font-bold leading-none text-amber-300">07</span>
+                  <span className="text-[5px] uppercase tracking-wider font-marcellus font-bold opacity-60 mt-0.5">Hrs</span>
                 </div>
-                <span className="text-[10px] font-bold font-mono">:</span>
+                <span className="text-[8px] font-bold font-mono text-white/50">:</span>
                 <div className="flex flex-col items-center">
-                  <span className="text-[11px] font-cormorant font-bold leading-none">45</span>
-                  <span className="text-[5.5px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Min</span>
+                  <span className="text-[10px] font-cormorant font-bold leading-none text-amber-300">45</span>
+                  <span className="text-[5px] uppercase tracking-wider font-marcellus font-bold opacity-60 mt-0.5">Min</span>
                 </div>
               </div>
             </div>
 
             {/* Theme-Specific Interactive Core (Mini Mockup) */}
-            <div className="z-10 flex items-center justify-center relative my-1 overflow-visible h-20">
+            <div className="z-10 flex items-center justify-center relative my-1 overflow-visible h-16">
               {heroActiveTheme === "jaipur" && (
-                <div className="w-full flex items-center justify-center relative overflow-hidden h-20">
-                  <motion.div animate={{ x: [0, -32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-6 z-10 w-9 h-16 bg-[#8A3A1A] border-r-2 border-amber-400 rounded-l-md shadow flex items-center justify-end pr-0.5"><span className="text-[6px] text-amber-400/40">囍</span></motion.div>
-                  <motion.div animate={{ x: [0, 32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-6 z-10 w-9 h-16 bg-[#8A3A1A] border-l-2 border-amber-400 rounded-r-md shadow flex items-center justify-start pl-0.5"><span className="text-[6px] text-amber-400/40">囍</span></motion.div>
-                  <span className="text-[7.5px] font-marcellus text-amber-300/80 tracking-widest font-bold uppercase drop-shadow">🚪 OPEN DOOR</span>
+                <div className="w-full flex items-center justify-center relative overflow-hidden h-16">
+                  {/* Left Door */}
+                  <motion.div 
+                    animate={{ x: [0, -20, 0] }} 
+                    transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} 
+                    className="absolute left-1/2 -translate-x-[100%] z-10 w-8 h-14 border border-amber-500/20 rounded-l-lg bg-[#8A3A1A] flex items-center justify-end pr-0.5 shadow-md overflow-hidden"
+                  >
+                    <svg viewBox="0 0 50 100" className="w-full h-full">
+                      <path d="M 0,100 L 50,100 L 50,0 C 35,15 15,20 0,25 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
+                      <path d="M 4,92 L 46,92 L 46,6 C 32,20 18,22 4,28 Z" fill="none" stroke="#FFD54F" strokeWidth="1" strokeDasharray="2,2" />
+                    </svg>
+                  </motion.div>
+                  {/* Right Door */}
+                  <motion.div 
+                    animate={{ x: [0, 20, 0] }} 
+                    transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} 
+                    className="absolute right-1/2 translate-x-[100%] z-10 w-8 h-14 border border-amber-500/20 rounded-r-lg bg-[#8A3A1A] flex items-center justify-start pl-0.5 shadow-md overflow-hidden"
+                  >
+                    <svg viewBox="0 0 50 100" className="w-full h-full">
+                      <path d="M 50,100 L 0,100 L 0,0 C 15,15 35,20 50,25 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
+                      <path d="M 46,92 L 4,92 L 4,6 C 18,20 32,22 46,28 Z" fill="none" stroke="#FFD54F" strokeWidth="1" strokeDasharray="2,2" />
+                    </svg>
+                  </motion.div>
+                  <span className="text-[6.5px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-0 animate-pulse">🚪 OPEN DOOR</span>
                 </div>
               )}
               {heroActiveTheme === "diya" && (
-                <div className="w-full flex items-center justify-center relative h-20">
-                  <div className="absolute w-10 h-10 rounded-full border border-amber-400/10 bg-amber-400/5 animate-pulse" />
-                  <div className="w-7 h-5.5 bg-[#170C2A] rounded-b-full relative border border-amber-400/20 flex items-center justify-center">
-                    <motion.div animate={{ scale: [1, 1.15, 0.95, 1.05, 1] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-2 h-3.5 bg-gradient-to-t from-orange-500 to-amber-300 rounded-t-full absolute -top-3 shadow-[0_0_8px_#f59e0b]" />
-                  </div>
+                <div className="w-full flex items-center justify-center relative h-16">
+                  <div className="absolute w-8 h-8 rounded-full border border-amber-400/20 bg-amber-400/5 animate-pulse" />
+                  <svg viewBox="0 0 40 30" className="w-8 h-6 overflow-visible">
+                    <motion.path 
+                      d="M20,0 C23,8 24,12 20,16 C16,12 17,8 20,0 Z" 
+                      fill="url(#diya-flame-grad)" 
+                      animate={{ scaleY: [1, 1.15, 0.95, 1.05, 1], scaleX: [1, 0.9, 1.05, 0.95, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                      style={{ transformOrigin: "bottom center" }}
+                    />
+                    <path d="M10,16 C10,22 30,22 30,16 C28,12 12,12 10,16 Z" fill="#170C2A" stroke="#FFB300" strokeWidth="1" />
+                    <defs>
+                      <linearGradient id="diya-flame-grad" x1="0" y1="1" x2="0" y2="0">
+                        <stop offset="0%" stopColor="#E65100" />
+                        <stop offset="60%" stopColor="#FB8C00" />
+                        <stop offset="100%" stopColor="#FFD54F" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
                 </div>
               )}
               {heroActiveTheme === "lotus" && (
-                <div className="w-full flex items-center justify-center relative h-20">
-                  <motion.div animate={{ scale: [0.95, 1.03, 0.95], rotate: [0, 2, 0, -2, 0] }} transition={{ duration: 4, repeat: Infinity }} className="relative select-none text-3.5xl drop-shadow-md">
-                    🪷
-                  </motion.div>
+                <div className="w-full flex items-center justify-center relative h-16">
+                  <motion.svg 
+                    viewBox="0 0 40 40" 
+                    className="w-8 h-8 fill-none stroke-rose-400/90 stroke-[1.2] overflow-visible"
+                    animate={{ scale: [0.95, 1.03, 0.95] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <path d="M20,10 C23,17 23,25 20,30 C17,25 17,17 20,10 Z" fill="rgba(244,143,177,0.1)" />
+                    <path d="M20,20 C14,18 10,22 10,28 C15,29 18,25 20,20 Z" fill="rgba(244,143,177,0.05)" />
+                    <path d="M20,15 C13,10 7,16 10,25 C14,25 18,21 20,15 Z" fill="rgba(244,143,177,0.05)" />
+                    <path d="M20,20 C26,18 30,22 30,28 C25,29 22,25 20,20 Z" fill="rgba(244,143,177,0.05)" />
+                    <path d="M20,15 C27,10 33,16 30,25 C26,25 22,21 20,15 Z" fill="rgba(244,143,177,0.05)" />
+                  </motion.svg>
                 </div>
               )}
               {heroActiveTheme === "elephant" && (
-                <div className="w-full flex items-center justify-center gap-1.5 relative h-20">
-                  <motion.span animate={{ x: [-4, 0, -4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-2xl drop-shadow-sm scale-x-[-1] select-none block">🐘</motion.span>
-                  <motion.span animate={{ x: [4, 0, 4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-2xl drop-shadow-sm select-none block">🐘</motion.span>
+                <div className="w-full flex items-center justify-center gap-4 relative h-16">
+                  <motion.div 
+                    animate={{ x: [-2, 0, -2], rotate: [0, -2, 0] }} 
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} 
+                    className="w-10 h-10 scale-x-[-1]"
+                  >
+                    <svg viewBox="0 0 120 100" className="w-full h-full">
+                      <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#D49A6A" stroke="#825229" strokeWidth="0.8" />
+                      <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" />
+                      <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
+                    </svg>
+                  </motion.div>
+                  <motion.div 
+                    animate={{ x: [2, 0, 2], rotate: [0, 2, 0] }} 
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} 
+                    className="w-10 h-10"
+                  >
+                    <svg viewBox="0 0 120 100" className="w-full h-full">
+                      <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#D49A6A" stroke="#825229" strokeWidth="0.8" />
+                      <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" />
+                      <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
+                    </svg>
+                  </motion.div>
                 </div>
               )}
               {heroActiveTheme === "thread" && (
-                <div className="w-full flex flex-col items-center justify-start relative h-20">
-                  <div className="w-0.5 h-6 bg-red-600/60" />
-                  <motion.div animate={{ rotate: [-10, 10, -10] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} style={{ transformOrigin: "top center" }} className="text-2xl drop-shadow-md select-none">
-                    🔔
+                <div className="w-full flex flex-col items-center justify-start relative h-16">
+                  <div className="w-0.5 h-3 bg-red-600/60" />
+                  <motion.div 
+                    animate={{ rotate: [-6, 6, -6] }} 
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} 
+                    style={{ transformOrigin: "top center" }} 
+                    className="w-6 h-8"
+                  >
+                    <svg viewBox="0 0 100 140" className="w-full h-full">
+                      <circle cx="50" cy="8" r="4" fill="none" stroke="#FFB300" strokeWidth="2" />
+                      <path d="M 38,22 C 38,10 62,10 62,22 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.8" />
+                      <path d="M 38,22 L 35,42 C 35,45 65,45 65,42 L 62,22 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.8" />
+                      <circle cx="50" cy="42" r="3" fill="#FFE082" />
+                    </svg>
                   </motion.div>
                 </div>
               )}
               {heroActiveTheme === "garland" && (
-                <div className="w-full flex items-center justify-center relative overflow-hidden h-20">
-                  <motion.div animate={{ x: [0, -28, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-4 z-10 w-10 h-16 bg-[#8B0000] border-r border-amber-400 rounded-l shadow" />
-                  <motion.div animate={{ x: [0, 28, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-4 z-10 w-10 h-16 bg-[#8B0000] border-l border-amber-400 rounded-r shadow" />
-                  <span className="text-2xl z-0 select-none block animate-bounce">🌸</span>
+                <div className="w-full flex items-center justify-center relative overflow-hidden h-16">
+                  <motion.div 
+                    animate={{ y: [-2, 0, -2] }} 
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} 
+                    className="absolute top-0 w-full h-8"
+                  >
+                    <svg viewBox="0 0 200 100" className="w-full h-full">
+                      <path d="M 0,10 Q 50,60 100,60 Q 150,60 200,10" fill="none" stroke="#FF8F00" strokeWidth="4" strokeLinecap="round" />
+                      <path d="M 0,10 Q 50,60 100,60 Q 150,60 200,10" fill="none" stroke="#FFC107" strokeWidth="2" strokeDasharray="4,4" strokeLinecap="round" />
+                      <circle cx="15" cy="15" r="4" fill="#FF6F00" />
+                      <circle cx="35" cy="25" r="4.5" fill="#FF8F00" />
+                      <circle cx="60" cy="40" r="5" fill="#FF6F00" />
+                      <circle cx="85" cy="52" r="5.5" fill="#FF8F00" />
+                      <circle cx="100" cy="54" r="6" fill="#FF6F00" />
+                      <circle cx="115" cy="52" r="5.5" fill="#FF8F00" />
+                      <circle cx="140" cy="40" r="5" fill="#FF6F00" />
+                      <circle cx="165" cy="25" r="4.5" fill="#FF8F00" />
+                      <circle cx="185" cy="15" r="4" fill="#FF6F00" />
+                    </svg>
+                  </motion.div>
                 </div>
               )}
             </div>
 
             {/* Bottom prompts */}
-            <div className="mb-4 z-10 flex flex-col items-center">
-              <div className="backdrop-blur-md bg-white/10 border border-white/20 px-3 py-1 rounded-full shadow">
-                <span className="text-[7.5px] font-marcellus tracking-[2px] text-white uppercase font-bold leading-none">
+            <div className="mb-2 z-10 flex flex-col items-center">
+              <div className="backdrop-blur-md bg-stone-900/40 border border-white/10 px-2 py-0.5 rounded-full shadow">
+                <span className="text-[7px] font-marcellus tracking-[1.5px] text-white uppercase font-bold leading-none">
                   {dateStr} • {cityStr}
                 </span>
               </div>
-              <div className="mt-3">
-                <span className="font-marcellus text-[9px] tracking-widest block uppercase font-bold text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] animate-pulse">
+              <div className="mt-2">
+                <span className="font-marcellus text-[8px] tracking-widest block uppercase font-bold text-amber-300 drop-shadow animate-pulse">
                   {activeSim.tag} Template
                 </span>
               </div>

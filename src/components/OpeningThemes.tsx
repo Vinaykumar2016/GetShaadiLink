@@ -731,23 +731,52 @@ export default function OpeningThemes({
           style={{ left: "10%", transformOrigin: "bottom left", willChange: "transform, opacity" }}
         >
           <svg viewBox="0 0 120 100" className="w-full h-full">
+            <defs>
+              <linearGradient id="sandstone-elephant-right" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#FAD8B7" />
+                <stop offset="50%" stopColor="#D49A6A" />
+                <stop offset="100%" stopColor="#9E6738" />
+              </linearGradient>
+            </defs>
             {/* Elephant base */}
             <path 
               d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
-              fill="#5D5C61" 
+              fill="url(#sandstone-elephant-right)" 
+              stroke="#825229"
+              strokeWidth="0.8"
             />
             {/* Trunk — animated sway */}
             <motion.path
               d="M92,15 Q95,12 97,14"
-              stroke="#FFD54F" strokeWidth="1" fill="none"
+              stroke="#D49A6A" strokeWidth="1.2" fill="none"
               animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q96,10 98,13", "M92,15 Q94,14 96,15", "M92,15 Q95,12 97,14"] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
             />
-            <circle cx="80" cy="35" r="0.7" fill="#000" />
-            <circle cx="39" cy="56" r="1.5" fill="#FFE082" />
-            <circle cx="44" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="49" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="53" cy="56" r="1.5" fill="#FFE082" />
+            {/* Ear contours */}
+            <path d="M42,38 C35,38 32,44 32,52 C32,60 36,64 42,64" fill="none" stroke="#825229" strokeWidth="0.8" />
+            <path d="M40,40 C35,40 33,44 33,50 C33,56 36,60 40,60" fill="none" stroke="#FFD54F" strokeWidth="0.5" opacity="0.3" />
+            {/* Jhool */}
+            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" stroke="#825229" strokeWidth="0.5" />
+            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
+            {/* Forehead Ornament */}
+            <path d="M76,32 Q82,24 88,32 Q85,42 80,45 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.5" />
+            <circle cx="82" cy="35" r="0.8" fill="#D32F2F" />
+            <circle cx="80" cy="40" r="0.8" fill="#D32F2F" />
+            {/* Tusks */}
+            <path d="M86,43 Q93,46 95,43 L91,40 Z" fill="#FFFFFF" stroke="#825229" strokeWidth="0.5" />
+            {/* Eye */}
+            <circle cx="78" cy="32" r="1" fill="#FFF" />
+            <circle cx="78" cy="32" r="0.5" fill="#000" />
+            {/* Howdah */}
+            <path d="M38,28 L50,28 L48,22 L40,22 Z" fill="#FFB300" stroke="#825229" strokeWidth="0.5" />
+            <path d="M41,22 Q44,15 47,22 Z" fill="#D32F2F" />
+            {/* Anklets */}
+            <circle cx="21" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="31" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="43" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="57" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="69" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="81" cy="80" r="1.2" fill="#FFD54F" />
           </svg>
         </motion.div>
 
@@ -759,29 +788,53 @@ export default function OpeningThemes({
           className="absolute z-10 w-28 h-28"
           style={{ right: "10%", transformOrigin: "bottom right", willChange: "transform, opacity" }}
         >
-          <svg viewBox="0 0 120 100" className="w-full h-full text-[#963E1C]">
+          <svg viewBox="0 0 120 100" className="w-full h-full">
+            <defs>
+              <linearGradient id="sandstone-elephant-right" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#FAD8B7" />
+                <stop offset="50%" stopColor="#D49A6A" />
+                <stop offset="100%" stopColor="#9E6738" />
+              </linearGradient>
+            </defs>
+            {/* Elephant base */}
             <path 
               d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
-              fill="#963E1C" 
+              fill="url(#sandstone-elephant-right)" 
+              stroke="#825229"
+              strokeWidth="0.8"
             />
             {/* Trunk — animated sway */}
             <motion.path
               d="M92,15 Q95,12 97,14"
-              stroke="#FFE082" strokeWidth="1" fill="none"
-              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q94,14 96,15", "M92,15 Q96,10 98,13", "M92,15 Q95,12 97,14"] }}
+              stroke="#D49A6A" strokeWidth="1.2" fill="none"
+              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q96,10 98,13", "M92,15 Q94,14 96,15", "M92,15 Q95,12 97,14"] }}
               transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
             />
-            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#FFE082" />
-            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#D32F2F" />
-            <path d="M38,28 L50,28 L50,38 L38,38 Z" fill="#FFE082" stroke="#963E1C" strokeWidth="0.5" />
-            <path d="M41,20 Q44,14 47,20 L49,28 L39,28 Z" fill="#FFE082" opacity="0.9" />
-            <path d="M86,43 Q90,46 92,44" stroke="#FFF" strokeWidth="1.5" fill="none" />
-            <circle cx="80" cy="35" r="1.5" fill="#FFF" />
-            <circle cx="80" cy="35" r="0.7" fill="#000" />
-            <circle cx="39" cy="56" r="1.5" fill="#FFE082" />
-            <circle cx="44" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="49" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="53" cy="56" r="1.5" fill="#FFE082" />
+            {/* Ear contours */}
+            <path d="M42,38 C35,38 32,44 32,52 C32,60 36,64 42,64" fill="none" stroke="#825229" strokeWidth="0.8" />
+            <path d="M40,40 C35,40 33,44 33,50 C33,56 36,60 40,60" fill="none" stroke="#FFD54F" strokeWidth="0.5" opacity="0.3" />
+            {/* Jhool */}
+            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" stroke="#825229" strokeWidth="0.5" />
+            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
+            {/* Forehead Ornament */}
+            <path d="M76,32 Q82,24 88,32 Q85,42 80,45 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.5" />
+            <circle cx="82" cy="35" r="0.8" fill="#D32F2F" />
+            <circle cx="80" cy="40" r="0.8" fill="#D32F2F" />
+            {/* Tusks */}
+            <path d="M86,43 Q93,46 95,43 L91,40 Z" fill="#FFFFFF" stroke="#825229" strokeWidth="0.5" />
+            {/* Eye */}
+            <circle cx="78" cy="32" r="1" fill="#FFF" />
+            <circle cx="78" cy="32" r="0.5" fill="#000" />
+            {/* Howdah */}
+            <path d="M38,28 L50,28 L48,22 L40,22 Z" fill="#FFB300" stroke="#825229" strokeWidth="0.5" />
+            <path d="M41,22 Q44,15 47,22 Z" fill="#D32F2F" />
+            {/* Anklets */}
+            <circle cx="21" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="31" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="43" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="57" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="69" cy="80" r="1.2" fill="#FFD54F" />
+            <circle cx="81" cy="80" r="1.2" fill="#FFD54F" />
           </svg>
         </motion.div>
 
