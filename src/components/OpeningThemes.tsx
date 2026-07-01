@@ -380,21 +380,10 @@ export default function OpeningThemes({
           animate={activated ? { x: -140, opacity: 0 } : { x: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
           style={{ willChange: "transform, opacity" }}
-          className="absolute left-6 z-10 w-24 h-40 bg-[#8A3A1A] border-r-4 border-brand-gold rounded-l-2xl shadow-lg flex items-center justify-end pr-1.5 overflow-hidden"
+          className="absolute left-1/2 -translate-x-[100%] z-10 w-24 h-40 shadow-2xl flex items-center justify-end overflow-hidden"
         >
-          {/* Gold shimmer overlay */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.15) 45%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.15) 55%, transparent 60%)",
-              willChange: "transform",
-            }}
-            animate={{ x: ["-100%", "200%"] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
-          />
-          <div className="w-18 h-36 border border-brand-gold/40 border-dashed rounded-l flex items-center justify-center text-brand-gold/30 font-serif">
-            囍
-          </div>
+          <img src="/samples/palace_door.png" className="w-[48px] h-full object-cover object-left" />
+          <div className="absolute inset-0 bg-black/5 mix-blend-multiply pointer-events-none" />
         </motion.div>
 
         {/* Right Palace Door */}
@@ -403,21 +392,10 @@ export default function OpeningThemes({
           animate={activated ? { x: 140, opacity: 0 } : { x: 0 }}
           transition={{ duration: 1.5, ease: "easeInOut" }}
           style={{ willChange: "transform, opacity" }}
-          className="absolute right-6 z-10 w-24 h-40 bg-[#8A3A1A] border-l-4 border-brand-gold rounded-r-2xl shadow-lg flex items-center justify-start pl-1.5 overflow-hidden"
+          className="absolute right-1/2 translate-x-[100%] z-10 w-24 h-40 shadow-2xl flex items-center justify-start overflow-hidden"
         >
-          {/* Gold shimmer overlay */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: "linear-gradient(105deg, transparent 40%, rgba(255,215,0,0.15) 45%, rgba(255,215,0,0.25) 50%, rgba(255,215,0,0.15) 55%, transparent 60%)",
-              willChange: "transform",
-            }}
-            animate={{ x: ["-100%", "200%"] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 2.5 }}
-          />
-          <div className="w-18 h-36 border border-brand-gold/40 border-dashed rounded-r flex items-center justify-center text-brand-gold/30 font-serif">
-            囍
-          </div>
+          <img src="/samples/palace_door.png" className="w-[48px] h-full object-cover object-right" />
+          <div className="absolute inset-0 bg-black/5 mix-blend-multiply pointer-events-none" />
         </motion.div>
 
         {/* Text in the Middle when doors open */}
@@ -712,72 +690,26 @@ export default function OpeningThemes({
           <circle cx="50" cy="50" r="32" strokeDasharray="2,5" />
         </motion.svg>
 
-        {/* Left Elephant (Bows & Slides Left) — with idle trunk sway */}
+        {/* Left Elephant (Bows & Slides Left) */}
         <motion.div
           initial={{ x: -20, rotate: 0, opacity: 1 }}
           animate={activated ? { rotate: -15, x: -220, opacity: 0 } : { x: -20, rotate: 0, opacity: 1 }}
           transition={{ duration: 1.6, ease: "easeInOut" }}
-          className="absolute z-10 w-28 h-28"
-          style={{ left: "10%", transformOrigin: "bottom left", willChange: "transform, opacity" }}
+          className="absolute z-10 w-32 h-32 flex items-center justify-center drop-shadow-xl scale-x-[-1]"
+          style={{ left: "5%", transformOrigin: "bottom center", willChange: "transform, opacity" }}
         >
-          <svg viewBox="0 0 120 100" className="w-full h-full text-[#963E1C]">
-            <path 
-              d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
-              fill="#963E1C" 
-            />
-            {/* Trunk — animated sway */}
-            <motion.path
-              d="M92,15 Q95,12 97,14"
-              stroke="#FFE082" strokeWidth="1" fill="none"
-              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q96,10 98,13", "M92,15 Q94,14 96,15", "M92,15 Q95,12 97,14"] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#FFE082" />
-            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#D32F2F" />
-            <path d="M38,28 L50,28 L50,38 L38,38 Z" fill="#FFE082" stroke="#963E1C" strokeWidth="0.5" />
-            <path d="M41,20 Q44,14 47,20 L49,28 L39,28 Z" fill="#FFE082" opacity="0.9" />
-            <path d="M86,43 Q90,46 92,44" stroke="#FFF" strokeWidth="1.5" fill="none" />
-            <circle cx="80" cy="35" r="1.5" fill="#FFF" />
-            <circle cx="80" cy="35" r="0.7" fill="#000" />
-            <circle cx="39" cy="56" r="1.5" fill="#FFE082" />
-            <circle cx="44" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="49" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="53" cy="56" r="1.5" fill="#FFE082" />
-          </svg>
+          <img src="/samples/royal_elephant.png" className="w-full h-full object-contain" />
         </motion.div>
 
-        {/* Right Elephant (Bows & Slides Right) — with idle trunk sway */}
+        {/* Right Elephant (Bows & Slides Right) */}
         <motion.div
-          initial={{ x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
-          animate={activated ? { rotate: -15, x: 220, opacity: 0 } : { x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
+          initial={{ x: 20, rotate: 0, opacity: 1 }}
+          animate={activated ? { rotate: -15, x: 220, opacity: 0 } : { x: 20, rotate: 0, opacity: 1 }}
           transition={{ duration: 1.6, ease: "easeInOut" }}
-          className="absolute z-10 w-28 h-28"
-          style={{ right: "10%", transformOrigin: "bottom right", willChange: "transform, opacity" }}
+          className="absolute z-10 w-32 h-32 flex items-center justify-center drop-shadow-xl"
+          style={{ right: "5%", transformOrigin: "bottom center", willChange: "transform, opacity" }}
         >
-          <svg viewBox="0 0 120 100" className="w-full h-full text-[#963E1C]">
-            <path 
-              d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
-              fill="#963E1C" 
-            />
-            {/* Trunk — animated sway */}
-            <motion.path
-              d="M92,15 Q95,12 97,14"
-              stroke="#FFE082" strokeWidth="1" fill="none"
-              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q94,14 96,15", "M92,15 Q96,10 98,13", "M92,15 Q95,12 97,14"] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#FFE082" />
-            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#D32F2F" />
-            <path d="M38,28 L50,28 L50,38 L38,38 Z" fill="#FFE082" stroke="#963E1C" strokeWidth="0.5" />
-            <path d="M41,20 Q44,14 47,20 L49,28 L39,28 Z" fill="#FFE082" opacity="0.9" />
-            <path d="M86,43 Q90,46 92,44" stroke="#FFF" strokeWidth="1.5" fill="none" />
-            <circle cx="80" cy="35" r="1.5" fill="#FFF" />
-            <circle cx="80" cy="35" r="0.7" fill="#000" />
-            <circle cx="39" cy="56" r="1.5" fill="#FFE082" />
-            <circle cx="44" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="49" cy="57" r="1.5" fill="#FFE082" />
-            <circle cx="53" cy="56" r="1.5" fill="#FFE082" />
-          </svg>
+          <img src="/samples/royal_elephant.png" className="w-full h-full object-contain" />
         </motion.div>
 
         {/* Revealed Names & Invitation in the Middle */}
@@ -892,16 +824,11 @@ export default function OpeningThemes({
           <div className="w-3 h-3 bg-amber-500 rounded-full border-2 border-amber-300 shadow-md mb-0.5" />
           {/* Bell body */}
           <motion.div
-            className="w-16 h-16 rounded-full flex items-center justify-center shadow-xl"
-            style={{
-              background: "radial-gradient(circle at 35% 35%, #FFE082 0%, #F9A825 55%, #E65100 100%)",
-              border: "3px solid #FFD54F",
-              boxShadow: "0 0 18px rgba(255,193,7,0.4), inset 0 -4px 8px rgba(0,0,0,0.2)",
-            }}
+            className="w-16 h-24 flex items-center justify-center drop-shadow-2xl"
             animate={{ rotate: threadY > 10 ? [-6, 6, -4, 4, 0] : 0 }}
             transition={{ duration: 0.4 }}
           >
-            <span className="text-2xl select-none">🔔</span>
+            <img src="/samples/sacred_knot.png" className="w-full h-full object-contain object-top" />
           </motion.div>
           {!activated && (
             <motion.span
@@ -944,31 +871,14 @@ export default function OpeningThemes({
     return renderEnvelopeFrame(
       "linear-gradient(to bottom, rgba(27,94,32,0.25) 0%, rgba(241,248,233,0.4) 60%, rgba(10,35,12,0.85) 100%)",
       <div className="w-full h-56 relative flex flex-col items-center justify-center overflow-hidden">
-        {/* Hanging toran row — staggered bounce + rises on activate */}
+        {/* Hanging toran garland */}
         <motion.div
-          className="absolute top-0 w-full flex justify-between px-2 z-20"
-          animate={activated ? { y: -60, opacity: 0 } : { y: 0, opacity: 1 }}
+          className="absolute top-0 w-full flex justify-center z-20"
+          animate={activated ? { y: -80, opacity: 0 } : { y: 0, opacity: 1 }}
           transition={{ duration: 1.0, ease: "easeInOut" }}
           style={{ willChange: "transform, opacity" }}
         >
-          {[...Array(7)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="flex flex-col items-center"
-              style={{ marginTop: i % 2 === 0 ? 0 : 8, willChange: "transform" }}
-              animate={activated ? {} : { y: [0, -4, 0], rotate: [0, i % 2 === 0 ? 3 : -3, 0] }}
-              transition={{ duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.18 }}
-            >
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 border border-yellow-300 shadow flex items-center justify-center text-[7px]">🌻</div>
-              <div className="w-[2.5px] h-7 bg-green-700/80 rounded-b-full" />
-              <motion.div
-                className="w-2 h-2 rounded-full bg-red-600"
-                style={{ willChange: "transform" }}
-                animate={activated ? {} : { scale: [1, 1.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.12 }}
-              />
-            </motion.div>
-          ))}
+          <img src="/samples/marigold_garland.png" className="w-full h-24 object-cover rounded-b-[60px] drop-shadow-lg opacity-95" />
         </motion.div>
 
         {/* Silk curtain panels */}

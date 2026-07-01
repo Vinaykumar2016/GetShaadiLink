@@ -23,7 +23,11 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FFD5B4 0%, #FFB3A7 100%)" }}>
             <div className="absolute inset-1.5 border border-amber-600/35 rounded-[22px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <span className="text-3xl mb-2">🕌</span>
+              <div className="flex w-16 h-20 mb-2 shadow-xl rounded-md overflow-hidden relative">
+                <img src="/samples/palace_door.png" className="w-1/2 h-full object-cover object-left" />
+                <img src="/samples/palace_door.png" className="w-1/2 h-full object-cover object-right" />
+                <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
+              </div>
               <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Royal Palace</span>
               <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Karan &amp; Aditi</span>
               <div className="mt-4 px-3 py-1 rounded-full bg-[#8A3A1A] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
@@ -73,8 +77,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -190,8 +194,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#FFD700", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -307,8 +311,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -378,7 +382,10 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FAF6F0 0%, #F5EFEB 100%)" }}>
             <div className="absolute inset-1.5 border border-amber-900/20 rounded-[22px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <span className="text-3xl mb-2 animate-bounce">🐘</span>
+              <div className="flex gap-4 mb-2">
+                <img src="/samples/royal_elephant.png" className="w-12 h-12 object-contain scale-x-[-1] drop-shadow-md" />
+                <img src="/samples/royal_elephant.png" className="w-12 h-12 object-contain drop-shadow-md" />
+              </div>
               <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Royal Elephant</span>
               <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Arjun &amp; Priyanka</span>
               <div className="mt-4 px-3 py-1 rounded-full bg-[#8A3A1A] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
@@ -424,8 +431,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -495,7 +502,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FFF5F2 0%, #FFE6DB 100%)" }}>
             <div className="absolute inset-1.5 border border-red-700/15 rounded-[22px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <span className="text-3xl mb-2 animate-sway-bell block origin-top">🔔</span>
+              <img src="/samples/sacred_knot.png" className="w-10 h-16 object-contain object-top mb-1 drop-shadow-lg origin-top animate-sway-bell" />
               <span className="font-marcellus text-[9px] text-[#991B1B] font-bold tracking-[2.5px] uppercase">Sacred Knot</span>
               <span className="font-cursive text-xl text-[#991B1B] mt-2 block whitespace-nowrap">Vikram &amp; Pooja</span>
               <div className="mt-4 px-3 py-1 rounded-full bg-[#991B1B] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
@@ -541,8 +548,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#991B1B", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -611,8 +618,10 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           {/* 0. COVER SECTION */}
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #E8F5E9 0%, #FAF6F0 100%)" }}>
             <div className="absolute inset-1.5 border border-emerald-800/15 rounded-[22px] pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <span className="text-3xl mb-2">🌼</span>
+            <div className="absolute top-0 inset-x-0 w-full flex justify-center">
+              <img src="/samples/marigold_garland.png" className="w-full h-16 object-cover rounded-b-[40px] drop-shadow-md opacity-90" />
+            </div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full mt-4">
               <span className="font-marcellus text-[9px] text-[#065F46] font-bold tracking-[2.5px] uppercase">Marigold Garland</span>
               <span className="font-cursive text-xl text-[#065F46] mt-2 block whitespace-nowrap">Siddharth &amp; Neha</span>
               <div className="mt-4 px-3 py-1 rounded-full bg-[#065F46] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
@@ -658,8 +667,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#065F46", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
