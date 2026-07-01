@@ -23,10 +23,21 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FFD5B4 0%, #FFB3A7 100%)" }}>
             <div className="absolute inset-1.5 border border-amber-600/35 rounded-[22px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <div className="flex w-16 h-20 mb-2 shadow-xl rounded-md overflow-hidden relative">
-                <img src="/samples/palace_door.png" className="w-1/2 h-full object-cover object-left" />
-                <img src="/samples/palace_door.png" className="w-1/2 h-full object-cover object-right" />
-                <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
+              <div className="flex w-16 h-20 mb-2 relative">
+                {/* Left Door */}
+                <div className="w-1/2 h-full overflow-hidden">
+                  <svg viewBox="0 0 100 160" className="w-full h-full">
+                    <path d="M 0,160 L 100,160 L 100,0 C 70,25 30,30 0,45 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
+                    <path d="M 8,150 L 92,150 L 92,10 C 65,30 35,35 8,48 Z" fill="none" stroke="#FFD54F" strokeWidth="1.5" strokeDasharray="3,3" />
+                  </svg>
+                </div>
+                {/* Right Door */}
+                <div className="w-1/2 h-full overflow-hidden">
+                  <svg viewBox="0 0 100 160" className="w-full h-full">
+                    <path d="M 100,160 L 0,160 L 0,0 C 30,25 70,30 100,45 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
+                    <path d="M 92,150 L 8,150 L 8,10 C 35,30 65,35 92,48 Z" fill="none" stroke="#FFD54F" strokeWidth="1.5" strokeDasharray="3,3" />
+                  </svg>
+                </div>
               </div>
               <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Royal Palace</span>
               <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Karan &amp; Aditi</span>
@@ -77,8 +88,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -194,8 +205,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#FFD700", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -311,8 +322,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -382,9 +393,17 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FAF6F0 0%, #F5EFEB 100%)" }}>
             <div className="absolute inset-1.5 border border-amber-900/20 rounded-[22px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <div className="flex gap-4 mb-2">
-                <img src="/samples/royal_elephant.png" className="w-12 h-12 object-contain scale-x-[-1] drop-shadow-md" />
-                <img src="/samples/royal_elephant.png" className="w-12 h-12 object-contain drop-shadow-md" />
+              <div className="flex gap-2 w-20 h-12 mb-2 justify-center">
+                <svg viewBox="0 0 120 100" className="w-10 h-10 scale-x-[-1]">
+                  <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#5D5C61" />
+                  <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" />
+                  <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
+                </svg>
+                <svg viewBox="0 0 120 100" className="w-10 h-10">
+                  <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#5D5C61" />
+                  <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" />
+                  <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
+                </svg>
               </div>
               <span className="font-marcellus text-[9px] text-[#8A3A1A] font-bold tracking-[2.5px] uppercase">Royal Elephant</span>
               <span className="font-cursive text-xl text-[#8A3A1A] mt-2 block whitespace-nowrap">Arjun &amp; Priyanka</span>
@@ -431,8 +450,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -502,7 +521,18 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #FFF5F2 0%, #FFE6DB 100%)" }}>
             <div className="absolute inset-1.5 border border-red-700/15 rounded-[22px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full">
-              <img src="/samples/sacred_knot.png" className="w-10 h-16 object-contain object-top mb-1 drop-shadow-lg origin-top animate-sway-bell" />
+              <svg viewBox="0 0 100 140" className="w-14 h-20 mb-1">
+                <path d="M 50,0 Q 48,15 49,30" stroke="#D32F2F" strokeWidth="2" fill="none" />
+                <path d="M 50,0 Q 52,15 51,30" stroke="#FFB300" strokeWidth="1" strokeDasharray="2,2" fill="none" />
+                <path d="M 45,30 C 35,25 35,40 48,35 C 60,30 60,45 50,40" stroke="#D32F2F" strokeWidth="2.5" fill="none" />
+                <path d="M 55,30 C 65,25 65,40 52,35 C 40,30 40,45 50,40" stroke="#FFB300" strokeWidth="1.5" fill="none" />
+                <path d="M 50,40 L 50,55" stroke="#D32F2F" strokeWidth="1.5" fill="none" />
+                <g transform="translate(50, 50)">
+                  <circle cx="0" cy="8" r="4" fill="none" stroke="#FFB300" strokeWidth="1.5" />
+                  <path d="M -10,22 C -10,10 10,10 10,22 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.8" />
+                  <path d="M -10,22 L -13,42 C -13,45 13,45 13,42 L 10,22 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.8" />
+                </g>
+              </svg>
               <span className="font-marcellus text-[9px] text-[#991B1B] font-bold tracking-[2.5px] uppercase">Sacred Knot</span>
               <span className="font-cursive text-xl text-[#991B1B] mt-2 block whitespace-nowrap">Vikram &amp; Pooja</span>
               <div className="mt-4 px-3 py-1 rounded-full bg-[#991B1B] text-white text-[6px] tracking-widest uppercase font-bold shadow-sm">✉️ OPEN INVITATION</div>
@@ -548,8 +578,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#991B1B", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -618,8 +648,21 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           {/* 0. COVER SECTION */}
           <div className="inv-cover-mock" style={{ background: "linear-gradient(to bottom, #E8F5E9 0%, #FAF6F0 100%)" }}>
             <div className="absolute inset-1.5 border border-emerald-800/15 rounded-[22px] pointer-events-none" />
-            <div className="absolute top-0 inset-x-0 w-full flex justify-center">
-              <img src="/samples/marigold_garland.png" className="w-full h-16 object-cover rounded-b-[40px] drop-shadow-md opacity-90" />
+            <div className="absolute top-0 inset-x-0 w-full flex justify-center h-16">
+              <svg viewBox="0 0 200 100" className="w-full h-full">
+                <rect x="0" y="0" width="200" height="100" fill="#8B0000" />
+                <path d="M 0,20 Q 50,85 100,85 Q 150,85 200,20" fill="none" stroke="#FF8F00" strokeWidth="6" strokeLinecap="round" />
+                <path d="M 0,20 Q 50,85 100,85 Q 150,85 200,20" fill="none" stroke="#FFC107" strokeWidth="3" strokeDasharray="6,6" strokeLinecap="round" />
+                <circle cx="15" cy="27" r="5" fill="#FF6F00" />
+                <circle cx="35" cy="40" r="5.5" fill="#FF8F00" />
+                <circle cx="60" cy="62" r="6" fill="#FF6F00" />
+                <circle cx="85" cy="78" r="6.5" fill="#FF8F00" />
+                <circle cx="100" cy="80" r="7" fill="#FF6F00" />
+                <circle cx="115" cy="78" r="6.5" fill="#FF8F00" />
+                <circle cx="140" cy="62" r="6" fill="#FF6F00" />
+                <circle cx="165" cy="40" r="5.5" fill="#FF8F00" />
+                <circle cx="185" cy="27" r="5" fill="#FF6F00" />
+              </svg>
             </div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center w-full mt-4">
               <span className="font-marcellus text-[9px] text-[#065F46] font-bold tracking-[2.5px] uppercase">Marigold Garland</span>
@@ -667,8 +710,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#065F46", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 

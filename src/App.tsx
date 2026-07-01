@@ -143,7 +143,7 @@ export default function App() {
         const currentIndex = themes.indexOf(prev);
         return themes[(currentIndex + 1) % themes.length];
       });
-      setSimSlide(0); // keep at cover screen as requested
+      setSimSlide(0);
     }, 4500);
     return () => clearInterval(interval);
   }, []);
@@ -293,9 +293,9 @@ export default function App() {
             <div className="z-10 flex items-center justify-center relative my-1 overflow-visible h-20">
               {heroActiveTheme === "jaipur" && (
                 <div className="w-full flex items-center justify-center relative overflow-hidden h-20">
-                  <motion.div animate={{ x: [0, -32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-1/2 -translate-x-[95%] z-10 w-9 h-16 shadow flex items-center justify-end overflow-hidden rounded-l-md"><img src="/samples/palace_door.png" className="w-[18px] h-full object-cover object-left" /></motion.div>
-                  <motion.div animate={{ x: [0, 32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-1/2 translate-x-[95%] z-10 w-9 h-16 shadow flex items-center justify-start overflow-hidden rounded-r-md"><img src="/samples/palace_door.png" className="w-[18px] h-full object-cover object-right" /></motion.div>
-                  <span className="text-[7.5px] font-marcellus text-amber-300/80 tracking-widest font-bold uppercase drop-shadow z-0">🚪 OPEN DOOR</span>
+                  <motion.div animate={{ x: [0, -32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-6 z-10 w-9 h-16 bg-[#8A3A1A] border-r-2 border-amber-400 rounded-l-md shadow flex items-center justify-end pr-0.5"><span className="text-[6px] text-amber-400/40">囍</span></motion.div>
+                  <motion.div animate={{ x: [0, 32, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-6 z-10 w-9 h-16 bg-[#8A3A1A] border-l-2 border-amber-400 rounded-r-md shadow flex items-center justify-start pl-0.5"><span className="text-[6px] text-amber-400/40">囍</span></motion.div>
+                  <span className="text-[7.5px] font-marcellus text-amber-300/80 tracking-widest font-bold uppercase drop-shadow">🚪 OPEN DOOR</span>
                 </div>
               )}
               {heroActiveTheme === "diya" && (
@@ -315,26 +315,23 @@ export default function App() {
               )}
               {heroActiveTheme === "elephant" && (
                 <div className="w-full flex items-center justify-center gap-1.5 relative h-20">
-                  <motion.div animate={{ x: [-4, 0, -4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="w-12 h-12 drop-shadow-md scale-x-[-1] select-none block flex items-center justify-center">
-                    <img src="/samples/royal_elephant.png" className="w-full h-full object-contain" />
-                  </motion.div>
-                  <motion.div animate={{ x: [4, 0, 4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="w-12 h-12 drop-shadow-md select-none block flex items-center justify-center">
-                    <img src="/samples/royal_elephant.png" className="w-full h-full object-contain" />
-                  </motion.div>
+                  <motion.span animate={{ x: [-4, 0, -4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-2xl drop-shadow-sm scale-x-[-1] select-none block">🐘</motion.span>
+                  <motion.span animate={{ x: [4, 0, 4] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="text-2xl drop-shadow-sm select-none block">🐘</motion.span>
                 </div>
               )}
               {heroActiveTheme === "thread" && (
                 <div className="w-full flex flex-col items-center justify-start relative h-20">
-                  <motion.div animate={{ rotate: [-8, 8, -8] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} style={{ transformOrigin: "top center" }} className="w-10 h-16 drop-shadow-lg select-none">
-                    <img src="/samples/sacred_knot.png" className="w-full h-full object-contain object-top" />
+                  <div className="w-0.5 h-6 bg-red-600/60" />
+                  <motion.div animate={{ rotate: [-10, 10, -10] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} style={{ transformOrigin: "top center" }} className="text-2xl drop-shadow-md select-none">
+                    🔔
                   </motion.div>
                 </div>
               )}
               {heroActiveTheme === "garland" && (
                 <div className="w-full flex items-center justify-center relative overflow-hidden h-20">
-                  <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute top-0 inset-x-0 z-10 h-12 flex justify-center">
-                    <img src="/samples/marigold_garland.png" className="w-32 h-full object-cover rounded-b-[40px] drop-shadow-md opacity-90" />
-                  </motion.div>
+                  <motion.div animate={{ x: [0, -28, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute left-4 z-10 w-10 h-16 bg-[#8B0000] border-r border-amber-400 rounded-l shadow" />
+                  <motion.div animate={{ x: [0, 28, 0] }} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1, ease: "easeInOut" }} className="absolute right-4 z-10 w-10 h-16 bg-[#8B0000] border-l border-amber-400 rounded-r shadow" />
+                  <span className="text-2xl z-0 select-none block animate-bounce">🌸</span>
                 </div>
               )}
             </div>
@@ -927,12 +924,12 @@ export default function App() {
   }
   // Simulator themes config for Hero Interactive mockup
   const heroSimulatorConfig = {
-    jaipur: { name: "Karan & Aditi", photo: "/samples/couple_realistic.png", tag: "Royal Palace", detail: "Traditional arches with soft sunset glow.", style: "bg-rose-100/70 text-amber-900 border-amber-700/20" },
-    diya: { name: "Kabir & Riya", photo: "/samples/couple_realistic.png", tag: "Midnight Diya", detail: "Celestial stars and floating orange sky lanterns.", style: "bg-indigo-950/80 text-amber-200 border-indigo-700/30" },
-    lotus: { name: "Dev & Ishika", photo: "/samples/couple_realistic.png", tag: "Temple Lotus", detail: "Blooming lotuses and falling pink rose petals.", style: "bg-orange-50/50 text-[#8A3A1A] border-[#8A3A1A]/10" },
-    elephant: { name: "Arjun & Priyanka", photo: "/samples/couple_realistic.png", tag: "Royal Elephant", detail: "Sandstone carvings with marigold curtains.", style: "bg-amber-50/65 text-[#8A3A1A] border-amber-800/10" },
-    thread: { name: "Vikram & Pooja", photo: "/samples/couple_realistic.png", tag: "Sacred Knot", detail: "Cotton tassels with swinging golden bells.", style: "bg-yellow-50/60 text-[#8B0000] border-[#8B0000]/10" },
-    garland: { name: "Arjun & Priyanka", photo: "/samples/couple_realistic.png", tag: "Marigold Garland", detail: "Orange-yellow flowers and mango leaves.", style: "bg-emerald-50/60 text-[#FFA500] border-emerald-800/10" },
+    jaipur: { name: "Karan & Aditi", photo: "/samples/couple1.jpg", tag: "Royal Palace", detail: "Traditional arches with soft sunset glow.", style: "bg-rose-100/70 text-amber-900 border-amber-700/20" },
+    diya: { name: "Kabir & Riya", photo: "/samples/couple2.jpg", tag: "Midnight Diya", detail: "Celestial stars and floating orange sky lanterns.", style: "bg-indigo-950/80 text-amber-200 border-indigo-700/30" },
+    lotus: { name: "Dev & Ishika", photo: "/samples/couple1.jpg", tag: "Temple Lotus", detail: "Blooming lotuses and falling pink rose petals.", style: "bg-orange-50/50 text-[#8A3A1A] border-[#8A3A1A]/10" },
+    elephant: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Royal Elephant", detail: "Sandstone carvings with marigold curtains.", style: "bg-amber-50/65 text-[#8A3A1A] border-amber-800/10" },
+    thread: { name: "Vikram & Pooja", photo: "/samples/couple1.jpg", tag: "Sacred Knot", detail: "Cotton tassels with swinging golden bells.", style: "bg-yellow-50/60 text-[#8B0000] border-[#8B0000]/10" },
+    garland: { name: "Arjun & Priyanka", photo: "/samples/couple2.jpg", tag: "Marigold Garland", detail: "Orange-yellow flowers and mango leaves.", style: "bg-emerald-50/60 text-[#FFA500] border-emerald-800/10" },
   };
   const activeSim = heroSimulatorConfig[heroActiveTheme as keyof typeof heroSimulatorConfig] || heroSimulatorConfig.jaipur;
 
