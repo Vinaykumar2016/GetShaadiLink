@@ -240,40 +240,117 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            key="slide1_carousel"
-            className="absolute inset-0 flex flex-col justify-center bg-stone-950 overflow-hidden"
+            key="slide1_steps"
+            className="absolute inset-0 bg-[#0F0C1B] overflow-hidden"
           >
-            {/* Real Screenshot Carousel (Placeholders to be replaced by user's actual screenshots) */}
-            <motion.div 
-              className="absolute inset-0 w-full h-full bg-cover bg-center"
-              animate={{ 
-                backgroundImage: [
-                  "url(/samples/mandap.jpg)",
-                  "url(/samples/couple1.jpg)", 
-                  "url(/samples/flowers.jpg)",
-                  "url(/samples/couple2.jpg)"
-                ] 
-              }}
-              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* Gradient Overlay for Text Readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+            {/* Dark background gradient */}
+            <div className="absolute inset-0 bg-gradient-to-b from-brand-rust/20 to-transparent opacity-30" />
             
-            {/* Overlay UI elements to still feel like the app */}
-            <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center pointer-events-none">
-              <div className="backdrop-blur-md bg-stone-900/60 border border-white/20 px-3 py-1 rounded-full shadow-lg">
-                <span className="text-[10px] font-marcellus tracking-[1.5px] text-white uppercase font-bold leading-none">
-                  {dateStr} • {cityStr}
-                </span>
+            {/* Top Status Bar (fake) */}
+            <div className="absolute top-0 left-0 right-0 h-6 bg-[#0F0C1B]/80 backdrop-blur-md z-30 flex items-center justify-center border-b border-white/5">
+              <span className="text-[7px] text-white/40 tracking-widest uppercase font-mono">Create Invite</span>
+            </div>
+
+            {/* Continuous Scrolling Container */}
+            <motion.div 
+              className="absolute top-6 left-0 right-0 w-full flex flex-col gap-6 px-4 py-8"
+              animate={{ y: [0, -600] }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            >
+              {/* Step 1: Add Details */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[8px] font-bold">1</div>
+                  <span className="text-[10px] text-white/90 font-marcellus">Add Details</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="bg-black/30 rounded-lg p-2 border border-white/5">
+                    <span className="text-[6px] text-stone-400 uppercase tracking-widest block mb-0.5">Bride Name</span>
+                    <motion.div 
+                      className="text-[11px] text-white font-medium"
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 2, repeat: Infinity, repeatDelay: 13 }}
+                      style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                    >
+                      Aditi Sharma
+                    </motion.div>
+                  </div>
+                  <div className="bg-black/30 rounded-lg p-2 border border-white/5">
+                    <span className="text-[6px] text-stone-400 uppercase tracking-widest block mb-0.5">Groom Name</span>
+                    <motion.div 
+                      className="text-[11px] text-white font-medium"
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 2, delay: 1, repeat: Infinity, repeatDelay: 13 }}
+                      style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
+                    >
+                      Karan Singh
+                    </motion.div>
+                  </div>
+                </div>
               </div>
-              <div className="mt-2 text-center">
-                <span className="font-marcellus text-[9px] tracking-[3px] block uppercase font-bold text-amber-300 drop-shadow-md animate-pulse">
-                  Premium Themes
-                </span>
-                <span className="font-cormorant text-[10px] text-white/70 block mt-1">
-                  Previewing Live Designs
-                </span>
+
+              {/* Step 2: Choose Theme */}
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[8px] font-bold">2</div>
+                  <span className="text-[10px] text-white/90 font-marcellus">Select Theme</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="h-16 rounded-lg bg-cover bg-center border border-white/10 opacity-50" style={{ backgroundImage: "url(/samples/mandap.jpg)" }} />
+                  <motion.div 
+                    className="h-16 rounded-lg bg-cover bg-center border-2 border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.3)] relative"
+                    style={{ backgroundImage: "url(/samples/couple1.jpg)" }}
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, delay: 3, repeat: Infinity, repeatDelay: 13 }}
+                  >
+                    <div className="absolute top-1 right-1 w-3 h-3 bg-amber-400 rounded-full flex items-center justify-center">
+                      <svg className="w-2 h-2 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                  </motion.div>
+                  <div className="h-16 rounded-lg bg-cover bg-center border border-white/10 opacity-50" style={{ backgroundImage: "url(/samples/couple2.jpg)" }} />
+                  <div className="h-16 rounded-lg bg-cover bg-center border border-white/10 opacity-50" style={{ backgroundImage: "url(/samples/flowers.jpg)" }} />
+                </div>
               </div>
+
+              {/* Step 3: Generating */}
+              <div className="flex flex-col items-center justify-center py-4">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  className="w-8 h-8 border-2 border-amber-400/30 border-t-amber-400 rounded-full mb-2"
+                />
+                <span className="text-[8px] text-amber-300 font-marcellus tracking-widest uppercase">Creating Magic...</span>
+              </div>
+
+              {/* Step 4: Preview Result */}
+              <div className="bg-stone-900 border border-white/20 rounded-2xl h-64 shadow-2xl overflow-hidden relative mt-2">
+                 <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: "url(/samples/couple1.jpg)" }} />
+                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-transparent to-black/80" />
+                 
+                 <div className="absolute top-4 left-0 right-0 flex flex-col items-center">
+                   <span className="text-[6px] text-amber-300 tracking-[2px] uppercase">✦ You're Invited ✦</span>
+                   <h3 className="font-great-vibes text-white text-xl mt-1">Aditi</h3>
+                   <span className="text-amber-400 text-[8px] italic my-0.5">weds</span>
+                   <h3 className="font-great-vibes text-white text-xl">Karan</h3>
+                 </div>
+                 
+                 <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                   <div className="bg-amber-600/90 text-white text-[8px] px-4 py-1.5 rounded-full border border-amber-400 font-bold uppercase tracking-widest shadow-lg">
+                     Open Invitation
+                   </div>
+                 </div>
+              </div>
+              
+              {/* Extra spacing for continuous loop padding */}
+              <div className="h-24" />
+            </motion.div>
+
+            {/* Fade overlays for the scroll area */}
+            <div className="absolute top-6 left-0 right-0 h-10 bg-gradient-to-b from-[#0F0C1B] to-transparent z-20 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0F0C1B] via-[#0F0C1B]/80 to-transparent z-20 pointer-events-none flex items-end justify-center pb-4">
+              <span className="text-[9px] font-marcellus text-amber-400 tracking-widest uppercase font-bold animate-pulse">Live Preview</span>
             </div>
           </motion.div>
         );

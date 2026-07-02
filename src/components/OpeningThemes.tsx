@@ -760,27 +760,14 @@ export default function OpeningThemes({
     );
   };
 
-  // 4. ROYAL MANDAP COVER: Parting silk curtains and golden pillars
+  // 4. ROYAL ELEPHANT COVER: Splitting realistic elephants
   const renderElephantTheme = () => {
     return renderEnvelopeFrame(
       "linear-gradient(to bottom, rgba(138,58,26,0.3) 0%, rgba(232,216,204,0.1) 60%, rgba(40,20,10,0.85) 100%)",
       <div className="w-full h-56 relative flex items-center justify-center overflow-hidden">
-        {/* Mandap structure base */}
-        <div className="absolute inset-0 z-10 flex justify-between px-2 pt-2 pointer-events-none">
-          <div className="w-6 h-full border-x-2 border-amber-500/50 bg-gradient-to-b from-amber-300 via-amber-600 to-amber-900 shadow-lg relative">
-             <div className="absolute top-0 w-full h-4 bg-amber-200" />
-             <div className="absolute top-10 w-full h-2 bg-amber-200" />
-          </div>
-          <div className="w-6 h-full border-x-2 border-amber-500/50 bg-gradient-to-b from-amber-300 via-amber-600 to-amber-900 shadow-lg relative">
-             <div className="absolute top-0 w-full h-4 bg-amber-200" />
-             <div className="absolute top-10 w-full h-2 bg-amber-200" />
-          </div>
-        </div>
         
-        {/* Garland top */}
-        <div className="absolute top-0 left-0 w-full h-10 z-20 overflow-hidden pointer-events-none">
-          <div className="w-full h-12 border-b-[6px] border-dotted border-orange-500 rounded-[50%] -mt-6 opacity-90 shadow-md" />
-        </div>
+        {/* Background ambient light */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(251,191,36,0.15)_0%,rgba(0,0,0,0)_70%)] pointer-events-none" />
 
         {/* Revealed Names & Invitation in the Middle */}
         <motion.div
@@ -799,28 +786,24 @@ export default function OpeningThemes({
           </h4>
         </motion.div>
 
-        {/* Left Curtain */}
+        {/* Left Elephant */}
         <motion.div 
-          initial={{ width: "50%", x: 0 }}
-          animate={activated ? { width: "15%", x: -20, opacity: 0.8 } : { width: "50%", x: 0 }}
-          transition={{ duration: 1.8, ease: "easeInOut" }} 
-          className="absolute left-0 top-0 h-full bg-gradient-to-br from-red-800 via-[#8A0000] to-[#4A000A] z-10 border-r-2 border-amber-400/50 shadow-[4px_0_15px_rgba(0,0,0,0.6)] origin-left flex items-center justify-end pr-2 overflow-hidden"
-          style={{ borderBottomRightRadius: activated ? "20%" : "0%" }}
+          initial={{ x: 0 }}
+          animate={activated ? { x: -160, opacity: 0 } : { x: 0 }}
+          transition={{ duration: 2, ease: "easeInOut" }} 
+          className="absolute left-[-10px] top-4 bottom-0 z-10 origin-left flex items-center justify-end"
         >
-           <div className="w-[1px] h-full bg-amber-500/30 ml-auto" />
-           <div className="w-[2px] h-full bg-amber-400/50 mx-1" />
+           <img src="/samples/royal_elephant.png" alt="Royal Elephant" className="h-full w-auto object-contain max-h-48 drop-shadow-[4px_0_15px_rgba(0,0,0,0.6)] scale-x-[-1]" />
         </motion.div>
 
-        {/* Right Curtain */}
+        {/* Right Elephant */}
         <motion.div 
-          initial={{ width: "50%", x: 0 }}
-          animate={activated ? { width: "15%", x: 20, opacity: 0.8 } : { width: "50%", x: 0 }}
-          transition={{ duration: 1.8, ease: "easeInOut" }} 
-          className="absolute right-0 top-0 h-full bg-gradient-to-bl from-red-800 via-[#8A0000] to-[#4A000A] z-10 border-l-2 border-amber-400/50 shadow-[-4px_0_15px_rgba(0,0,0,0.6)] origin-right flex items-center justify-start pl-2 overflow-hidden"
-          style={{ borderBottomLeftRadius: activated ? "20%" : "0%" }}
+          initial={{ x: 0 }}
+          animate={activated ? { x: 160, opacity: 0 } : { x: 0 }}
+          transition={{ duration: 2, ease: "easeInOut" }} 
+          className="absolute right-[-10px] top-4 bottom-0 z-10 origin-right flex items-center justify-start"
         >
-           <div className="w-[2px] h-full bg-amber-400/50 mr-1" />
-           <div className="w-[1px] h-full bg-amber-500/30" />
+           <img src="/samples/royal_elephant.png" alt="Royal Elephant" className="h-full w-auto object-contain max-h-48 drop-shadow-[-4px_0_15px_rgba(0,0,0,0.6)]" />
         </motion.div>
 
         {/* Golden Confetti on Open */}
