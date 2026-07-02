@@ -240,310 +240,38 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            key="slide1"
-            className="absolute inset-0 flex flex-col justify-between p-3.5 pt-8 text-center select-none bg-stone-950"
+            key="slide1_carousel"
+            className="absolute inset-0 flex flex-col justify-center bg-stone-950 overflow-hidden"
           >
-            {/* Full-bleed background photo layer */}
-            <motion.div
-              className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url(${activeSim.photo})` }}
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+            {/* Real Screenshot Carousel (Placeholders to be replaced by user's actual screenshots) */}
+            <motion.div 
+              className="absolute inset-0 w-full h-full bg-cover bg-center"
+              animate={{ 
+                backgroundImage: [
+                  "url(/samples/mandap.jpg)",
+                  "url(/samples/couple1.jpg)", 
+                  "url(/samples/flowers.jpg)",
+                  "url(/samples/couple2.jpg)"
+                ] 
+              }}
+              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
             />
-
-            {/* Multiply theme gradient overlay */}
-            <div 
-              className="absolute inset-0 z-0 opacity-75 mix-blend-multiply"
-              style={{ background: activeStyle.bg }}
-            />
-
-            {/* Glassmorphism Name Card */}
-            <div className="z-10 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-[20px] p-3 shadow-xl flex flex-col items-center mt-2 pointer-events-none">
-              <h4 className="text-2xl font-great-vibes font-normal text-white leading-tight tracking-wide drop-shadow">
-                {brideName}
-              </h4>
-              <span className="font-cormorant italic text-[14px] my-0.5 block text-amber-300 font-bold leading-none">
-                {landingLang === "kn" ? "ಸಂಗ" : landingLang === "hi" ? "संग" : landingLang === "ta" ? "உடன்" : landingLang === "te" ? "తో" : landingLang === "ml" ? "ഒപ്പം" : "weds"}
-              </span>
-              <h4 className="text-2xl font-great-vibes font-normal text-white leading-tight tracking-wide drop-shadow">
-                {groomName}
-              </h4>
-              <div className="w-8 h-[0.5px] my-1.5 bg-white/25" />
-              
-              {/* Mini Countdown */}
-              <div className="flex gap-2.5 justify-center text-white leading-none">
-                <div className="flex flex-col items-center">
-                  <span className="text-[14px] font-cormorant font-bold leading-none text-amber-200">190</span>
-                  <span className="text-[8px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Days</span>
-                </div>
-                <span className="text-[9px] font-bold font-mono text-white/40">:</span>
-                <div className="flex flex-col items-center">
-                  <span className="text-[14px] font-cormorant font-bold leading-none text-amber-200">07</span>
-                  <span className="text-[8px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Hrs</span>
-                </div>
-                <span className="text-[9px] font-bold font-mono text-white/40">:</span>
-                <div className="flex flex-col items-center">
-                  <span className="text-[14px] font-cormorant font-bold leading-none text-amber-200">45</span>
-                  <span className="text-[8px] uppercase tracking-wider font-marcellus font-bold opacity-75 mt-0.5">Min</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Theme-Specific Interactive Core (Mini Mockup) */}
-            <div className="flex-1 flex items-center justify-center relative my-2 overflow-visible z-10">
-              {heroActiveTheme === "jaipur" && (
-                <div className="w-full h-full flex-1 flex items-center justify-center relative overflow-hidden min-h-[140px]">
-                  {/* Text in the Middle when doors open */}
-                  <div className="absolute text-center z-0">
-                    <span className="font-marcellus text-[9.5px] tracking-[2.5px] uppercase text-amber-300 font-bold block mb-1">SHUBH VIVAH</span>
-                    <h5 className="font-great-vibes text-lg text-amber-100 leading-tight">{brideName} &amp; {groomName}</h5>
-                  </div>
-                  {/* Left Door */}
-                  <motion.div 
-                    animate={{ x: [0, -48, 0] }} 
-                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 1.2, ease: "easeInOut" }} 
-                    style={{ willChange: "transform" }}
-                    className="absolute right-1/2 w-16 h-32 border border-amber-500/20 rounded-l-lg bg-[#8A3A1A] flex items-center justify-end pr-0.5 shadow-md overflow-hidden origin-right"
-                  >
-                    <svg viewBox="0 0 100 160" className="w-full h-full">
-                      <path d="M 0,160 L 100,160 L 100,0 C 70,25 30,30 0,45 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
-                      <path d="M 8,150 L 92,150 L 92,10 C 65,30 35,35 8,48 Z" fill="none" stroke="#FFD54F" strokeWidth="1.5" strokeDasharray="3,3" />
-                      <circle cx="25" cy="65" r="2.5" fill="#FFD54F" />
-                      <circle cx="75" cy="65" r="2.5" fill="#FFD54F" />
-                      <circle cx="25" cy="100" r="2.5" fill="#FFD54F" />
-                      <circle cx="75" cy="100" r="2.5" fill="#FFD54F" />
-                      <circle cx="25" cy="135" r="2.5" fill="#FFD54F" />
-                      <circle cx="75" cy="135" r="2.5" fill="#FFD54F" />
-                      <path d="M 94,80 A 6,6 0 0,0 94,92" fill="none" stroke="#FFD54F" strokeWidth="2.5" />
-                    </svg>
-                  </motion.div>
-                  {/* Right Door */}
-                  <motion.div 
-                    animate={{ x: [0, 48, 0] }} 
-                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 1.2, ease: "easeInOut" }} 
-                    style={{ willChange: "transform" }}
-                    className="absolute left-1/2 w-16 h-32 border border-amber-500/20 rounded-r-lg bg-[#8A3A1A] flex items-center justify-start pl-0.5 shadow-md overflow-hidden origin-left"
-                  >
-                    <svg viewBox="0 0 100 160" className="w-full h-full">
-                      <path d="M 100,160 L 0,160 L 0,0 C 30,25 70,30 100,45 Z" fill="#8A3A1A" stroke="#D4A843" strokeWidth="2.5" />
-                      <path d="M 92,150 L 8,150 L 8,10 C 35,30 65,35 92,48 Z" fill="none" stroke="#FFD54F" strokeWidth="1.5" strokeDasharray="3,3" />
-                      <circle cx="25" cy="65" r="2.5" fill="#FFD54F" />
-                      <circle cx="75" cy="65" r="2.5" fill="#FFD54F" />
-                      <circle cx="25" cy="100" r="2.5" fill="#FFD54F" />
-                      <circle cx="75" cy="100" r="2.5" fill="#FFD54F" />
-                      <circle cx="25" cy="135" r="2.5" fill="#FFD54F" />
-                      <circle cx="75" cy="135" r="2.5" fill="#FFD54F" />
-                      <path d="M 6,80 A 6,6 0 0,1 6,92" fill="none" stroke="#FFD54F" strokeWidth="2.5" />
-                    </svg>
-                  </motion.div>
-                  <span className="absolute bottom-1.5 text-[9px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-20 animate-pulse">🚪 OPEN DOOR</span>
-                </div>
-              )}
-              {heroActiveTheme === "diya" && (
-                <div className="w-full h-full flex-1 flex flex-col items-center justify-center relative overflow-visible min-h-[140px]">
-                  {/* Warm glow pulse behind diya */}
-                  <motion.div
-                    className="absolute w-24 h-24 rounded-full pointer-events-none bg-amber-400/10"
-                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                  />
-                  <svg viewBox="0 0 40 30" className="w-24 h-18 overflow-visible z-10">
-                    <motion.path 
-                      d="M20,0 C23,8 24,12 20,16 C16,12 17,8 20,0 Z" 
-                      fill="url(#diya-flame-grad)" 
-                      animate={{ scaleY: [1, 1.15, 0.95, 1.05, 1], scaleX: [1, 0.9, 1.05, 0.95, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      style={{ transformOrigin: "bottom center" }}
-                    />
-                    <path d="M10,16 C10,22 30,22 30,16 C28,12 12,12 10,16 Z" fill="#170C2A" stroke="#FFB300" strokeWidth="1.2" />
-                    <defs>
-                      <linearGradient id="diya-flame-grad" x1="0" y1="1" x2="0" y2="0">
-                        <stop offset="0%" stopColor="#E65100" />
-                        <stop offset="60%" stopColor="#FB8C00" />
-                        <stop offset="100%" stopColor="#FFD54F" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <span className="absolute bottom-1.5 text-[9px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-20 animate-pulse">🪔 TOUCH TO LIGHT</span>
-                </div>
-              )}
-              {heroActiveTheme === "lotus" && (
-                <div className="w-full h-full flex-1 flex items-center justify-center relative min-h-[140px]">
-                  <motion.svg 
-                    viewBox="0 0 40 40" 
-                    className="w-20 h-20 fill-none stroke-rose-400/90 stroke-[1.2] overflow-visible"
-                    animate={{ scale: [0.95, 1.08, 0.95], rotate: [0, 3, -3, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <path d="M20,10 C23,17 23,25 20,30 C17,25 17,17 20,10 Z" fill="rgba(244,143,177,0.2)" />
-                    <path d="M20,20 C14,18 10,22 10,28 C15,29 18,25 20,20 Z" fill="rgba(244,143,177,0.1)" />
-                    <path d="M20,15 C13,10 7,16 10,25 C14,25 18,21 20,15 Z" fill="rgba(244,143,177,0.1)" />
-                    <path d="M20,20 C26,18 30,22 30,28 C25,29 22,25 20,20 Z" fill="rgba(244,143,177,0.1)" />
-                    <path d="M20,15 C27,10 33,16 30,25 C26,25 22,21 20,15 Z" fill="rgba(244,143,177,0.1)" />
-                  </motion.svg>
-                  <span className="absolute bottom-1.5 text-[9px] font-marcellus text-rose-200/90 tracking-widest font-bold uppercase drop-shadow z-20 animate-pulse">🌸 TAP TO BLOOM</span>
-                </div>
-              )}
-              {heroActiveTheme === "elephant" && (
-                <div className="w-full h-full flex-1 flex items-center justify-between px-3 relative overflow-hidden min-h-[140px]">
-                  {/* Center welcome text behind elephants */}
-                  <div className="absolute left-0 right-0 text-center z-0">
-                    <span className="font-marcellus text-[6px] tracking-[2.5px] uppercase text-amber-300 font-bold block mb-1">SHUBH VIVAH</span>
-                    <h5 className="font-great-vibes text-sm text-amber-100 leading-tight">Welcome</h5>
-                  </div>
-                  {/* Left Elephant */}
-                  <motion.div 
-                    animate={{ x: [0, -32, 0], rotate: [0, -8, 0] }} 
-                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 0.5, ease: "easeInOut" }} 
-                    className="w-18 h-18 scale-x-[-1] z-10"
-                    style={{ transformOrigin: "bottom left" }}
-                  >
-                    <svg viewBox="0 0 120 100" className="w-full h-full">
-                      <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#D49A6A" stroke="#825229" strokeWidth="0.8" />
-                      <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" />
-                      <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
-                    </svg>
-                  </motion.div>
-                  {/* Right Elephant */}
-                  <motion.div 
-                    animate={{ x: [0, 32, 0], rotate: [0, 8, 0] }} 
-                    transition={{ duration: 4, repeat: Infinity, repeatDelay: 0.5, ease: "easeInOut" }} 
-                    className="w-18 h-18 z-10"
-                    style={{ transformOrigin: "bottom right" }}
-                  >
-                    <svg viewBox="0 0 120 100" className="w-full h-full">
-                      <path d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" fill="#D49A6A" stroke="#825229" strokeWidth="0.8" />
-                      <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" />
-                      <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
-                    </svg>
-                  </motion.div>
-                  <span className="absolute bottom-1.5 left-0 right-0 text-[9px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-20 animate-pulse">🐘 SWIPE TO ENTER</span>
-                </div>
-              )}
-              {heroActiveTheme === "thread" && (
-                <div className="w-full h-full flex flex-col items-center justify-start pt-0 overflow-visible relative">
-                  {/* Hanging Toran garland arch at top */}
-                  <div className="w-40 flex justify-center items-center gap-0 absolute top-0">
-                    {[...Array(6)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="flex flex-col items-center"
-                        style={{ marginTop: i % 2 === 0 ? 0 : 4, willChange: "transform" }}
-                        animate={{ rotate: [0, i % 2 === 0 ? 3 : -3, 0], y: [0, i % 2 === 0 ? -1 : 1, 0] }}
-                        transition={{ duration: 2.5 + i * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.15 }}
-                      >
-                        <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border border-yellow-300 shadow flex items-center justify-center text-[5px]">🌸</div>
-                        <div className="w-[1.5px] h-4 bg-green-700 rounded-b-full" />
-                      </motion.div>
-                    ))}
-                  </div>
-                  
-                  {/* Hanging thread kalava */}
-                  <svg
-                    className="absolute pointer-events-none z-0"
-                    style={{ top: 12, left: "50%", transform: "translateX(-50%)" }}
-                    width="8"
-                    height="120"
-                    overflow="visible"
-                  >
-                    <motion.path
-                      d="M4,0 C4,15 4,35 4,60"
-                      stroke="#C62828"
-                      strokeWidth="2.5"
-                      fill="none"
-                      strokeLinecap="round"
-                    />
-                    <motion.path
-                      d="M4,0 C4,15 4,35 4,60"
-                      stroke="#FFD600"
-                      strokeWidth="0.8"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeDasharray="3,3"
-                      opacity="0.7"
-                    />
-                  </svg>
-
-                  {/* Golden Bell pulling down on a loop */}
-                  <motion.div
-                    animate={{ y: [16, 45, 16], rotate: [-6, 6, -6] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    style={{ transformOrigin: "top center" }}
-                    className="absolute w-8 h-12 flex flex-col items-center"
-                  >
-                    <svg viewBox="0 0 100 140" className="w-full h-full">
-                      <circle cx="50" cy="8" r="4" fill="none" stroke="#FFB300" strokeWidth="2" />
-                      <path d="M 38,22 C 38,10 62,10 62,22 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.8" />
-                      <path d="M 38,22 L 35,42 C 35,45 65,45 65,42 L 62,22 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.8" />
-                      <circle cx="50" cy="42" r="3" fill="#FFE082" />
-                    </svg>
-                  </motion.div>
-                  <span className="absolute bottom-1.5 text-[9px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-20 animate-pulse">🔔 PULL BELL</span>
-                </div>
-              )}
-              {heroActiveTheme === "garland" && (
-                <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden relative">
-                  {/* Hanging Toran arch */}
-                  <div className="absolute top-0 w-full flex justify-between px-2 z-20">
-                    {[...Array(6)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="flex flex-col items-center"
-                        style={{ marginTop: i % 2 === 0 ? 0 : 5 }}
-                        animate={{ y: [0, -3, 0], rotate: [0, i % 2 === 0 ? 2 : -2, 0] }}
-                        transition={{ duration: 2 + i * 0.2, repeat: Infinity, ease: "easeInOut" }}
-                      >
-                        <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-amber-300 to-orange-500 border border-yellow-300 shadow flex items-center justify-center text-[5px]">🌸</div>
-                        <div className="w-[1.8px] h-5 bg-green-700/80 rounded-b-full" />
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Red Velvet Frame Garland Box */}
-                  <div className="w-40 h-28 relative rounded-xl overflow-hidden shadow-xl mt-4 border border-amber-900/20 bg-[#1A0005] flex items-center justify-center z-10">
-                    {/* Welcome Text behind Garland */}
-                    <div className="flex flex-col items-center gap-0.5 text-center z-0">
-                      <span className="text-sm">🌸</span>
-                      <span className="font-marcellus text-[5px] tracking-widest text-amber-300 uppercase">Welcome</span>
-                      <h5 className="font-great-vibes text-xs text-amber-100 leading-tight">{brideName} &amp; {groomName}</h5>
-                    </div>
-
-                    {/* Draped Garland rising up on loop */}
-                    <motion.div
-                      className="absolute inset-0 z-10 w-full h-full"
-                      animate={{ y: [0, -45, 0], opacity: [1, 0.3, 1] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 0.8 }}
-                      style={{ willChange: "transform, opacity" }}
-                    >
-                      <svg viewBox="0 0 200 140" className="w-full h-full">
-                        <rect x="0" y="0" width="200" height="140" fill="#8B0000" />
-                        <rect x="5" y="5" width="190" height="130" fill="none" stroke="#FFB300" strokeWidth="1" strokeDasharray="3,3" />
-                        <path d="M 0,20 Q 50,85 100,85 Q 150,85 200,20" fill="none" stroke="#FF8F00" strokeWidth="6" strokeLinecap="round" />
-                        <path d="M 0,20 Q 50,85 100,85 Q 150,85 200,20" fill="none" stroke="#FFC107" strokeWidth="3" strokeDasharray="6,6" strokeLinecap="round" />
-                        <path d="M 20,32 Q 20,55 23,60 Q 26,55 26,34 Z" fill="#2E7D32" />
-                        <path d="M 50,54 Q 50,75 53,80 Q 56,75 56,56 Z" fill="#2E7D32" />
-                        <path d="M 80,72 Q 80,95 83,100 Q 86,95 86,74 Z" fill="#2E7D32" />
-                        <path d="M 120,72 Q 120,95 123,100 Q 126,95 126,74 Z" fill="#2E7D32" />
-                        <path d="M 150,54 Q 150,75 153,80 Q 156,75 156,56 Z" fill="#2E7D32" />
-                        <path d="M 180,32 Q 180,55 183,60 Q 186,55 186,34 Z" fill="#2E7D32" />
-                      </svg>
-                    </motion.div>
-                  </div>
-                  <span className="absolute bottom-1.5 text-[9px] font-marcellus text-amber-200/90 tracking-widest font-bold uppercase drop-shadow z-20 animate-pulse">🌸 SWIPE TO OPEN</span>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom prompts */}
-            <div className="mb-2 z-10 flex flex-col items-center">
-              <div className="backdrop-blur-md bg-stone-900/40 border border-white/10 px-2 py-0.5 rounded-full shadow">
-                <span className="text-[9.5px] font-marcellus tracking-[1.5px] text-white uppercase font-bold leading-none">
+            {/* Gradient Overlay for Text Readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+            
+            {/* Overlay UI elements to still feel like the app */}
+            <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center pointer-events-none">
+              <div className="backdrop-blur-md bg-stone-900/60 border border-white/20 px-3 py-1 rounded-full shadow-lg">
+                <span className="text-[10px] font-marcellus tracking-[1.5px] text-white uppercase font-bold leading-none">
                   {dateStr} • {cityStr}
                 </span>
               </div>
-              <div className="mt-2">
-                <span className="font-marcellus text-[8px] tracking-widest block uppercase font-bold text-amber-300 drop-shadow animate-pulse">
-                  {activeSim.tag} Template
+              <div className="mt-2 text-center">
+                <span className="font-marcellus text-[9px] tracking-[3px] block uppercase font-bold text-amber-300 drop-shadow-md animate-pulse">
+                  Premium Themes
+                </span>
+                <span className="font-cormorant text-[10px] text-white/70 block mt-1">
+                  Previewing Live Designs
                 </span>
               </div>
             </div>

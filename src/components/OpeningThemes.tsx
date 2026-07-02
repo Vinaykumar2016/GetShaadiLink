@@ -346,7 +346,7 @@ export default function OpeningThemes({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
-          className="mt-6 xs:mt-7 z-20 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-[28px] p-4 xs:p-5 shadow-2xl flex flex-col items-center pointer-events-none"
+          className="mt-6 xs:mt-7 z-20 w-[94%] mx-auto bg-gradient-to-b from-black/60 via-black/20 to-transparent rounded-[28px] p-4 xs:p-5 flex flex-col items-center pointer-events-none"
         >
           {/* Auspicious Header */}
           <div className="flex items-center gap-2 mb-3 opacity-90">
@@ -354,13 +354,13 @@ export default function OpeningThemes({
             <span className="font-marcellus text-[9px] tracking-[3px] text-amber-200 uppercase font-bold">You're Invited</span>
             <span className="text-amber-300 text-[10px]">✦</span>
           </div>
-          <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${getFontSizeForName(bride)}`} style={{ color: "#ffffff" }}>
+          <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] ${getFontSizeForName(bride)}`} style={{ color: "#ffffff" }}>
             {bride}
           </h2>
           <span className="font-cormorant italic text-xl xs:text-2xl my-0.5 block text-amber-300/90 font-bold drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
             {t("weds")}
           </span>
-          <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${getFontSizeForName(groom)}`} style={{ color: "#ffffff" }}>
+          <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] ${getFontSizeForName(groom)}`} style={{ color: "#ffffff" }}>
             {groom}
           </h2>
           <div className="w-12 h-[1px] my-2 bg-white/20" />
@@ -379,7 +379,7 @@ export default function OpeningThemes({
           transition={{ duration: 0.8, delay: 0.4, type: "spring" }}
           className="mb-3 xs:mb-5 z-20 flex flex-col items-center"
         >
-          <div className="backdrop-blur-md bg-white/15 border border-white/30 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.3)] flex items-center gap-2">
+          <div className="bg-black/40 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.5)] flex items-center gap-2">
             <span className="text-amber-300 text-[10px]">📍</span>
             <p className="text-[10px] font-marcellus tracking-[2.5px] uppercase font-bold text-white leading-none mt-0.5">
               {niceDate} • {city}
@@ -399,7 +399,7 @@ export default function OpeningThemes({
             <motion.span 
               animate={activated ? { opacity: [1, 0.3, 1] } : { scale: [1, 1.05, 1], textShadow: ["0px 0px 4px rgba(251,191,36,0.2)", "0px 0px 8px rgba(251,191,36,0.6)", "0px 0px 4px rgba(251,191,36,0.2)"] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
-              className="font-marcellus text-[11px] tracking-[2.5px] block uppercase font-bold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
+              className="font-marcellus text-[11px] tracking-[2.5px] block uppercase font-bold text-amber-300 drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)] bg-black/30 px-4 py-1.5 rounded-full border border-amber-300/20"
             >
               {activated ? t("unveilingInvite") : tapPrompt}
             </motion.span>
