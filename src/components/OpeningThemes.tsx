@@ -298,38 +298,62 @@ export default function OpeningThemes({
 
         {/* Color overlay matching theme gradient */}
         <div 
-          className="absolute inset-0 z-0 opacity-80 mix-blend-multiply transition-all duration-300"
+          className="absolute inset-0 z-0 opacity-55 mix-blend-overlay transition-all duration-300"
           style={{ background: bgGradient }}
         />
 
-        {/* Floating Ambient Sparks / Fireflies Layer */}
+        {/* Enhanced Floating Ambient Particles Layer */}
         <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
-          {[...Array(8)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 rounded-full bg-amber-200/50 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
-              style={{
-                top: `${20 + i * 11}%`,
-                left: `${15 + (i * 27) % 70}%`,
-                willChange: "transform, opacity",
-              }}
-              animate={{
-                y: [0, -40, 0],
-                opacity: [0.2, 0.9, 0.2],
-                scale: [0.8, 1.3, 0.8],
-              }}
-              transition={{
-                duration: 5 + i,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.3,
-              }}
-            />
-          ))}
+          {[...Array(16)].map((_, i) => {
+            const size = i % 3 === 0 ? 'w-2 h-2' : i % 2 === 0 ? 'w-1 h-1' : 'w-1.5 h-1.5';
+            const isSparkle = i % 4 === 0;
+            return (
+              <motion.div
+                key={i}
+                className={`absolute ${size} rounded-full bg-amber-200/60 shadow-[0_0_10px_rgba(251,191,36,0.9)] flex items-center justify-center`}
+                style={{
+                  top: `${10 + (i * 17) % 80}%`,
+                  left: `${5 + (i * 23) % 90}%`,
+                  willChange: "transform, opacity",
+                }}
+                animate={activated ? {
+                  y: [0, (i%2===0?-100:100)],
+                  x: [0, (i%3===0?-100:100)],
+                  opacity: [0.8, 0],
+                  scale: [1, 0]
+                } : {
+                  y: [0, -30 - (i * 5), 0],
+                  x: [0, (i % 2 === 0 ? 15 : -15), 0],
+                  opacity: [0.1, 0.7, 0.1],
+                  scale: [0.8, 1.2, 0.8],
+                  rotate: isSparkle ? [0, 90, 180] : 0
+                }}
+                transition={activated ? { duration: 0.8 + (i * 0.05), ease: "easeOut" } : {
+                  duration: 4 + (i % 5),
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.2,
+                }}
+              >
+                {isSparkle && <span className="text-[6px] text-amber-100">✦</span>}
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Top Header Card Info: Glassmorphic panel with Great Vibes cursive */}
-        <div className="mt-4 xs:mt-5 z-20 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-[28px] p-4 xs:p-5 shadow-2xl flex flex-col items-center pointer-events-none">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
+          className="mt-6 xs:mt-7 z-20 w-[94%] mx-auto backdrop-blur-md bg-white/10 border border-white/20 rounded-[28px] p-4 xs:p-5 shadow-2xl flex flex-col items-center pointer-events-none"
+        >
+          {/* Auspicious Header */}
+          <div className="flex items-center gap-2 mb-3 opacity-90">
+            <span className="text-amber-300 text-[10px]">✦</span>
+            <span className="font-marcellus text-[9px] tracking-[3px] text-amber-200 uppercase font-bold">You're Invited</span>
+            <span className="text-amber-300 text-[10px]">✦</span>
+          </div>
           <h2 className={`font-great-vibes font-normal tracking-wide leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${getFontSizeForName(bride)}`} style={{ color: "#ffffff" }}>
             {bride}
           </h2>
@@ -341,7 +365,7 @@ export default function OpeningThemes({
           </h2>
           <div className="w-12 h-[1px] my-2 bg-white/20" />
           {renderCountdown("#ffffff")}
-        </div>
+        </motion.div>
 
         {/* Dynamic Theme Interactive Core */}
         <div className="flex-1 flex items-center justify-center relative my-2 xs:my-3 overflow-visible z-20">
@@ -349,22 +373,38 @@ export default function OpeningThemes({
         </div>
 
         {/* Footer prompts: Glassmorphic date badge */}
-        <div className="mb-2 xs:mb-4 z-20 flex flex-col items-center">
-          <div className="backdrop-blur-md bg-white/10 border border-white/20 px-4 py-1.5 rounded-full shadow-lg">
-            <p className="text-[10px] font-marcellus tracking-[2.5px] uppercase font-bold text-white leading-none">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4, type: "spring" }}
+          className="mb-3 xs:mb-5 z-20 flex flex-col items-center"
+        >
+          <div className="backdrop-blur-md bg-white/15 border border-white/30 px-5 py-2 rounded-full shadow-[0_4px_15px_rgba(0,0,0,0.3)] flex items-center gap-2">
+            <span className="text-amber-300 text-[10px]">📍</span>
+            <p className="text-[10px] font-marcellus tracking-[2.5px] uppercase font-bold text-white leading-none mt-0.5">
               {niceDate} • {city}
             </p>
           </div>
-          <div className="mt-3.5">
+          <div className="mt-4 flex flex-col items-center">
+            {/* Scroll indicator / CTA pointer */}
+            {!activated && (
+              <motion.div 
+                animate={{ y: [0, 5, 0], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="text-amber-400 text-[10px] mb-1"
+              >
+                ▼
+              </motion.div>
+            )}
             <motion.span 
-              animate={activated ? { opacity: [1, 0.3, 1] } : { scale: [1, 1.03, 1] }}
+              animate={activated ? { opacity: [1, 0.3, 1] } : { scale: [1, 1.05, 1], textShadow: ["0px 0px 4px rgba(251,191,36,0.2)", "0px 0px 8px rgba(251,191,36,0.6)", "0px 0px 4px rgba(251,191,36,0.2)"] }}
               transition={{ repeat: Infinity, duration: 1.5 }}
-              className="font-marcellus text-[11px] tracking-[2px] block uppercase font-bold text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]"
+              className="font-marcellus text-[11px] tracking-[2.5px] block uppercase font-bold text-amber-300 drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
             >
               {activated ? t("unveilingInvite") : tapPrompt}
             </motion.span>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   };
@@ -376,10 +416,10 @@ export default function OpeningThemes({
       <div className="w-full flex items-center justify-center overflow-hidden relative h-56">
         {/* Left Palace Door */}
         <motion.div
-          initial={{ x: 0 }}
-          animate={activated ? { x: -140, opacity: 0 } : { x: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          style={{ willChange: "transform, opacity" }}
+          initial={{ rotateY: 0, x: 0 }}
+          animate={activated ? { rotateY: -70, x: -90, opacity: 0 } : { rotateY: 0, x: 0 }}
+          transition={{ duration: 1.6, ease: "easeInOut" }}
+          style={{ transformPerspective: 800, transformOrigin: "left", willChange: "transform, opacity" }}
           className="absolute left-6 z-10 w-24 h-40 shadow-xl flex items-center justify-end overflow-hidden"
         >
           <svg viewBox="0 0 100 160" className="w-full h-full">
@@ -404,10 +444,10 @@ export default function OpeningThemes({
 
         {/* Right Palace Door */}
         <motion.div
-          initial={{ x: 0 }}
-          animate={activated ? { x: 140, opacity: 0 } : { x: 0 }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-          style={{ willChange: "transform, opacity" }}
+          initial={{ rotateY: 0, x: 0 }}
+          animate={activated ? { rotateY: 70, x: 90, opacity: 0 } : { rotateY: 0, x: 0 }}
+          transition={{ duration: 1.6, ease: "easeInOut" }}
+          style={{ transformPerspective: 800, transformOrigin: "right", willChange: "transform, opacity" }}
           className="absolute right-6 z-10 w-24 h-40 shadow-xl flex items-center justify-start overflow-hidden"
         >
           <svg viewBox="0 0 100 160" className="w-full h-full">
@@ -430,6 +470,17 @@ export default function OpeningThemes({
           </svg>
         </motion.div>
 
+        {/* Golden Dust Burst on Open */}
+        {activated && (
+          <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center">
+             <motion.div 
+               initial={{ scale: 0, opacity: 1 }} 
+               animate={{ scale: 4, opacity: 0 }} 
+               transition={{ duration: 1.2, ease: "easeOut" }}
+               className="w-20 h-20 bg-amber-400/20 rounded-full blur-xl"
+             />
+          </div>
+        )}
         {/* Text in the Middle when doors open */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -636,6 +687,13 @@ export default function OpeningThemes({
             </motion.g>
           ))}
 
+          {/* Flash on activation */}
+          {activated && (
+            <motion.circle cx="0" cy="0" r="0" fill="#FFF"
+              animate={{ r: [0, 80], opacity: [0.8, 0] }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+            />
+          )}
           {/* Golden center stamen */}
           <motion.circle
             cx="0" cy="0" r="8"
@@ -702,147 +760,33 @@ export default function OpeningThemes({
     );
   };
 
-  // 4. ROYAL ELEPHANT COVER: Splitting face-to-face decorated elephants
+  // 4. ROYAL MANDAP COVER: Parting silk curtains and golden pillars
   const renderElephantTheme = () => {
     return renderEnvelopeFrame(
-      "linear-gradient(to bottom, rgba(138,58,26,0.2) 0%, rgba(232,216,204,0.5) 60%, rgba(40,20,10,0.85) 100%)",
+      "linear-gradient(to bottom, rgba(138,58,26,0.3) 0%, rgba(232,216,204,0.1) 60%, rgba(40,20,10,0.85) 100%)",
       <div className="w-full h-56 relative flex items-center justify-center overflow-hidden">
-        {/* Rotating gold mandala sun behind text (revealed on open) — smooth linear rotation */}
-        <motion.svg
-          initial={{ rotate: 0, opacity: 0 }}
-          animate={activated ? { rotate: 360, opacity: 0.15 } : { rotate: 360 }}
-          transition={activated
-            ? { rotate: { duration: 20, repeat: Infinity, ease: "linear" }, opacity: { duration: 1.2, ease: "easeOut" } }
-            : { rotate: { duration: 30, repeat: Infinity, ease: "linear" } }
-          }
-          viewBox="0 0 100 100" className="absolute w-36 h-36 fill-none stroke-brand-gold stroke-[0.8]"
-          style={{ opacity: activated ? undefined : 0.06, willChange: "transform, opacity" }}
-        >
-          <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
-          <circle cx="50" cy="50" r="32" strokeDasharray="2,5" />
-        </motion.svg>
-
-        {/* Left Elephant (Bows & Slides Left) */}
-        <motion.div
-          initial={{ x: -20, rotate: 0, opacity: 1 }}
-          animate={activated ? { rotate: -15, x: -220, opacity: 0 } : { x: -20, rotate: 0, opacity: 1 }}
-          transition={{ duration: 1.6, ease: "easeInOut" }}
-          className="absolute z-10 w-28 h-28"
-          style={{ left: "10%", transformOrigin: "bottom left", willChange: "transform, opacity" }}
-        >
-          <svg viewBox="0 0 120 100" className="w-full h-full">
-            <defs>
-              <linearGradient id="sandstone-elephant-right" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#FAD8B7" />
-                <stop offset="50%" stopColor="#D49A6A" />
-                <stop offset="100%" stopColor="#9E6738" />
-              </linearGradient>
-            </defs>
-            {/* Elephant base */}
-            <path 
-              d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
-              fill="url(#sandstone-elephant-right)" 
-              stroke="#825229"
-              strokeWidth="0.8"
-            />
-            {/* Trunk — animated sway */}
-            <motion.path
-              d="M92,15 Q95,12 97,14"
-              stroke="#D49A6A" strokeWidth="1.2" fill="none"
-              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q96,10 98,13", "M92,15 Q94,14 96,15", "M92,15 Q95,12 97,14"] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* Ear contours */}
-            <path d="M42,38 C35,38 32,44 32,52 C32,60 36,64 42,64" fill="none" stroke="#825229" strokeWidth="0.8" />
-            <path d="M40,40 C35,40 33,44 33,50 C33,56 36,60 40,60" fill="none" stroke="#FFD54F" strokeWidth="0.5" opacity="0.3" />
-            {/* Jhool */}
-            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" stroke="#825229" strokeWidth="0.5" />
-            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
-            {/* Forehead Ornament */}
-            <path d="M76,32 Q82,24 88,32 Q85,42 80,45 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.5" />
-            <circle cx="82" cy="35" r="0.8" fill="#D32F2F" />
-            <circle cx="80" cy="40" r="0.8" fill="#D32F2F" />
-            {/* Tusks */}
-            <path d="M86,43 Q93,46 95,43 L91,40 Z" fill="#FFFFFF" stroke="#825229" strokeWidth="0.5" />
-            {/* Eye */}
-            <circle cx="78" cy="32" r="1" fill="#FFF" />
-            <circle cx="78" cy="32" r="0.5" fill="#000" />
-            {/* Howdah */}
-            <path d="M38,28 L50,28 L48,22 L40,22 Z" fill="#FFB300" stroke="#825229" strokeWidth="0.5" />
-            <path d="M41,22 Q44,15 47,22 Z" fill="#D32F2F" />
-            {/* Anklets */}
-            <circle cx="21" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="31" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="43" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="57" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="69" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="81" cy="80" r="1.2" fill="#FFD54F" />
-          </svg>
-        </motion.div>
-
-        {/* Right Elephant (Bows & Slides Right) — with idle trunk sway */}
-        <motion.div
-          initial={{ x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
-          animate={activated ? { rotate: -15, x: 220, opacity: 0 } : { x: 20, scaleX: -1, rotate: 0, opacity: 1 }}
-          transition={{ duration: 1.6, ease: "easeInOut" }}
-          className="absolute z-10 w-28 h-28"
-          style={{ right: "10%", transformOrigin: "bottom right", willChange: "transform, opacity" }}
-        >
-          <svg viewBox="0 0 120 100" className="w-full h-full">
-            <defs>
-              <linearGradient id="sandstone-elephant-right" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#FAD8B7" />
-                <stop offset="50%" stopColor="#D49A6A" />
-                <stop offset="100%" stopColor="#9E6738" />
-              </linearGradient>
-            </defs>
-            {/* Elephant base */}
-            <path 
-              d="M10,65 C10,55 12,48 22,42 C28,38 35,38 42,38 C46,38 48,34 50,30 C53,24 58,22 62,22 C65,22 68,26 68,30 C68,35 65,40 68,45 C72,50 82,48 88,38 C92,32 94,22 92,15 C92,13 95,12 96,15 C98,22 96,35 90,45 C86,52 82,55 82,60 C82,68 85,75 85,82 C85,84 82,84 81,82 C80,78 78,72 76,72 C74,72 73,78 73,82 C73,84 70,84 69,82 C68,76 66,70 64,70 C62,70 61,76 61,82 C61,84 58,84 57,82 C56,76 54,70 51,70 C48,70 47,76 47,82 C47,84 44,84 43,82 C42,76 40,70 38,70 C36,70 35,76 35,82 C35,84 32,84 31,82 C30,76 28,70 25,70 C22,70 21,76 21,82 C21,84 18,84 17,82 C16,76 14,70 12,70 C10,70 10,68 10,65 Z" 
-              fill="url(#sandstone-elephant-right)" 
-              stroke="#825229"
-              strokeWidth="0.8"
-            />
-            {/* Trunk — animated sway */}
-            <motion.path
-              d="M92,15 Q95,12 97,14"
-              stroke="#D49A6A" strokeWidth="1.2" fill="none"
-              animate={activated ? {} : { d: ["M92,15 Q95,12 97,14", "M92,15 Q96,10 98,13", "M92,15 Q94,14 96,15", "M92,15 Q95,12 97,14"] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* Ear contours */}
-            <path d="M42,38 C35,38 32,44 32,52 C32,60 36,64 42,64" fill="none" stroke="#825229" strokeWidth="0.8" />
-            <path d="M40,40 C35,40 33,44 33,50 C33,56 36,60 40,60" fill="none" stroke="#FFD54F" strokeWidth="0.5" opacity="0.3" />
-            {/* Jhool */}
-            <path d="M35,38 C40,38 48,39 52,38 C55,42 56,48 56,54 C56,56 54,58 50,58 C44,58 40,56 36,54 C36,48 35,42 35,38 Z" fill="#D32F2F" stroke="#825229" strokeWidth="0.5" />
-            <path d="M40,42 C43,42 46,43 48,42 C50,44 50,47 50,50 C50,51 49,52 47,52 C44,52 42,51 40,50 C40,47 40,44 40,42 Z" fill="#FFB300" />
-            {/* Forehead Ornament */}
-            <path d="M76,32 Q82,24 88,32 Q85,42 80,45 Z" fill="#FFB300" stroke="#FFE082" strokeWidth="0.5" />
-            <circle cx="82" cy="35" r="0.8" fill="#D32F2F" />
-            <circle cx="80" cy="40" r="0.8" fill="#D32F2F" />
-            {/* Tusks */}
-            <path d="M86,43 Q93,46 95,43 L91,40 Z" fill="#FFFFFF" stroke="#825229" strokeWidth="0.5" />
-            {/* Eye */}
-            <circle cx="78" cy="32" r="1" fill="#FFF" />
-            <circle cx="78" cy="32" r="0.5" fill="#000" />
-            {/* Howdah */}
-            <path d="M38,28 L50,28 L48,22 L40,22 Z" fill="#FFB300" stroke="#825229" strokeWidth="0.5" />
-            <path d="M41,22 Q44,15 47,22 Z" fill="#D32F2F" />
-            {/* Anklets */}
-            <circle cx="21" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="31" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="43" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="57" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="69" cy="80" r="1.2" fill="#FFD54F" />
-            <circle cx="81" cy="80" r="1.2" fill="#FFD54F" />
-          </svg>
-        </motion.div>
+        {/* Mandap structure base */}
+        <div className="absolute inset-0 z-10 flex justify-between px-2 pt-2 pointer-events-none">
+          <div className="w-6 h-full border-x-2 border-amber-500/50 bg-gradient-to-b from-amber-300 via-amber-600 to-amber-900 shadow-lg relative">
+             <div className="absolute top-0 w-full h-4 bg-amber-200" />
+             <div className="absolute top-10 w-full h-2 bg-amber-200" />
+          </div>
+          <div className="w-6 h-full border-x-2 border-amber-500/50 bg-gradient-to-b from-amber-300 via-amber-600 to-amber-900 shadow-lg relative">
+             <div className="absolute top-0 w-full h-4 bg-amber-200" />
+             <div className="absolute top-10 w-full h-2 bg-amber-200" />
+          </div>
+        </div>
+        
+        {/* Garland top */}
+        <div className="absolute top-0 left-0 w-full h-10 z-20 overflow-hidden pointer-events-none">
+          <div className="w-full h-12 border-b-[6px] border-dotted border-orange-500 rounded-[50%] -mt-6 opacity-90 shadow-md" />
+        </div>
 
         {/* Revealed Names & Invitation in the Middle */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={activated ? { opacity: 1, scale: 1 } : { opacity: 0 }}
-          transition={{ delay: 0.3, duration: 1.2, ease: "easeOut" }}
+          transition={{ delay: 0.5, duration: 1.2, ease: "easeOut" }}
           className="absolute text-center z-0 flex flex-col items-center justify-center pointer-events-none"
         >
           <span className="font-marcellus text-[9px] tracking-[4px] uppercase text-brand-rust font-bold block mb-1">
@@ -855,10 +799,50 @@ export default function OpeningThemes({
           </h4>
         </motion.div>
 
+        {/* Left Curtain */}
+        <motion.div 
+          initial={{ width: "50%", x: 0 }}
+          animate={activated ? { width: "15%", x: -20, opacity: 0.8 } : { width: "50%", x: 0 }}
+          transition={{ duration: 1.8, ease: "easeInOut" }} 
+          className="absolute left-0 top-0 h-full bg-gradient-to-br from-red-800 via-[#8A0000] to-[#4A000A] z-10 border-r-2 border-amber-400/50 shadow-[4px_0_15px_rgba(0,0,0,0.6)] origin-left flex items-center justify-end pr-2 overflow-hidden"
+          style={{ borderBottomRightRadius: activated ? "20%" : "0%" }}
+        >
+           <div className="w-[1px] h-full bg-amber-500/30 ml-auto" />
+           <div className="w-[2px] h-full bg-amber-400/50 mx-1" />
+        </motion.div>
+
+        {/* Right Curtain */}
+        <motion.div 
+          initial={{ width: "50%", x: 0 }}
+          animate={activated ? { width: "15%", x: 20, opacity: 0.8 } : { width: "50%", x: 0 }}
+          transition={{ duration: 1.8, ease: "easeInOut" }} 
+          className="absolute right-0 top-0 h-full bg-gradient-to-bl from-red-800 via-[#8A0000] to-[#4A000A] z-10 border-l-2 border-amber-400/50 shadow-[-4px_0_15px_rgba(0,0,0,0.6)] origin-right flex items-center justify-start pl-2 overflow-hidden"
+          style={{ borderBottomLeftRadius: activated ? "20%" : "0%" }}
+        >
+           <div className="w-[2px] h-full bg-amber-400/50 mr-1" />
+           <div className="w-[1px] h-full bg-amber-500/30" />
+        </motion.div>
+
+        {/* Golden Confetti on Open */}
+        {activated && (
+           <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden">
+             {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ y: -20, opacity: 1, rotate: 0 }}
+                  animate={{ y: 200, opacity: 0, rotate: 360 }}
+                  transition={{ duration: 2 + Math.random(), delay: Math.random() * 0.5, ease: "easeIn" }}
+                  className="absolute w-2 h-2 bg-amber-300 rounded-sm"
+                  style={{ left: `${10 + (i * 7)}%` }}
+                />
+             ))}
+           </div>
+        )}
+
         {!activated && (
           <button
             onClick={handleActivate}
-            className="absolute z-20 py-2.5 px-6 rounded-full border-2 border-brand-gold bg-[#963E1C] hover:bg-[#8A3A1A] text-white font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-lg transition-transform"
+            className="absolute z-20 py-2.5 px-6 rounded-full border-2 border-amber-300 bg-gradient-to-r from-[#963E1C] to-[#8A3A1A] hover:brightness-110 text-amber-100 font-marcellus text-[10.5px] uppercase tracking-widest font-bold cursor-pointer active:scale-95 shadow-xl transition-all"
           >
             {t("enterCelebration")}
           </button>
@@ -926,6 +910,14 @@ export default function OpeningThemes({
           />
         </svg>
 
+        {/* Draggable Bell and Sound Waves */}
+        {activated && (
+          <motion.div className="absolute bottom-[40px] z-10 w-24 h-24 border-2 border-amber-300 rounded-full"
+            initial={{ scale: 0.5, opacity: 1 }}
+            animate={{ scale: 3, opacity: 0 }}
+            transition={{ duration: 1 }}
+          />
+        )}
         {/* Draggable Bell */}
         <motion.div
           drag="y"
@@ -1052,6 +1044,20 @@ export default function OpeningThemes({
           ))}
         </motion.div>
 
+        {/* Marigold Confetti */}
+        {activated && (
+          <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden">
+             {[...Array(15)].map((_, i) => (
+                <motion.div key={i}
+                  initial={{ y: 200, opacity: 1, x: 0 }}
+                  animate={{ y: -50, opacity: 0, x: (i%2===0?30:-30) }}
+                  transition={{ duration: 1.5 + Math.random(), ease: "easeOut" }}
+                  className="absolute w-3 h-3 rounded-full bg-orange-500 shadow-sm"
+                  style={{ left: `${20 + (i * 4)}%` }}
+                />
+             ))}
+          </div>
+        )}
         {/* Silk background behind the garland */}
         <div className="w-52 h-36 relative rounded-xl overflow-hidden shadow-xl mt-6 border border-amber-900/20 bg-[#1A0005] flex items-center justify-center">
           {/* Revealed center glow behind garland */}
