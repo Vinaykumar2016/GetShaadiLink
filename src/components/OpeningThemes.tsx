@@ -793,7 +793,7 @@ export default function OpeningThemes({
           transition={{ duration: 2, ease: "easeInOut" }} 
           className="absolute left-[-10px] top-4 bottom-0 z-10 origin-left flex items-center justify-end"
         >
-           <img src="/samples/royal_elephant.png" alt="Royal Elephant" className="h-full w-auto object-contain max-h-48 drop-shadow-[4px_0_15px_rgba(0,0,0,0.6)] scale-x-[-1]" />
+           <img src="/samples/royal_elephant_transparent.png" alt="Royal Elephant" className="h-full w-auto object-contain max-h-48 drop-shadow-[4px_0_15px_rgba(0,0,0,0.6)] scale-x-[-1]" />
         </motion.div>
 
         {/* Right Elephant */}
@@ -803,7 +803,7 @@ export default function OpeningThemes({
           transition={{ duration: 2, ease: "easeInOut" }} 
           className="absolute right-[-10px] top-4 bottom-0 z-10 origin-right flex items-center justify-start"
         >
-           <img src="/samples/royal_elephant.png" alt="Royal Elephant" className="h-full w-auto object-contain max-h-48 drop-shadow-[-4px_0_15px_rgba(0,0,0,0.6)]" />
+           <img src="/samples/royal_elephant_transparent.png" alt="Royal Elephant" className="h-full w-auto object-contain max-h-48 drop-shadow-[-4px_0_15px_rgba(0,0,0,0.6)]" />
         </motion.div>
 
         {/* Golden Confetti on Open */}
