@@ -15,6 +15,16 @@ interface BuilderFormProps {
 export default function BuilderForm({ onSuccess, initialData, onCancelEdit, preselectedTheme }: BuilderFormProps) {
   // Wizard state control
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const formTopRef = React.useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to top of form on step navigation
+  useEffect(() => {
+    if (formTopRef.current) {
+      formTopRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.scrollTo({ top: 120, behavior: "smooth" });
+    }
+  }, [step]);
 
   // Field states
   const [bride, setBride] = useState("");
@@ -426,7 +436,7 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         {/* Main interactive creation panel card form: 7 columns */}
         <div className="lg:col-span-7 bg-white border border-brand-rust/10 rounded-[32px] overflow-hidden shadow-paper">
           {/* Top header branding display */}
-          <div className="p-6 sm:p-8 bg-[#FAF6F0] border-b border-brand-rust/10 relative">
+          <div ref={formTopRef} className="p-4 sm:p-8 bg-[#FAF6F0] border-b border-brand-rust/10 relative">
             <span className="font-cinzel text-[10px] font-bold tracking-widest text-brand-gold mb-2 block uppercase">
               ✦ INDIAS #1 DIGITAL SHAADI CARD
             </span>
@@ -534,8 +544,8 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                   {/* CUSTOM PRETTY SUBDOMAIN-LIKE URL COMPONENT */}
                   <div className="flex flex-col gap-1.5 p-4 rounded-2xl bg-brand-rust/5 border border-brand-rust/10">
                     <label htmlFor="link-slug" className="text-[10px] font-cinzel tracking-widest text-brand-rust/80 uppercase font-semibold">Custom Link Webpath</label>
-                    <div className="flex items-center bg-white border border-brand-rust/10 rounded-xl overflow-hidden focus-within:border-brand-rust/50 text-sm">
-                      <span className="px-4 py-3 text-brand-rust/40 bg-brand-rust/5 border-r border-brand-rust/5 select-none font-mono text-xs font-semibold">
+                    <div className="flex flex-wrap sm:flex-nowrap items-center bg-white border border-brand-rust/10 rounded-xl overflow-hidden focus-within:border-brand-rust/50 text-sm">
+                      <span className="px-3 py-3 text-brand-rust/40 bg-brand-rust/5 border-r border-brand-rust/5 select-none font-mono text-xs font-semibold shrink-0">
                         getshaadilink.in/
                       </span>
                       <input
@@ -544,9 +554,9 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
                         value={slug}
                         onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                         placeholder="priya-arjun"
-                        className="flex-1 px-4 py-3 bg-transparent text-brand-rust outline-none font-mono text-xs"
+                        className="flex-1 min-w-[120px] px-3 py-3 bg-transparent text-brand-rust outline-none font-mono text-xs"
                       />
-                      <div className="px-3">
+                      <div className="px-3 shrink-0">
                         {slugLoading ? (
                           <div className="w-4 h-4 border-2 border-brand-rust/20 border-t-brand-rust animate-spin rounded-full" />
                         ) : slugAvailable === true ? (

@@ -77,6 +77,80 @@ export default function RestrictedPaywall({ data, onAccessGranted, onBackHome }:
     }
   };
 
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayNow = async () => {
+    playClickSound();
+    setIsProcessingPayment(true);
+    try {
+      const isLoaded = await loadRazorpayScript();
+      if (!isLoaded) {
+        throw new Error("Failed to load Razorpay Checkout SDK. Please check your internet connection.");
+      }
+
+      const options = {
+        key: "rzp_live_T1cBBF0iEWb9ej",
+        amount: 99900,
+        currency: "INR",
+        name: "GetShaadiLink",
+        description: "Activate Premium Wedding Invitation Card",
+        theme: { color: themeColors.primary || "#8A3A1A" },
+        handler: async function (response: any) {
+          try {
+            const res = await fetch(`/api/invitations/${data.slug}/update`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpayPaymentId: response.razorpay_payment_id,
+              }),
+            });
+            const updateResult = await res.json();
+            if (!res.ok) {
+              throw new Error(updateResult.error || "Failed to update payment status.");
+            }
+            // Fetch updated full card data
+            const dataRes = await fetch(`/api/invitations/${data.slug}`);
+            if (dataRes.ok) {
+              const fullData = await dataRes.json();
+              onAccessGranted(fullData);
+            } else {
+              window.location.reload();
+            }
+          } catch (err: any) {
+            alert(err.message || "Failed to activate card after payment.");
+          } finally {
+            setIsProcessingPayment(false);
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setIsProcessingPayment(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      alert(err.message || "Payment gateway error.");
+      setIsProcessingPayment(false);
+    }
+  };
+
   const handleBackClick = () => {
     playClickSound();
     onBackHome();
@@ -141,6 +215,21 @@ export default function RestrictedPaywall({ data, onAccessGranted, onBackHome }:
           <p className="text-xs text-stone-500/80">
             If you are the card owner, please enter your secret passcode below to unlock and preview your card.
           </p>
+        </div>
+
+        {/* Direct Payment CTA */}
+        <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center">
+          <p className="text-xs font-bold text-stone-800 mb-2">
+            Are you the card owner? Activate your live invitation now!
+          </p>
+          <button
+            onClick={handlePayNow}
+            disabled={isProcessingPayment}
+            className="w-full py-3 px-6 rounded-xl bg-brand-rust hover:bg-brand-rust/90 text-white font-bold text-xs tracking-wider uppercase shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <Sparkles className="w-4 h-4 text-brand-gold animate-pulse" />
+            <span>{isProcessingPayment ? "Opening Payment..." : "Pay ₹999 to Activate Live Card"}</span>
+          </button>
         </div>
 
         {/* Passcode Form */}
