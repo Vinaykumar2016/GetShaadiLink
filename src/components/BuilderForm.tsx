@@ -434,12 +434,10 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
               Create Your Invitation
             </h2>
             <p className="text-xs text-brand-rust/60 mt-2 leading-relaxed">
-              Fill details, upload custom visuals, and create a beautiful custom animated website for ₹999 one-time.
+              Fill details, upload custom visuals, and create a beautiful custom animated website.
             </p>
 
-            <span className="absolute top-6 right-6 font-cinzel font-bold text-sm text-brand-rust bg-brand-rust/5 border border-brand-rust/10 px-4 py-1.5 rounded-full select-none">
-              ₹999
-            </span>
+
           </div>
 
           {/* Stepper progressive indicator lines */}

@@ -2579,11 +2579,10 @@ export default function InvitationView({
 
       {/* Demo Mode Overlay banner */}
       {isDemoMode && (
-        <div className="fixed top-0 inset-x-0 z-[600] bg-gradient-to-r from-brand-rust to-brand-terracotta text-white font-semibold text-xs tracking-wider uppercase text-center py-3.5 px-4 flex items-center justify-center gap-4 shadow-md">
-          <span>💡 Live Preview Mode (Save 40% Active)</span>
+        <div className="fixed top-3 right-3 z-[600]">
           <button 
             onClick={onCloseDemo} 
-            className="bg-white hover:bg-stone-100 text-[#8A3A1A] px-4 py-1.5 rounded-full text-[10px] font-bold tracking-normal active:scale-95 transition-all cursor-pointer shadow"
+            className="bg-brand-rust/90 hover:bg-brand-rust text-white px-4 py-2 rounded-full text-[11px] font-bold tracking-wide active:scale-95 transition-all cursor-pointer shadow-lg backdrop-blur-sm"
           >
             ✕ Close Preview
           </button>
