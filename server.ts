@@ -10,6 +10,40 @@ import compression from "compression";
 dotenv.config();
 
 const app = express();
+
+// Security Hardening: Hide server footprint & enforce OWASP security headers
+app.disable("x-powered-by");
+
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
+
+// In-Memory Rate Limiter to prevent brute-force attacks on sensitive auth routes
+const authAttemptTracker = new Map<string, { count: number; resetTime: number }>();
+function rateLimitAuthMiddleware(req: any, res: any, next: any) {
+  const clientIp = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").toString().split(",")[0].trim();
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes window
+  const maxAttempts = 20; // max 20 attempts per 15 mins
+
+  const record = authAttemptTracker.get(clientIp);
+  if (!record || now > record.resetTime) {
+    authAttemptTracker.set(clientIp, { count: 1, resetTime: now + windowMs });
+    return next();
+  }
+
+  if (record.count >= maxAttempts) {
+    return res.status(429).json({ error: "Too many authentication attempts. Please try again in 15 minutes." });
+  }
+
+  record.count += 1;
+  next();
+}
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
 // Enable Gzip compression to minimize asset transfer sizes with balanced CPU usage
@@ -433,7 +467,7 @@ app.get("/api/invitations/:slug", (req, res) => {
 });
 
 // API: Auth / Login verifying passcode for invitation
-app.post("/api/invitations/:slug/auth", (req, res) => {
+app.post("/api/invitations/:slug/auth", rateLimitAuthMiddleware, (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password } = req.body;
   const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
@@ -1104,7 +1138,7 @@ app.get("/api/agency/:agencyId/stats", (req, res) => {
 });
 
 // API: Admin Login
-app.post("/api/admin/login", (req, res) => {
+app.post("/api/admin/login", rateLimitAuthMiddleware, (req, res) => {
   const { username, password } = req.body;
   const expectedUsername = process.env.ADMIN_USERNAME || "VinayMathad";
   const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
