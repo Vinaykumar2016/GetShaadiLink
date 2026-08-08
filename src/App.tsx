@@ -1422,7 +1422,6 @@ export default function App() {
                 }, 100);
               }}
               onLaunchDemo={handleLaunchDemo}
-              userPhoto={invitationData?.heroPhoto || invitationData?.photos?.[0]}
             />
           </motion.section>
 
