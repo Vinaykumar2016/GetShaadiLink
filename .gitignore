@@ -12,3 +12,5 @@ coverage/
 # Deployment packages and large ZIP files
 deploy/
 *.zip
+
+scratch/
