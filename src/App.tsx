@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Invitation } from "./types";
 import BuilderForm from "./components/BuilderForm";
-import InvitationView from "./components/InvitationView";
 import ThemeShowroom from "./components/ThemeShowroom";
-import UserDashboard from "./components/UserDashboard";
-import AdminDashboard from "./components/AdminDashboard";
-import AgencyDashboard from "./components/AgencyDashboard";
-import RestrictedPaywall from "./components/RestrictedPaywall";
+// Lazy-load heavy components not needed on initial landing page render
+const InvitationView = React.lazy(() => import("./components/InvitationView"));
+const UserDashboard = React.lazy(() => import("./components/UserDashboard"));
+const AdminDashboard = React.lazy(() => import("./components/AdminDashboard"));
+const AgencyDashboard = React.lazy(() => import("./components/AgencyDashboard"));
+const RestrictedPaywall = React.lazy(() => import("./components/RestrictedPaywall"));
 import { playClickSound } from "./utils/soundUtils";
 import { Sparkles, Heart, Check, Copy, Share2, ArrowRight, Eye, EyeOff, Star, Quote, ChevronDown, Minus } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "motion/react";
@@ -878,25 +879,29 @@ export default function App() {
   // Admin View
   if (adminActive) {
     return (
-      <AdminDashboard 
-        onClose={() => {
-          setAdminActive(false);
-          window.history.pushState({}, "", "/");
-        }}
-      />
+      <React.Suspense fallback={<div className="min-h-screen bg-brand-cream flex items-center justify-center"><div className="text-brand-rust animate-pulse font-display text-xl">Loading...</div></div>}>
+        <AdminDashboard 
+          onClose={() => {
+            setAdminActive(false);
+            window.history.pushState({}, "", "/");
+          }}
+        />
+      </React.Suspense>
     );
   }
 
   // Agency View
   if (activeAgencyId) {
     return (
-      <AgencyDashboard 
-        agencyId={activeAgencyId}
-        onClose={() => {
-          setActiveAgencyId(null);
-          window.history.pushState({}, "", "/");
-        }}
-      />
+      <React.Suspense fallback={<div className="min-h-screen bg-brand-cream flex items-center justify-center"><div className="text-brand-rust animate-pulse font-display text-xl">Loading...</div></div>}>
+        <AgencyDashboard 
+          agencyId={activeAgencyId}
+          onClose={() => {
+            setActiveAgencyId(null);
+            window.history.pushState({}, "", "/");
+          }}
+        />
+      </React.Suspense>
     );
   }
 
@@ -904,25 +909,29 @@ export default function App() {
   if (slug && invitationData) {
     if ((invitationData as any).restricted) {
       return (
-        <RestrictedPaywall
-          data={invitationData as any}
-          onAccessGranted={(freshData) => {
-            setInvitationData(freshData);
-          }}
-          onBackHome={() => {
-            setSlug(null);
-            setInvitationData(null);
-            window.history.pushState({}, "", "/");
-          }}
-        />
+        <React.Suspense fallback={<div className="min-h-screen bg-brand-cream flex items-center justify-center"><div className="text-brand-rust animate-pulse font-display text-xl">Loading...</div></div>}>
+          <RestrictedPaywall
+            data={invitationData as any}
+            onAccessGranted={(freshData) => {
+              setInvitationData(freshData);
+            }}
+            onBackHome={() => {
+              setSlug(null);
+              setInvitationData(null);
+              window.history.pushState({}, "", "/");
+            }}
+          />
+        </React.Suspense>
       );
     }
     return (
-      <InvitationView 
-        data={invitationData} 
-        isDemoMode={isDemoMode}
-        onCloseDemo={handleCloseDemo}
-      />
+      <React.Suspense fallback={<div className="min-h-screen bg-brand-cream flex items-center justify-center"><div className="text-brand-rust animate-pulse font-display text-xl">Loading...</div></div>}>
+        <InvitationView 
+          data={invitationData} 
+          isDemoMode={isDemoMode}
+          onCloseDemo={handleCloseDemo}
+        />
+      </React.Suspense>
     );
   }
   // Simulator themes config for Hero Interactive mockup
@@ -1154,12 +1163,15 @@ export default function App() {
       {/* Main Container */}
       {loggedInCardData ? (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-          <UserDashboard
-            data={loggedInCardData}
-            onLogout={() => { setLoggedInCardData(null); playClickSound(); }}
-            onUpdateSuccess={(freshData) => setLoggedInCardData(freshData)}
-          />
+          <React.Suspense fallback={<div className="min-h-screen bg-brand-cream flex items-center justify-center"><div className="text-brand-rust animate-pulse font-display text-xl">Loading...</div></div>}>
+            <UserDashboard
+              data={loggedInCardData}
+              onLogout={() => { setLoggedInCardData(null); playClickSound(); }}
+              onUpdateSuccess={(freshData) => setLoggedInCardData(freshData)}
+            />
+          </React.Suspense>
         </main>
+
       ) : (
         /* STUNNING HIGH-CONVERSION LANDING PAGE */
         <main className="relative z-10 w-full flex flex-col items-center">

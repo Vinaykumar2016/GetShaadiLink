@@ -88,8 +88,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -205,8 +205,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#FFD700", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/mandap.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -323,7 +323,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
               <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/flowers.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -464,8 +464,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#8A3A1A", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/mandap.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -592,8 +592,8 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
           >
             <div className="inv-sec-tag-mock" style={{ color: "#991B1B", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
-              <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/flowers.jpg" alt="Couple 1" className="inv-gallery-img-mock" />
+              <img src="/samples/couple2.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -725,7 +725,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
             <div className="inv-sec-tag-mock" style={{ color: "#065F46", opacity: 0.8 }}>Moments</div>
             <div className="inv-gallery-grid-mock">
               <img src="/samples/couple_realistic.png" alt="Couple 1" className="inv-gallery-img-mock" />
-              <img src="/samples/couple_realistic.png" alt="Couple 2" className="inv-gallery-img-mock" />
+              <img src="/samples/couple1.jpg" alt="Couple 2" className="inv-gallery-img-mock" />
             </div>
           </div>
 
@@ -812,25 +812,29 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
 
       {/* Showroom Title */}
       <div className="text-center space-y-2">
-        <h3 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
+        <h2 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
           Explore Digital Invitations
-        </h3>
+        </h2>
         <p className="text-xs text-stone-400 max-w-sm mx-auto">
           Choose a visual cover style to begin. Watch the live interactive animations in one click.
         </p>
       </div>
 
       {/* Catalog Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto px-4 sm:px-6">
         {themes.map((t) => (
           <div
             key={t.id}
             id={`theme-card-${t.id}`}
-            className="rounded-[32px] bg-white/5 border border-white/10 p-6 flex flex-col justify-between shadow-2xl hover:border-amber-400/40 transition-all duration-300 relative group overflow-hidden backdrop-blur-md"
+            className="shimmer-card rounded-[32px] bg-white/5 border border-white/10 p-6 flex flex-col justify-between shadow-2xl hover:border-amber-400/40 transition-all transition-transform duration-300 relative group overflow-hidden backdrop-blur-md"
           >
             {/* Phone Bezel Container */}
-            <div className="w-full flex justify-center mb-6 pt-2">
-              <div className="w-[180px] h-[320px] rounded-[36px] border-[5px] border-stone-800 bg-[#08000F] relative shadow-lg overflow-hidden flex flex-col justify-between">
+            <div
+              className="w-full flex justify-center mb-6 pt-2 cursor-pointer"
+              onClick={() => handleDemoClick(t.id)}
+              title="Click to watch demo"
+            >
+              <div className="w-[180px] h-[320px] rounded-[36px] border-[5px] border-stone-800 bg-[#08000F] relative shadow-lg overflow-hidden flex flex-col justify-between hover:scale-[1.02] transition-transform duration-200 group-hover:scale-[1.02] group-hover:-translate-y-1">
                 {/* Dynamic screen content */}
                 <div className="showroom-phone-screen">
                   <div className="showroom-scroll-track">
@@ -847,9 +851,9 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
             {/* Description Info */}
             <div className="space-y-3">
               <div>
-                <h4 className="font-marcellus text-lg font-bold tracking-wide text-amber-400">
+                <h3 className="font-marcellus text-lg font-bold tracking-wide text-amber-400">
                   {t.name}
-                </h4>
+                </h3>
                 <p className="text-[11.5px] text-stone-300/80 leading-relaxed min-h-[36px] mt-1.5">
                   {t.tagline}
                 </p>
@@ -872,7 +876,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
                 className="w-full py-3 rounded-xl font-cinzel font-bold text-[10px] tracking-wider uppercase text-stone-950 bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-98"
               >
                 <Wand2 className="w-3.5 h-3.5" />
-                <span>Try This Design</span>
+                <span>Customize Free ✦</span>
               </button>
               
               <button

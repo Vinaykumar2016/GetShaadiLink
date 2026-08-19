@@ -21,6 +21,7 @@
   --color-brand-gold: #C5A880;
   --color-brand-gold-light: #F4EFE6;
   --color-brand-terracotta: #963E1C;
+  --navbar-height: 73px;
 }
 
 /* Custom CSS Scrollbar and micro-reveal effects */
@@ -176,6 +177,12 @@
   flex-direction: column;
   animation: scrollPreview 12s ease-in-out infinite;
   will-change: transform;
+}
+
+/* Pause scroll animation on hover so users can read the invitation content */
+.showroom-scroll-track:hover,
+.group:hover .showroom-scroll-track {
+  animation-play-state: paused;
 }
 
 @keyframes scrollPreview {

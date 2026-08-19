@@ -14235,12 +14235,15 @@ var require_json = __commonJS({
     var JSON_SYNTAX_REGEXP = /#+/g;
     function json(options) {
       var opts = options || {};
-      var limit = typeof opts.limit !== "number" ? bytes.parse(opts.limit || "100kb") : opts.limit;
+      var limit = typeof opts.limit === "undefined" || opts.limit === null ? 102400 : bytes.parse(opts.limit);
       var inflate = opts.inflate !== false;
       var reviver = opts.reviver;
       var strict = opts.strict !== false;
       var type = opts.type || "application/json";
       var verify = opts.verify || false;
+      if (limit === null) {
+        throw new TypeError('option limit "' + String(opts.limit) + '" is invalid');
+      }
       if (verify !== false && typeof verify !== "function") {
         throw new TypeError("option verify must be function");
       }
@@ -14362,9 +14365,12 @@ var require_raw = __commonJS({
     function raw(options) {
       var opts = options || {};
       var inflate = opts.inflate !== false;
-      var limit = typeof opts.limit !== "number" ? bytes.parse(opts.limit || "100kb") : opts.limit;
+      var limit = typeof opts.limit === "undefined" || opts.limit === null ? 102400 : bytes.parse(opts.limit);
       var type = opts.type || "application/octet-stream";
       var verify = opts.verify || false;
+      if (limit === null) {
+        throw new TypeError('option limit "' + String(opts.limit) + '" is invalid');
+      }
       if (verify !== false && typeof verify !== "function") {
         throw new TypeError("option verify must be function");
       }
@@ -14420,9 +14426,12 @@ var require_text = __commonJS({
       var opts = options || {};
       var defaultCharset = opts.defaultCharset || "utf-8";
       var inflate = opts.inflate !== false;
-      var limit = typeof opts.limit !== "number" ? bytes.parse(opts.limit || "100kb") : opts.limit;
+      var limit = typeof opts.limit === "undefined" || opts.limit === null ? 102400 : bytes.parse(opts.limit);
       var type = opts.type || "text/plain";
       var verify = opts.verify || false;
+      if (limit === null) {
+        throw new TypeError('option limit "' + String(opts.limit) + '" is invalid');
+      }
       if (verify !== false && typeof verify !== "function") {
         throw new TypeError("option verify must be function");
       }
@@ -17028,9 +17037,12 @@ var require_urlencoded = __commonJS({
       }
       var extended = opts.extended !== false;
       var inflate = opts.inflate !== false;
-      var limit = typeof opts.limit !== "number" ? bytes.parse(opts.limit || "100kb") : opts.limit;
+      var limit = typeof opts.limit === "undefined" || opts.limit === null ? 102400 : bytes.parse(opts.limit);
       var type = opts.type || "application/x-www-form-urlencoded";
       var verify = opts.verify || false;
+      if (limit === null) {
+        throw new TypeError('option limit "' + String(opts.limit) + '" is invalid');
+      }
       if (verify !== false && typeof verify !== "function") {
         throw new TypeError("option verify must be function");
       }
@@ -17729,8 +17741,8 @@ var require_escape_html = __commonJS({
   "node_modules/escape-html/index.js"(exports2, module2) {
     "use strict";
     var matchHtmlRegExp = /["'&<>]/;
-    module2.exports = escapeHtml;
-    function escapeHtml(string) {
+    module2.exports = escapeHtml2;
+    function escapeHtml2(string) {
       var str = "" + string;
       var match = matchHtmlRegExp.exec(str);
       if (!match) {
@@ -17861,7 +17873,7 @@ var require_finalhandler = __commonJS({
     "use strict";
     var debug = require_src2()("finalhandler");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var onFinished = require_on_finished();
     var parseUrl = require_parseurl();
     var statuses = require_statuses();
@@ -17873,7 +17885,7 @@ var require_finalhandler = __commonJS({
     };
     var isFinished = onFinished.isFinished;
     function createHtmlDocument(message) {
-      var body = escapeHtml(message).replace(NEWLINE_REGEXP, "<br>").replace(DOUBLE_SPACE_REGEXP, " &nbsp;");
+      var body = escapeHtml2(message).replace(NEWLINE_REGEXP, "<br>").replace(DOUBLE_SPACE_REGEXP, " &nbsp;");
       return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>' + body + "</pre>\n</body>\n</html>\n";
     }
     module2.exports = finalhandler;
@@ -20000,14 +20012,14 @@ var require_etag = __commonJS({
   "node_modules/etag/index.js"(exports2, module2) {
     "use strict";
     module2.exports = etag;
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var Stats = require("fs").Stats;
     var toString = Object.prototype.toString;
     function entitytag(entity) {
       if (entity.length === 0) {
         return '"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk"';
       }
-      var hash = crypto2.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
+      var hash = crypto3.createHash("sha1").update(entity, "utf8").digest("base64").substring(0, 27);
       var len = typeof entity === "string" ? Buffer.byteLength(entity, "utf8") : entity.length;
       return '"' + len.toString(16) + "-" + hash + '"';
     }
@@ -20377,7 +20389,7 @@ var require_send = __commonJS({
     var deprecate3 = require_depd()("send");
     var destroy = require_destroy();
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
     var fs4 = require("fs");
@@ -20477,7 +20489,7 @@ var require_send = __commonJS({
       }
       var res = this.res;
       var msg = statuses.message[status] || String(status);
-      var doc = createHtmlDocument("Error", escapeHtml(msg));
+      var doc = createHtmlDocument("Error", escapeHtml2(msg));
       clearHeaders(res);
       if (err && err.headers) {
         setHeaders(res, err.headers);
@@ -20577,7 +20589,7 @@ var require_send = __commonJS({
         return;
       }
       var loc = encodeUrl(collapseLeadingSlashes(this.path + "/"));
-      var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml(loc));
+      var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml2(loc));
       res.statusCode = 301;
       res.setHeader("Content-Type", "text/html; charset=UTF-8");
       res.setHeader("Content-Length", Buffer.byteLength(doc));
@@ -22900,11 +22912,11 @@ var require_request = __commonJS({
 // node_modules/cookie-signature/index.js
 var require_cookie_signature = __commonJS({
   "node_modules/cookie-signature/index.js"(exports2) {
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     exports2.sign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Cookie value must be provided as a string.");
       if (null == secret) throw new TypeError("Secret key must be provided.");
-      return val + "." + crypto2.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
+      return val + "." + crypto3.createHmac("sha256", secret).update(val).digest("base64").replace(/\=+$/, "");
     };
     exports2.unsign = function(val, secret) {
       if ("string" !== typeof val) throw new TypeError("Signed cookie string must be provided.");
@@ -22913,7 +22925,7 @@ var require_cookie_signature = __commonJS({
       return sha1(mac) == sha1(val) ? str : false;
     };
     function sha1(str) {
-      return crypto2.createHash("sha1").update(str).digest("hex");
+      return crypto3.createHash("sha1").update(str).digest("hex");
     }
   }
 });
@@ -23166,7 +23178,7 @@ var require_response = __commonJS({
     var createError = require_http_errors();
     var deprecate3 = require_depd()("express");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var http3 = require("http");
     var isAbsolute = require_utils2().isAbsolute;
     var onFinished = require_on_finished();
@@ -23572,7 +23584,7 @@ var require_response = __commonJS({
           body = statuses.message[status] + ". Redirecting to " + address;
         },
         html: function() {
-          var u = escapeHtml(address);
+          var u = escapeHtml2(address);
           body = "<p>" + statuses.message[status] + ". Redirecting to " + u + "</p>";
         },
         default: function() {
@@ -23704,7 +23716,7 @@ var require_serve_static = __commonJS({
   "node_modules/serve-static/index.js"(exports2, module2) {
     "use strict";
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var parseUrl = require_parseurl();
     var resolve = require("path").resolve;
     var send = require_send();
@@ -23791,7 +23803,7 @@ var require_serve_static = __commonJS({
         originalUrl.path = null;
         originalUrl.pathname = collapseLeadingSlashes(originalUrl.pathname + "/");
         var loc = encodeUrl(url.format(originalUrl));
-        var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml(loc));
+        var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml2(loc));
         res.statusCode = 301;
         res.setHeader("Content-Type", "text/html; charset=UTF-8");
         res.setHeader("Content-Length", Buffer.byteLength(doc));
@@ -35428,22 +35440,22 @@ var require_crypto2 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.NodeCrypto = void 0;
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var NodeCrypto = class {
       async sha256DigestBase64(str) {
-        return crypto2.createHash("sha256").update(str).digest("base64");
+        return crypto3.createHash("sha256").update(str).digest("base64");
       }
       randomBytesBase64(count) {
-        return crypto2.randomBytes(count).toString("base64");
+        return crypto3.randomBytes(count).toString("base64");
       }
       async verify(pubkey, data, signature) {
-        const verifier = crypto2.createVerify("RSA-SHA256");
+        const verifier = crypto3.createVerify("RSA-SHA256");
         verifier.update(data);
         verifier.end();
         return verifier.verify(pubkey, signature, "base64");
       }
       async sign(privateKey, data) {
-        const signer = crypto2.createSign("RSA-SHA256");
+        const signer = crypto3.createSign("RSA-SHA256");
         signer.update(data);
         signer.end();
         return signer.sign(privateKey, "base64");
@@ -35461,7 +35473,7 @@ var require_crypto2 = __commonJS({
        *   string in hexadecimal encoding.
        */
       async sha256DigestHex(str) {
-        return crypto2.createHash("sha256").update(str).digest("hex");
+        return crypto3.createHash("sha256").update(str).digest("hex");
       }
       /**
        * Computes the HMAC hash of a message using the provided crypto key and the
@@ -35473,7 +35485,7 @@ var require_crypto2 = __commonJS({
        */
       async signWithHmacSha256(key, msg) {
         const cryptoKey = typeof key === "string" ? key : toBuffer(key);
-        return toArrayBuffer(crypto2.createHmac("sha256", cryptoKey).update(msg).digest());
+        return toArrayBuffer(crypto3.createHmac("sha256", cryptoKey).update(msg).digest());
       }
     };
     exports2.NodeCrypto = NodeCrypto;
@@ -36330,10 +36342,10 @@ var require_oauth2client = __commonJS({
        * https://github.com/googleapis/google-auth-library-nodejs/blob/main/samples/oauth2-codeVerifier.js
        */
       async generateCodeVerifierAsync() {
-        const crypto2 = (0, crypto_1.createCrypto)();
-        const randomString = crypto2.randomBytesBase64(96);
+        const crypto3 = (0, crypto_1.createCrypto)();
+        const randomString = crypto3.randomBytesBase64(96);
         const codeVerifier = randomString.replace(/\+/g, "~").replace(/=/g, "_").replace(/\//g, "-");
-        const unencodedCodeChallenge = await crypto2.sha256DigestBase64(codeVerifier);
+        const unencodedCodeChallenge = await crypto3.sha256DigestBase64(codeVerifier);
         const codeChallenge = unencodedCodeChallenge.split("=")[0].replace(/\+/g, "-").replace(/\//g, "_");
         return { codeVerifier, codeChallenge };
       }
@@ -36774,7 +36786,7 @@ var require_oauth2client = __commonJS({
        * @return Returns a promise resolving to LoginTicket on verification.
        */
       async verifySignedJwtWithCertsAsync(jwt, certs, requiredAudience, issuers, maxExpiry) {
-        const crypto2 = (0, crypto_1.createCrypto)();
+        const crypto3 = (0, crypto_1.createCrypto)();
         if (!maxExpiry) {
           maxExpiry = _OAuth2Client.DEFAULT_MAX_TOKEN_LIFETIME_SECS_;
         }
@@ -36787,7 +36799,7 @@ var require_oauth2client = __commonJS({
         let envelope;
         let payload;
         try {
-          envelope = JSON.parse(crypto2.decodeBase64StringUtf8(segments[0]));
+          envelope = JSON.parse(crypto3.decodeBase64StringUtf8(segments[0]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token envelope: ${segments[0]}': ${err.message}`;
@@ -36798,7 +36810,7 @@ var require_oauth2client = __commonJS({
           throw new Error("Can't parse token envelope: " + segments[0]);
         }
         try {
-          payload = JSON.parse(crypto2.decodeBase64StringUtf8(segments[1]));
+          payload = JSON.parse(crypto3.decodeBase64StringUtf8(segments[1]));
         } catch (err) {
           if (err instanceof Error) {
             err.message = `Can't parse token payload '${segments[0]}`;
@@ -36815,7 +36827,7 @@ var require_oauth2client = __commonJS({
         if (envelope.alg === "ES256") {
           signature = formatEcdsa.joseToDer(signature, "ES256").toString("base64");
         }
-        const verified = await crypto2.verify(cert, signed, signature);
+        const verified = await crypto3.verify(cert, signed, signature);
         if (!verified) {
           throw new Error("Invalid token signature: " + jwt);
         }
@@ -37190,14 +37202,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer4 = require_safe_buffer().Buffer;
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto2.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto3.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -37287,17 +37299,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto2.createHmac("sha" + bits, secret);
+        var hmac = crypto3.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto2 ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual = "timingSafeEqual" in crypto3 ? function timingSafeEqual2(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto2.timingSafeEqual(a, b);
+      return crypto3.timingSafeEqual(a, b);
     } : function timingSafeEqual2(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -37314,7 +37326,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto2.createSign("RSA-SHA" + bits);
+        var signer = crypto3.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -37324,7 +37336,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto2.createVerify("RSA-SHA" + bits);
+        var verifier = crypto3.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -37333,11 +37345,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto2.createSign("RSA-SHA" + bits);
+        var signer = crypto3.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto3.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto3.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -37347,12 +37359,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto2.createVerify("RSA-SHA" + bits);
+        var verifier = crypto3.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto3.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto3.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -39928,14 +39940,14 @@ var require_awsrequestsigner = __commonJS({
       }
     };
     exports2.AwsRequestSigner = AwsRequestSigner;
-    async function sign(crypto2, key, msg) {
-      return await crypto2.signWithHmacSha256(key, msg);
+    async function sign(crypto3, key, msg) {
+      return await crypto3.signWithHmacSha256(key, msg);
     }
-    async function getSigningKey(crypto2, key, dateStamp, region, serviceName) {
-      const kDate = await sign(crypto2, `AWS4${key}`, dateStamp);
-      const kRegion = await sign(crypto2, kDate, region);
-      const kService = await sign(crypto2, kRegion, serviceName);
-      const kSigning = await sign(crypto2, kService, "aws4_request");
+    async function getSigningKey(crypto3, key, dateStamp, region, serviceName) {
+      const kDate = await sign(crypto3, `AWS4${key}`, dateStamp);
+      const kRegion = await sign(crypto3, kDate, region);
+      const kService = await sign(crypto3, kRegion, serviceName);
+      const kSigning = await sign(crypto3, kService, "aws4_request");
       return kSigning;
     }
     async function generateAuthenticationHeaderMap(options) {
@@ -41654,24 +41666,24 @@ var require_googleauth = __commonJS({
           const signed = await client.sign(data);
           return signed.signedBlob;
         }
-        const crypto2 = (0, crypto_1.createCrypto)();
+        const crypto3 = (0, crypto_1.createCrypto)();
         if (client instanceof jwtclient_1.JWT && client.key) {
-          const sign = await crypto2.sign(client.key, data);
+          const sign = await crypto3.sign(client.key, data);
           return sign;
         }
         const creds = await this.getCredentials();
         if (!creds.client_email) {
           throw new Error("Cannot sign data without `client_email`.");
         }
-        return this.signBlob(crypto2, creds.client_email, data, endpoint);
+        return this.signBlob(crypto3, creds.client_email, data, endpoint);
       }
-      async signBlob(crypto2, emailOrUniqueId, data, endpoint) {
+      async signBlob(crypto3, emailOrUniqueId, data, endpoint) {
         const url = new URL(endpoint + `${emailOrUniqueId}:signBlob`);
         const res = await this.request({
           method: "POST",
           url: url.href,
           data: {
-            payload: crypto2.encodeBase64StringUtf8(data)
+            payload: crypto3.encodeBase64StringUtf8(data)
           },
           retry: true,
           retryConfig: {
@@ -45765,7 +45777,7 @@ var require_main = __commonJS({
     var fs4 = require("fs");
     var path3 = require("path");
     var os2 = require("os");
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var TIPS = [
       "\u25C8 encrypted .env [www.dotenvx.com]",
       "\u25C8 secrets for agents [www.dotenvx.com]",
@@ -46009,7 +46021,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto3.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error) {
@@ -46078,11 +46090,342 @@ var require_main = __commonJS({
   }
 });
 
+// node_modules/nodemailer/lib/punycode/index.js
+var require_punycode = __commonJS({
+  "node_modules/nodemailer/lib/punycode/index.js"(exports2, module2) {
+    "use strict";
+    var maxInt = 2147483647;
+    var base = 36;
+    var tMin = 1;
+    var tMax = 26;
+    var skew = 38;
+    var damp = 700;
+    var initialBias = 72;
+    var initialN = 128;
+    var delimiter = "-";
+    var regexPunycode = /^xn--/;
+    var regexNonASCII = /[^\0-\x7F]/;
+    var regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g;
+    var errors = {
+      overflow: "Overflow: input needs wider integers to process",
+      "not-basic": "Illegal input >= 0x80 (not a basic code point)",
+      "invalid-input": "Invalid input"
+    };
+    var baseMinusTMin = base - tMin;
+    var floor = Math.floor;
+    var stringFromCharCode = String.fromCharCode;
+    function error(type) {
+      throw new RangeError(errors[type]);
+    }
+    function map(array, callback) {
+      const result = [];
+      let length = array.length;
+      while (length--) {
+        result[length] = callback(array[length]);
+      }
+      return result;
+    }
+    function mapDomain(domain, callback) {
+      const parts = domain.split("@");
+      let result = "";
+      if (parts.length > 1) {
+        result = parts[0] + "@";
+        domain = parts[1];
+      }
+      domain = domain.replace(regexSeparators, ".");
+      const labels = domain.split(".");
+      const encoded = map(labels, callback).join(".");
+      return result + encoded;
+    }
+    function ucs2decode(string) {
+      const output = [];
+      let counter = 0;
+      const length = string.length;
+      while (counter < length) {
+        const value = string.charCodeAt(counter++);
+        if (value >= 55296 && value <= 56319 && counter < length) {
+          const extra = string.charCodeAt(counter++);
+          if ((extra & 64512) == 56320) {
+            output.push(((value & 1023) << 10) + (extra & 1023) + 65536);
+          } else {
+            output.push(value);
+            counter--;
+          }
+        } else {
+          output.push(value);
+        }
+      }
+      return output;
+    }
+    var ucs2encode = (codePoints) => String.fromCodePoint(...codePoints);
+    var basicToDigit = function(codePoint) {
+      if (codePoint >= 48 && codePoint < 58) {
+        return 26 + (codePoint - 48);
+      }
+      if (codePoint >= 65 && codePoint < 91) {
+        return codePoint - 65;
+      }
+      if (codePoint >= 97 && codePoint < 123) {
+        return codePoint - 97;
+      }
+      return base;
+    };
+    var digitToBasic = function(digit, flag) {
+      return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+    };
+    var adapt = function(delta, numPoints, firstTime) {
+      let k = 0;
+      delta = firstTime ? floor(delta / damp) : delta >> 1;
+      delta += floor(delta / numPoints);
+      for (
+        ;
+        /* no initialization */
+        delta > baseMinusTMin * tMax >> 1;
+        k += base
+      ) {
+        delta = floor(delta / baseMinusTMin);
+      }
+      return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
+    };
+    var decode = function(input) {
+      const output = [];
+      const inputLength = input.length;
+      let i2 = 0;
+      let n = initialN;
+      let bias = initialBias;
+      let basic = input.lastIndexOf(delimiter);
+      if (basic < 0) {
+        basic = 0;
+      }
+      for (let j = 0; j < basic; ++j) {
+        if (input.charCodeAt(j) >= 128) {
+          error("not-basic");
+        }
+        output.push(input.charCodeAt(j));
+      }
+      for (let index = basic > 0 ? basic + 1 : 0; index < inputLength; ) {
+        const oldi = i2;
+        for (let w = 1, k = base; ; k += base) {
+          if (index >= inputLength) {
+            error("invalid-input");
+          }
+          const digit = basicToDigit(input.charCodeAt(index++));
+          if (digit >= base) {
+            error("invalid-input");
+          }
+          if (digit > floor((maxInt - i2) / w)) {
+            error("overflow");
+          }
+          i2 += digit * w;
+          const t2 = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
+          if (digit < t2) {
+            break;
+          }
+          const baseMinusT = base - t2;
+          if (w > floor(maxInt / baseMinusT)) {
+            error("overflow");
+          }
+          w *= baseMinusT;
+        }
+        const out = output.length + 1;
+        bias = adapt(i2 - oldi, out, oldi == 0);
+        if (floor(i2 / out) > maxInt - n) {
+          error("overflow");
+        }
+        n += floor(i2 / out);
+        i2 %= out;
+        output.splice(i2++, 0, n);
+      }
+      return String.fromCodePoint(...output);
+    };
+    var encode = function(input) {
+      const output = [];
+      input = ucs2decode(input);
+      const inputLength = input.length;
+      let n = initialN;
+      let delta = 0;
+      let bias = initialBias;
+      for (const currentValue of input) {
+        if (currentValue < 128) {
+          output.push(stringFromCharCode(currentValue));
+        }
+      }
+      const basicLength = output.length;
+      let handledCPCount = basicLength;
+      if (basicLength) {
+        output.push(delimiter);
+      }
+      while (handledCPCount < inputLength) {
+        let m2 = maxInt;
+        for (const currentValue of input) {
+          if (currentValue >= n && currentValue < m2) {
+            m2 = currentValue;
+          }
+        }
+        const handledCPCountPlusOne = handledCPCount + 1;
+        if (m2 - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
+          error("overflow");
+        }
+        delta += (m2 - n) * handledCPCountPlusOne;
+        n = m2;
+        for (const currentValue of input) {
+          if (currentValue < n && ++delta > maxInt) {
+            error("overflow");
+          }
+          if (currentValue === n) {
+            let q = delta;
+            for (let k = base; ; k += base) {
+              const t2 = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
+              if (q < t2) {
+                break;
+              }
+              const qMinusT = q - t2;
+              const baseMinusT = base - t2;
+              output.push(stringFromCharCode(digitToBasic(t2 + qMinusT % baseMinusT, 0)));
+              q = floor(qMinusT / baseMinusT);
+            }
+            output.push(stringFromCharCode(digitToBasic(q, 0)));
+            bias = adapt(delta, handledCPCountPlusOne, handledCPCount === basicLength);
+            delta = 0;
+            ++handledCPCount;
+          }
+        }
+        ++delta;
+        ++n;
+      }
+      return output.join("");
+    };
+    var toUnicode = function(input) {
+      return mapDomain(input, function(string) {
+        return regexPunycode.test(string) ? decode(string.slice(4).toLowerCase()) : string;
+      });
+    };
+    var toASCII = function(input) {
+      return mapDomain(input, function(string) {
+        return regexNonASCII.test(string) ? "xn--" + encode(string) : string;
+      });
+    };
+    var punycode = {
+      /**
+       * A string representing the current Punycode.js version number.
+       * @memberOf punycode
+       * @type String
+       */
+      version: "2.3.1",
+      /**
+       * An object of methods to convert from JavaScript's internal character
+       * representation (UCS-2) to Unicode code points, and back.
+       * @see <https://mathiasbynens.be/notes/javascript-encoding>
+       * @memberOf punycode
+       * @type Object
+       */
+      ucs2: {
+        decode: ucs2decode,
+        encode: ucs2encode
+      },
+      decode,
+      encode,
+      toASCII,
+      toUnicode
+    };
+    module2.exports = punycode;
+  }
+});
+
+// node_modules/nodemailer/lib/shared/url.js
+var require_url = __commonJS({
+  "node_modules/nodemailer/lib/shared/url.js"(exports2, module2) {
+    "use strict";
+    var urllib = require("url");
+    var punycode = require_punycode();
+    var URLImpl = typeof URL !== "undefined" && URL || urllib.URL;
+    var SLASHLESS_AUTHORITY = /^([a-zA-Z][a-zA-Z0-9+.-]*:)(?!\/\/)(.+)$/;
+    function safeDecode(str) {
+      try {
+        return decodeURIComponent(str);
+      } catch (_err) {
+        return str;
+      }
+    }
+    function normalizeHostname(raw) {
+      let hostname = raw || "";
+      if (!hostname) {
+        return "";
+      }
+      if (hostname.charAt(0) === "[" && hostname.charAt(hostname.length - 1) === "]") {
+        return hostname.slice(1, -1);
+      }
+      return punycode.toASCII(safeDecode(hostname));
+    }
+    module2.exports.parse = (input, parseQueryString) => {
+      input = input || "";
+      if (!URLImpl) {
+        return urllib.parse(input, parseQueryString);
+      }
+      const slashless = SLASHLESS_AUTHORITY.exec(input);
+      const normalized = slashless ? slashless[1] + "//" + slashless[2] : input;
+      let u;
+      try {
+        u = new URLImpl(normalized);
+      } catch (_err) {
+        return urllib.parse(input, parseQueryString);
+      }
+      const hostname = normalizeHostname(u.hostname);
+      const port = u.port || null;
+      const pathname = u.pathname || null;
+      const search = u.search || null;
+      let auth = null;
+      if (u.username || u.password) {
+        auth = safeDecode(u.username) + (u.password ? ":" + safeDecode(u.password) : "");
+      }
+      let query;
+      if (parseQueryString) {
+        query = /* @__PURE__ */ Object.create(null);
+        u.searchParams.forEach((value, key) => {
+          if (Object.prototype.hasOwnProperty.call(query, key)) {
+            if (Array.isArray(query[key])) {
+              query[key].push(value);
+            } else {
+              query[key] = [query[key], value];
+            }
+          } else {
+            query[key] = value;
+          }
+        });
+      } else {
+        query = search ? search.slice(1) : null;
+      }
+      return {
+        protocol: u.protocol || null,
+        host: u.host || null,
+        hostname,
+        port,
+        pathname,
+        search,
+        path: (pathname || "") + (search || "") || null,
+        href: u.href,
+        auth,
+        query
+      };
+    };
+    module2.exports.resolve = (from, to) => {
+      if (!URLImpl) {
+        return urllib.resolve(from, to);
+      }
+      try {
+        return new URLImpl(to, from).href;
+      } catch (_err) {
+        return urllib.resolve(from, to);
+      }
+    };
+  }
+});
+
 // node_modules/nodemailer/lib/fetch/cookies.js
 var require_cookies = __commonJS({
   "node_modules/nodemailer/lib/fetch/cookies.js"(exports2, module2) {
     "use strict";
-    var urllib = require("url");
+    var urllib = require_url();
     var SESSION_TIMEOUT = 1800;
     var Cookies = class {
       constructor(options) {
@@ -46291,7 +46634,7 @@ var require_package3 = __commonJS({
   "node_modules/nodemailer/package.json"(exports2, module2) {
     module2.exports = {
       name: "nodemailer",
-      version: "8.0.10",
+      version: "9.0.5",
       description: "Easy as cake e-mail sending from your Node.js applications",
       main: "lib/nodemailer.js",
       scripts: {
@@ -46318,19 +46661,19 @@ var require_package3 = __commonJS({
       },
       homepage: "https://nodemailer.com/",
       devDependencies: {
-        "@aws-sdk/client-sesv2": "3.1037.0",
+        "@aws-sdk/client-sesv2": "3.1104.0",
         bunyan: "1.8.15",
-        c8: "11.0.0",
-        eslint: "10.2.1",
+        c8: "12.0.0",
+        eslint: "10.8.0",
         "eslint-config-prettier": "10.1.8",
-        globals: "17.5.0",
+        globals: "17.9.0",
         libbase64: "1.3.0",
-        libmime: "5.3.8",
+        libmime: "5.4.1",
         libqp: "2.1.1",
-        prettier: "3.8.3",
+        prettier: "3.9.6",
         proxy: "1.0.2",
         "proxy-test-server": "1.0.0",
-        "smtp-server": "3.18.4"
+        "smtp-server": "3.19.2"
       },
       engines: {
         node: ">=6.0.0"
@@ -46386,7 +46729,7 @@ var require_fetch = __commonJS({
     "use strict";
     var http3 = require("http");
     var https2 = require("https");
-    var urllib = require("url");
+    var urllib = require_url();
     var zlib2 = require("zlib");
     var { PassThrough: PassThrough3 } = require("stream");
     var Cookies = require_cookies();
@@ -46485,7 +46828,10 @@ var require_fetch = __commonJS({
         path: parsed.path,
         port: parsed.port ? parsed.port : parsed.protocol === "https:" ? 443 : 80,
         headers,
-        rejectUnauthorized: false,
+        // Validate TLS certificates by default. Callers that genuinely need to
+        // reach a self-signed/internal host opt out explicitly with
+        // options.tls = { rejectUnauthorized: false }.
+        rejectUnauthorized: true,
         agent: false
       };
       if (options.tls) {
@@ -46556,7 +46902,19 @@ var require_fetch = __commonJS({
           }
           options.method = "GET";
           options.body = false;
-          return nmfetch(urllib.resolve(url, res.headers.location), options);
+          const redirectUrl = urllib.resolve(url, res.headers.location);
+          const redirectParsed = urllib.parse(redirectUrl);
+          const crossHost = redirectParsed.hostname !== parsed.hostname;
+          const downgrade = parsed.protocol === "https:" && redirectParsed.protocol === "http:";
+          if (options.headers && (crossHost || downgrade)) {
+            const sensitive = ["authorization", "cookie", "proxy-authorization"];
+            Object.keys(options.headers).forEach((key) => {
+              if (sensitive.includes(key.toLowerCase())) {
+                delete options.headers[key];
+              }
+            });
+          }
+          return nmfetch(redirectUrl, options);
         }
         fetchRes.statusCode = res.statusCode;
         fetchRes.headers = res.headers;
@@ -46621,7 +46979,7 @@ var require_fetch = __commonJS({
 var require_shared3 = __commonJS({
   "node_modules/nodemailer/lib/shared/index.js"(exports2, module2) {
     "use strict";
-    var urllib = require("url");
+    var urllib = require_url();
     var util = require("util");
     var fs4 = require("fs");
     var nmfetch = require_fetch();
@@ -47009,6 +47367,10 @@ var require_shared3 = __commonJS({
           callback = module2.exports.callbackPromise(resolve2, reject);
         });
       }
+      resolveContentValue(data, key, options, callback);
+      return promise;
+    };
+    function resolveContentValue(data, key, options, callback) {
       let content = data && data[key] && data[key].content || data[key];
       const encoding = (typeof data[key] === "object" && data[key].encoding || "utf8").toString().toLowerCase().replace(/[-_\s]/g, "");
       if (!content) {
@@ -47035,13 +47397,10 @@ var require_shared3 = __commonJS({
               callback(err);
             });
           }
-          return resolveStream(nmfetch(content.path || content.href), callback);
+          return resolveStream(nmfetch(content.path || content.href, { headers: content.httpHeaders, tls: content.tls }), callback);
         } else if (/^data:/i.test(content.path || content.href)) {
           const parsedDataUri = module2.exports.parseDataURI(content.path || content.href);
-          if (!parsedDataUri || !parsedDataUri.data) {
-            return callback(null, Buffer.from(0));
-          }
-          return callback(null, parsedDataUri.data);
+          return callback(null, parsedDataUri && parsedDataUri.data ? parsedDataUri.data : Buffer.alloc(0));
         } else if (content.path) {
           if (options.disableFileAccess) {
             return setImmediate(() => {
@@ -47057,8 +47416,7 @@ var require_shared3 = __commonJS({
         content = Buffer.from(data[key].content, encoding);
       }
       setImmediate(() => callback(null, content));
-      return promise;
-    };
+    }
     module2.exports.assign = function() {
       const args = Array.from(arguments);
       const target = args.shift() || {};
@@ -49243,7 +49601,7 @@ var require_mime_types2 = __commonJS({
         if (!mimeType) {
           return defaultExtension;
         }
-        const parts = (mimeType || "").toLowerCase().trim().split("/");
+        const parts = mimeType.toLowerCase().trim().split("/");
         const rootType = parts.shift().trim();
         const subType = parts.join("/").trim();
         if (mimeTypes.has(rootType + "/" + subType)) {
@@ -49261,248 +49619,6 @@ var require_mime_types2 = __commonJS({
         }
       }
     };
-  }
-});
-
-// node_modules/nodemailer/lib/punycode/index.js
-var require_punycode = __commonJS({
-  "node_modules/nodemailer/lib/punycode/index.js"(exports2, module2) {
-    "use strict";
-    var maxInt = 2147483647;
-    var base = 36;
-    var tMin = 1;
-    var tMax = 26;
-    var skew = 38;
-    var damp = 700;
-    var initialBias = 72;
-    var initialN = 128;
-    var delimiter = "-";
-    var regexPunycode = /^xn--/;
-    var regexNonASCII = /[^\0-\x7F]/;
-    var regexSeparators = /[\x2E\u3002\uFF0E\uFF61]/g;
-    var errors = {
-      overflow: "Overflow: input needs wider integers to process",
-      "not-basic": "Illegal input >= 0x80 (not a basic code point)",
-      "invalid-input": "Invalid input"
-    };
-    var baseMinusTMin = base - tMin;
-    var floor = Math.floor;
-    var stringFromCharCode = String.fromCharCode;
-    function error(type) {
-      throw new RangeError(errors[type]);
-    }
-    function map(array, callback) {
-      const result = [];
-      let length = array.length;
-      while (length--) {
-        result[length] = callback(array[length]);
-      }
-      return result;
-    }
-    function mapDomain(domain, callback) {
-      const parts = domain.split("@");
-      let result = "";
-      if (parts.length > 1) {
-        result = parts[0] + "@";
-        domain = parts[1];
-      }
-      domain = domain.replace(regexSeparators, ".");
-      const labels = domain.split(".");
-      const encoded = map(labels, callback).join(".");
-      return result + encoded;
-    }
-    function ucs2decode(string) {
-      const output = [];
-      let counter = 0;
-      const length = string.length;
-      while (counter < length) {
-        const value = string.charCodeAt(counter++);
-        if (value >= 55296 && value <= 56319 && counter < length) {
-          const extra = string.charCodeAt(counter++);
-          if ((extra & 64512) == 56320) {
-            output.push(((value & 1023) << 10) + (extra & 1023) + 65536);
-          } else {
-            output.push(value);
-            counter--;
-          }
-        } else {
-          output.push(value);
-        }
-      }
-      return output;
-    }
-    var ucs2encode = (codePoints) => String.fromCodePoint(...codePoints);
-    var basicToDigit = function(codePoint) {
-      if (codePoint >= 48 && codePoint < 58) {
-        return 26 + (codePoint - 48);
-      }
-      if (codePoint >= 65 && codePoint < 91) {
-        return codePoint - 65;
-      }
-      if (codePoint >= 97 && codePoint < 123) {
-        return codePoint - 97;
-      }
-      return base;
-    };
-    var digitToBasic = function(digit, flag) {
-      return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
-    };
-    var adapt = function(delta, numPoints, firstTime) {
-      let k = 0;
-      delta = firstTime ? floor(delta / damp) : delta >> 1;
-      delta += floor(delta / numPoints);
-      for (
-        ;
-        /* no initialization */
-        delta > baseMinusTMin * tMax >> 1;
-        k += base
-      ) {
-        delta = floor(delta / baseMinusTMin);
-      }
-      return floor(k + (baseMinusTMin + 1) * delta / (delta + skew));
-    };
-    var decode = function(input) {
-      const output = [];
-      const inputLength = input.length;
-      let i2 = 0;
-      let n = initialN;
-      let bias = initialBias;
-      let basic = input.lastIndexOf(delimiter);
-      if (basic < 0) {
-        basic = 0;
-      }
-      for (let j = 0; j < basic; ++j) {
-        if (input.charCodeAt(j) >= 128) {
-          error("not-basic");
-        }
-        output.push(input.charCodeAt(j));
-      }
-      for (let index = basic > 0 ? basic + 1 : 0; index < inputLength; ) {
-        const oldi = i2;
-        for (let w = 1, k = base; ; k += base) {
-          if (index >= inputLength) {
-            error("invalid-input");
-          }
-          const digit = basicToDigit(input.charCodeAt(index++));
-          if (digit >= base) {
-            error("invalid-input");
-          }
-          if (digit > floor((maxInt - i2) / w)) {
-            error("overflow");
-          }
-          i2 += digit * w;
-          const t2 = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
-          if (digit < t2) {
-            break;
-          }
-          const baseMinusT = base - t2;
-          if (w > floor(maxInt / baseMinusT)) {
-            error("overflow");
-          }
-          w *= baseMinusT;
-        }
-        const out = output.length + 1;
-        bias = adapt(i2 - oldi, out, oldi == 0);
-        if (floor(i2 / out) > maxInt - n) {
-          error("overflow");
-        }
-        n += floor(i2 / out);
-        i2 %= out;
-        output.splice(i2++, 0, n);
-      }
-      return String.fromCodePoint(...output);
-    };
-    var encode = function(input) {
-      const output = [];
-      input = ucs2decode(input);
-      const inputLength = input.length;
-      let n = initialN;
-      let delta = 0;
-      let bias = initialBias;
-      for (const currentValue of input) {
-        if (currentValue < 128) {
-          output.push(stringFromCharCode(currentValue));
-        }
-      }
-      const basicLength = output.length;
-      let handledCPCount = basicLength;
-      if (basicLength) {
-        output.push(delimiter);
-      }
-      while (handledCPCount < inputLength) {
-        let m2 = maxInt;
-        for (const currentValue of input) {
-          if (currentValue >= n && currentValue < m2) {
-            m2 = currentValue;
-          }
-        }
-        const handledCPCountPlusOne = handledCPCount + 1;
-        if (m2 - n > floor((maxInt - delta) / handledCPCountPlusOne)) {
-          error("overflow");
-        }
-        delta += (m2 - n) * handledCPCountPlusOne;
-        n = m2;
-        for (const currentValue of input) {
-          if (currentValue < n && ++delta > maxInt) {
-            error("overflow");
-          }
-          if (currentValue === n) {
-            let q = delta;
-            for (let k = base; ; k += base) {
-              const t2 = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;
-              if (q < t2) {
-                break;
-              }
-              const qMinusT = q - t2;
-              const baseMinusT = base - t2;
-              output.push(stringFromCharCode(digitToBasic(t2 + qMinusT % baseMinusT, 0)));
-              q = floor(qMinusT / baseMinusT);
-            }
-            output.push(stringFromCharCode(digitToBasic(q, 0)));
-            bias = adapt(delta, handledCPCountPlusOne, handledCPCount === basicLength);
-            delta = 0;
-            ++handledCPCount;
-          }
-        }
-        ++delta;
-        ++n;
-      }
-      return output.join("");
-    };
-    var toUnicode = function(input) {
-      return mapDomain(input, function(string) {
-        return regexPunycode.test(string) ? decode(string.slice(4).toLowerCase()) : string;
-      });
-    };
-    var toASCII = function(input) {
-      return mapDomain(input, function(string) {
-        return regexNonASCII.test(string) ? "xn--" + encode(string) : string;
-      });
-    };
-    var punycode = {
-      /**
-       * A string representing the current Punycode.js version number.
-       * @memberOf punycode
-       * @type String
-       */
-      version: "2.3.1",
-      /**
-       * An object of methods to convert from JavaScript's internal character
-       * representation (UCS-2) to Unicode code points, and back.
-       * @see <https://mathiasbynens.be/notes/javascript-encoding>
-       * @memberOf punycode
-       * @type Object
-       */
-      ucs2: {
-        decode: ucs2decode,
-        encode: ucs2encode
-      },
-      decode,
-      encode,
-      toASCII,
-      toUnicode
-    };
-    module2.exports = punycode;
   }
 });
 
@@ -49780,12 +49896,30 @@ var require_mime_funcs = __commonJS({
       /**
        * Checks if a value is plaintext string (uses only printable 7bit chars)
        *
+       * When isParam is set the value is destined for a header parameter, so HT, CR and LF
+       * are not plaintext either: a header parameter has no way to carry them. HT is a valid
+       * fold point, so folding and unfolding a header would rewrite it as a space, and CR/LF
+       * cannot appear in a header value at all. DEL is neither a token character nor qtext,
+       * so it can not be carried bare or quoted. Such values have to go through the rfc2231
+       * parameter continuation encoding instead, the same way a quote already does.
+       *
        * @param {String} value String to be tested
+       * @param {Boolean} [isParam] Set to true if the value is a header parameter value
        * @returns {Boolean} true if it is a plaintext string
        */
       isPlainText(value, isParam) {
-        const re = isParam ? /[\x00-\x08\x0b\x0c\x0e-\x1f"\u0080-\uFFFF]/ : /[\x00-\x08\x0b\x0c\x0e-\x1f\u0080-\uFFFF]/;
+        const re = isParam ? /[\x00-\x1f\x7f"\u0080-\uFFFF]/ : /[\x00-\x08\x0b\x0c\x0e-\x1f\u0080-\uFFFF]/;
         return typeof value === "string" && !re.test(value);
+      },
+      /**
+       * Wraps a value into a quoted-string. Inside one a quote would end the string early
+       * and a backslash would escape whatever follows it, so both go out as quoted-pairs.
+       *
+       * @param {String} value String to be quoted
+       * @returns {String} The value as a quoted-string, quotes included
+       */
+      quoteString(value) {
+        return '"' + (value || "").toString().replace(/["\\]/g, "\\$&") + '"';
       },
       /**
        * Checks if a multi line string containes lines longer than the selected value.
@@ -49840,7 +49974,7 @@ var require_mime_funcs = __commonJS({
             let lpart = "";
             for (let i2 = 0, len = encodedStr.length; i2 < len; i2++) {
               let chr = encodedStr.charAt(i2);
-              if (/[\ud83c\ud83d\ud83e]/.test(chr) && i2 < len - 1) {
+              if (/[\ud800-\udbff]/.test(chr) && /[\udc00-\udfff]/.test(encodedStr.charAt(i2 + 1))) {
                 chr += encodedStr.charAt(++i2);
               }
               if (Buffer.byteLength(lpart + chr) <= maxLength || i2 === 0) {
@@ -49901,23 +50035,25 @@ var require_mime_funcs = __commonJS({
        */
       buildHeaderValue(structured) {
         const paramsArray = [];
-        Object.keys(structured.params || {}).forEach((param) => {
-          const value = structured.params[param];
-          if (!this.isPlainText(value, true) || value.length >= 75) {
-            this.buildHeaderParam(param, value, 50).forEach((encodedParam) => {
+        Object.keys(structured.params || {}).forEach((key) => {
+          const value2 = structured.params[key];
+          const param = key.replace(/[\x00-\x1f\x7f]/g, "");
+          if (!this.isPlainText(value2, true) || value2.length >= 75) {
+            this.buildHeaderParam(param, value2, 50).forEach((encodedParam) => {
               if (!/[\s"\\;:/=(),<>@[\]?]|^[-']|'$/.test(encodedParam.value) || encodedParam.key.substr(-1) === "*") {
                 paramsArray.push(encodedParam.key + "=" + encodedParam.value);
               } else {
                 paramsArray.push(encodedParam.key + "=" + JSON.stringify(encodedParam.value));
               }
             });
-          } else if (/[\s'"\\;:/=(),<>@[\]?]|^-/.test(value)) {
-            paramsArray.push(param + "=" + JSON.stringify(value));
+          } else if (/[\s'"\\;:/=(),<>@[\]?]|^-/.test(value2)) {
+            paramsArray.push(param + "=" + JSON.stringify(value2));
           } else {
-            paramsArray.push(param + "=" + value);
+            paramsArray.push(param + "=" + value2);
           }
         });
-        return structured.value + (paramsArray.length ? "; " + paramsArray.join("; ") : "");
+        const value = typeof structured.value === "string" ? structured.value.replace(/[\x00-\x1f\x7f]/g, "") : structured.value;
+        return value + (paramsArray.length ? "; " + paramsArray.join("; ") : "");
       },
       /**
        * Encodes a string or an Buffer to an UTF-8 Parameter Value Continuation encoding (rfc2231)
@@ -49937,7 +50073,7 @@ var require_mime_funcs = __commonJS({
       buildHeaderParam(key, data, maxLength) {
         const list = [];
         let encodedStr = typeof data === "string" ? data : (data || "").toString();
-        let chr, ord;
+        let chr;
         let line;
         let startPos = 0;
         let i2, len;
@@ -49967,8 +50103,7 @@ var require_mime_funcs = __commonJS({
             const encodedStrArr = [];
             for (i2 = 0, len = encodedStr.length; i2 < len; i2++) {
               chr = encodedStr.charAt(i2);
-              ord = chr.charCodeAt(0);
-              if (ord >= 55296 && ord <= 56319 && i2 < len - 1) {
+              if (/[\ud800-\udbff]/.test(chr) && /[\udc00-\udfff]/.test(encodedStr.charAt(i2 + 1))) {
                 chr += encodedStr.charAt(i2 + 1);
                 encodedStrArr.push(chr);
                 i2++;
@@ -49994,7 +50129,7 @@ var require_mime_funcs = __commonJS({
                     encoded
                   });
                   line = "";
-                  startPos = i2 - 1;
+                  encoded = true;
                 } else {
                   encoded = true;
                   i2 = startPos;
@@ -50252,7 +50387,7 @@ var require_mime_funcs = __commonJS({
         try {
           str = encodeURIComponent(str);
         } catch (_E) {
-          return str.replace(/[^\x00-\x1F *'()<>@,;:\\"[\]?=\u007F-\uFFFF]+/g, "");
+          str = encodeURIComponent(Buffer.from(str, "utf-8").toString("utf-8"));
         }
         return str.replace(/[\x00-\x1F *'()<>@,;:\\"[\]?=\u007F-\uFFFF]/g, (chr) => this.encodeURICharComponent(chr));
       }
@@ -50264,6 +50399,17 @@ var require_mime_funcs = __commonJS({
 var require_addressparser = __commonJS({
   "node_modules/nodemailer/lib/addressparser/index.js"(exports2, module2) {
     "use strict";
+    function _quoteLocalPart(address) {
+      const lastAt = address.lastIndexOf("@");
+      if (lastAt < 0) {
+        return address;
+      }
+      const user = address.substr(0, lastAt);
+      if (/^[^\s"(),:;<>@[\\\]]+$/.test(user) || /^"(?:[^"\\]|\\[\s\S])*"$/.test(user)) {
+        return address;
+      }
+      return '"' + user.replace(/["\\]/g, "\\$&") + '"@' + address.substr(lastAt + 1);
+    }
     function _handleAddress(tokens, depth) {
       let isGroup = false;
       let state = "text";
@@ -50376,6 +50522,7 @@ var require_addressparser = __commonJS({
         if (data.address.length > 1) {
           data.text = data.text.concat(data.address.splice(1));
         }
+        const addressFromQuotedText = !data.address.length && data.textWasQuoted.some((wasQuoted) => wasQuoted);
         data.text = data.text.join(" ");
         data.address = data.address.join(" ");
         const address = {
@@ -50389,6 +50536,9 @@ var require_addressparser = __commonJS({
             address.address = "";
           }
         }
+        if (addressFromQuotedText && address.address) {
+          address.address = _quoteLocalPart(address.address);
+        }
         addresses.push(address);
       }
       return addresses;
@@ -50400,6 +50550,7 @@ var require_addressparser = __commonJS({
         this.operatorExpecting = "";
         this.node = null;
         this.escaped = false;
+        this.inDomainLiteral = false;
         this.list = [];
         this.operators = {
           '"': '"',
@@ -50442,6 +50593,13 @@ var require_addressparser = __commonJS({
        * @param {String} chr Character from the address field
        */
       checkChar(chr, nextChr) {
+        if (!this.escaped && !this.operatorExpecting) {
+          if (!this.inDomainLiteral && chr === "[") {
+            this.inDomainLiteral = true;
+          } else if (this.inDomainLiteral && (chr === "]" || chr === "," || chr === ";")) {
+            this.inDomainLiteral = false;
+          }
+        }
         if (this.escaped) {
         } else if (chr === this.operatorExpecting) {
           this.node = {
@@ -50456,7 +50614,7 @@ var require_addressparser = __commonJS({
           this.operatorExpecting = "";
           this.escaped = false;
           return;
-        } else if (!this.operatorExpecting && chr in this.operators) {
+        } else if (!this.operatorExpecting && !this.inDomainLiteral && chr in this.operators) {
           this.node = {
             type: "operator",
             value: chr
@@ -50658,7 +50816,7 @@ var require_le_unix = __commonJS({
 var require_mime_node = __commonJS({
   "node_modules/nodemailer/lib/mime-node/index.js"(exports2, module2) {
     "use strict";
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var fs4 = require("fs");
     var punycode = require_punycode();
     var { PassThrough: PassThrough3 } = require("stream");
@@ -50673,11 +50831,15 @@ var require_mime_node = __commonJS({
     var LeWindows = require_le_windows();
     var LeUnix = require_le_unix();
     var FORMATTED_HEADERS = ["From", "Sender", "To", "Cc", "Bcc", "Reply-To", "Date", "References"];
+    var ATEXT = "[A-Za-z0-9!#$%&'*+\\-/=?^_`{|}~\\x80-\\uFFFF]";
+    var DOT_ATOM = new RegExp("^" + ATEXT + "+(?:\\." + ATEXT + "+)*$");
+    var QUOTED_STRING = /^"(?:[^"\\]|\\[\s\S])*"$/;
+    var PLAIN_ADDRESS = /^[^\s"(),:;<>@[\\\]]+@[^\s"(),:;<>@[\\\]]+$/;
     var MimeNode = class _MimeNode {
       constructor(contentType, options) {
         this.nodeCounter = 0;
         options = options || {};
-        this.baseBoundary = options.baseBoundary || crypto2.randomBytes(8).toString("hex");
+        this.baseBoundary = options.baseBoundary || crypto3.randomBytes(8).toString("hex");
         this.boundaryPrefix = options.boundaryPrefix || "--_NmP";
         this.disableFileAccess = !!options.disableFileAccess;
         this.disableUrlAccess = !!options.disableUrlAccess;
@@ -51027,15 +51189,16 @@ var require_mime_node = __commonJS({
               break;
             case "Content-Type":
               structured = mimeFuncs.parseHeaderValue(value);
+              structured.value = (structured.value || "").toString().replace(/[\x00-\x1f\x7f]/g, "");
               this._handleContentType(structured);
               if (structured.value.match(/^text\/plain\b/) && typeof this.content === "string" && /[\u0080-\uFFFF]/.test(this.content)) {
                 structured.params.charset = "utf-8";
               }
               value = mimeFuncs.buildHeaderValue(structured);
               if (this.filename) {
-                param = this._encodeWords(this.filename);
+                param = /[\x00-\x1f\x7f]/.test(this.filename) ? mimeFuncs.encodeWord(this.filename, this._getTextEncoding(this.filename), 52) : this._encodeWords(this.filename);
                 if (param !== this.filename || /[\s'"\\;:/=(),<>@[\]?]|^-/.test(param)) {
-                  param = '"' + param + '"';
+                  param = JSON.stringify(param);
                 }
                 value += "; name=" + param;
               }
@@ -51052,8 +51215,9 @@ var require_mime_node = __commonJS({
           }
           if (typeof this.normalizeHeaderKey === "function") {
             const normalized = this.normalizeHeaderKey(key, value);
-            if (normalized && typeof normalized === "string" && normalized.length) {
-              key = normalized;
+            const cleaned = typeof normalized === "string" ? normalized.replace(/[\x00-\x1f\x7f]/g, "") : "";
+            if (cleaned) {
+              key = cleaned;
             }
           }
           headers.push(mimeFuncs.foldLines(key + ": " + value, 76));
@@ -51254,7 +51418,7 @@ var require_mime_node = __commonJS({
         };
         if (envelope.from) {
           list = [];
-          this._convertAddresses(this._parseAddresses(envelope.from), list);
+          this._convertAddresses(this._parseEnvelopeAddresses(envelope.from), list);
           list = list.filter((address) => address && address.address);
           if (list.length && list[0]) {
             this._envelope.from = list[0].address;
@@ -51262,7 +51426,7 @@ var require_mime_node = __commonJS({
         }
         ["to", "cc", "bcc"].forEach((key) => {
           if (envelope[key]) {
-            this._convertAddresses(this._parseAddresses(envelope[key]), this._envelope.to);
+            this._convertAddresses(this._parseEnvelopeAddresses(envelope[key]), this._envelope.to);
           }
         });
         this._envelope.to = this._envelope.to.map((to) => to.address).filter((address) => address);
@@ -51393,7 +51557,7 @@ var require_mime_node = __commonJS({
             });
             return contentStream;
           }
-          return nmfetch(content.href, { headers: content.httpHeaders });
+          return nmfetch(content.href, { headers: content.httpHeaders, tls: content.tls });
         }
         contentStream = new PassThrough3();
         setImmediate(() => {
@@ -51417,13 +51581,57 @@ var require_mime_node = __commonJS({
           [],
           [].concat(addresses).map((address) => {
             if (address && address.address) {
-              address.address = this._normalizeAddress(address.address);
-              address.name = address.name || "";
-              return [address];
+              const normalized = this._normalizeAddress(address.address);
+              if (normalized === address.address && typeof address.name === "string") {
+                return [address];
+              }
+              const copy = Object.assign({}, address);
+              copy.address = normalized;
+              copy.name = address.name || "";
+              return [copy];
             }
-            return addressparser(address);
+            return this._normalizeParsedAddresses(addressparser(address));
           })
         );
+      }
+      /**
+       * Normalizes the addresses of a freshly parsed address list, groups included.
+       *
+       * Everything this method returns carries a normalized address, whether it arrived as an
+       * object or was parsed out of a header value. Without this the two shapes disagree, and
+       * a consumer reading the parsed form back is handed the ambiguous
+       * 'user@evil.com@good.com' that the header and the envelope no longer carry.
+       *
+       * @param {Array} parsed An array of address objects, as returned by addressparser
+       * @return {Array} The same array, with every address normalized
+       */
+      _normalizeParsedAddresses(parsed) {
+        parsed.forEach((entry) => {
+          if (entry.address) {
+            entry.address = this._normalizeAddress(entry.address);
+          } else if (entry.group) {
+            this._normalizeParsedAddresses(entry.group);
+          }
+        });
+        return parsed;
+      }
+      /**
+       * Parses the addresses of an explicitly set envelope.
+       *
+       * An envelope value is an addr-spec and never a display name, so a bare local username
+       * such as 'root' is the address here. Header parsing has to read the same value as a
+       * display name, as a value with no '@' in it can not be an addr-spec in a header.
+       *
+       * @param {Mixed} addresses Addresses to be parsed
+       * @return {Array} An array of address objects
+       */
+      _parseEnvelopeAddresses(addresses) {
+        return this._parseAddresses(addresses).map((entry) => {
+          if (entry.address || entry.group || !entry.name || /[\s@]/.test(entry.name)) {
+            return entry;
+          }
+          return { address: this._normalizeAddress(entry.name), name: "" };
+        });
       }
       /**
        * Normalizes a header key, uses Camel-Case form, except for uppercase MIME-
@@ -51432,7 +51640,7 @@ var require_mime_node = __commonJS({
        * @return {String} key in Camel-Case form
        */
       _normalizeHeaderKey(key) {
-        key = (key || "").toString().replace(/\r?\n|\r/g, " ").trim().toLowerCase().replace(/^X-SMTPAPI$|^(MIME|DKIM|ARC|BIMI)\b|^[a-z]|-(SPF|FBL|ID|MD5)$|-[a-z]/gi, (c) => c.toUpperCase()).replace(/^Content-Features$/i, "Content-features");
+        key = (key || "").toString().replace(/\r?\n|\r/g, " ").replace(/[\x00-\x1f\x7f]/g, "").trim().toLowerCase().replace(/^X-SMTPAPI$|^(MIME|DKIM|ARC|BIMI)\b|^[a-z]|-(SPF|FBL|ID|MD5)$|-[a-z]/gi, (c) => c.toUpperCase()).replace(/^Content-Features$/i, "Content-features");
         return key;
       }
       /**
@@ -51479,7 +51687,7 @@ var require_mime_node = __commonJS({
           case "Message-ID":
           case "In-Reply-To":
           case "Content-Id":
-            value = (value || "").toString().replace(/\r?\n|\r/g, " ");
+            value = (value || "").toString().replace(/\r?\n|\r/g, " ").replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
             if (value.charAt(0) !== "<") {
               value = "<" + value;
             }
@@ -51492,7 +51700,7 @@ var require_mime_node = __commonJS({
             value = [].concat.apply(
               [],
               [].concat(value || "").map((elm) => {
-                elm = (elm || "").toString().replace(/\r?\n|\r/g, " ").trim();
+                elm = (elm || "").toString().replace(/\r?\n|\r/g, " ").replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "").trim();
                 return elm.replace(/<[^>]*>/g, (str) => str.replace(/\s/g, "")).split(/\s+/);
               })
             ).map((elm) => {
@@ -51510,13 +51718,13 @@ var require_mime_node = __commonJS({
               return value.toUTCString().replace(/GMT/, "+0000");
             }
             value = (value || "").toString().replace(/\r?\n|\r/g, " ");
-            return this._encodeWords(value);
+            return this._encodeHeaderText(value);
           case "Content-Type":
           case "Content-Disposition":
             return (value || "").toString().replace(/\r?\n|\r/g, " ");
           default:
             value = (value || "").toString().replace(/\r?\n|\r/g, " ");
-            return this._encodeWords(value);
+            return this._encodeHeaderText(value);
         }
       }
       /**
@@ -51533,7 +51741,7 @@ var require_mime_node = __commonJS({
           if (address.address) {
             address.address = this._normalizeAddress(address.address);
             if (!address.name) {
-              values.push(address.address.indexOf(" ") >= 0 ? `<${address.address}>` : `${address.address}`);
+              values.push(PLAIN_ADDRESS.test(address.address) ? address.address : `<${address.address}>`);
             } else {
               values.push(`${this._encodeAddressName(address.name)} <${address.address}>`);
             }
@@ -51554,12 +51762,15 @@ var require_mime_node = __commonJS({
        * @return {String} address string
        */
       _normalizeAddress(address) {
-        address = (address || "").toString().replace(/[\x00-\x1F<>]+/g, " ").trim();
-        const lastAt = address.lastIndexOf("@");
-        if (lastAt < 0) {
+        address = (address || "").toString().replace(/[\x00-\x1F\x7F<>]+/g, " ").trim();
+        if (!address) {
           return address;
         }
-        let user = address.substr(0, lastAt);
+        const lastAt = address.lastIndexOf("@");
+        if (lastAt < 0) {
+          return this._normalizeLocalPart(address);
+        }
+        const user = address.substr(0, lastAt);
         const domain = address.substr(lastAt + 1);
         let encodedDomain = domain;
         try {
@@ -51570,15 +51781,25 @@ var require_mime_node = __commonJS({
           }
         } catch (_err) {
         }
-        if (user.indexOf(" ") >= 0) {
-          if (user.charAt(0) !== '"') {
-            user = '"' + user;
-          }
-          if (user.substr(-1) !== '"') {
-            user = user + '"';
-          }
+        return `${this._normalizeLocalPart(user)}@${encodedDomain}`;
+      }
+      /**
+       * Normalizes the local part of an address into a form that can be emitted as is.
+       *
+       * A local part is either a dot-atom or a quoted-string, anything else is not a valid
+       * addr-spec. The quotes of a quoted local part get lost along the way, and a bare
+       * 'user@evil.com@good.com' leaves it to the receiver which '@' splits the domain off,
+       * while the split here is always at the last one. So whatever is not already one of
+       * the two valid forms goes back out as a quoted-string.
+       *
+       * @param {String} user Local part of an address
+       * @return {String} Local part as a dot-atom or as a quoted-string
+       */
+      _normalizeLocalPart(user) {
+        if (DOT_ATOM.test(user) || QUOTED_STRING.test(user)) {
+          return user;
         }
-        return `${user}@${encodedDomain}`;
+        return mimeFuncs.quoteString(user);
       }
       /**
        * If needed, mime encodes the name part
@@ -51589,12 +51810,26 @@ var require_mime_node = __commonJS({
       _encodeAddressName(name) {
         if (!/^[\w ]*$/.test(name)) {
           if (/^[\x20-\x7e]*$/.test(name)) {
-            return '"' + name.replace(/([\\"])/g, "\\$1") + '"';
+            return mimeFuncs.quoteString(name);
           } else {
             return mimeFuncs.encodeWord(name, this._getTextEncoding(name), 52);
           }
         }
         return name;
+      }
+      /**
+       * Encodes an unstructured header value. Such a value can only carry VCHAR and WSP, so a
+       * control char or DEL has to be forced into the mime encoded word that a non-ascii value
+       * would get anyway. HT stays as it is, it is valid folding whitespace here.
+       *
+       * @param {String} value Header value to encode
+       * @returns {String} Mime word encoded string if needed
+       */
+      _encodeHeaderText(value) {
+        return /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value) ? mimeFuncs.encodeWord(value, this._getTextEncoding(value), 52) : (
+          // encodeWords only encodes if needed, otherwise the original string is returned
+          this._encodeWords(value)
+        );
       }
       /**
        * If needed, mime encodes the name part
@@ -51636,8 +51871,8 @@ var require_mime_node = __commonJS({
       _generateMessageId() {
         return "<" + [2, 2, 2, 6].reduce(
           // crux to generate UUID-like random strings
-          (prev, len) => prev + "-" + crypto2.randomBytes(len).toString("hex"),
-          crypto2.randomBytes(4).toString("hex")
+          (prev, len) => prev + "-" + crypto3.randomBytes(len).toString("hex"),
+          crypto3.randomBytes(4).toString("hex")
         ) + "@" + // try to use the domain of the FROM address or fallback to server hostname
         (this.getEnvelope().from || this.hostname || "localhost").split("@").pop() + ">";
       }
@@ -51669,7 +51904,11 @@ var require_mail_composer = __commonJS({
         this._useAlternative = this._alternatives.length > 1;
         this._useMixed = this._attachments.attached.length > 1 || this._alternatives.length && this._attachments.attached.length === 1;
         if (this.mail.raw) {
-          this.message = new MimeNode("message/rfc822", { newline: this.mail.newline }).setRaw(this.mail.raw);
+          this.message = new MimeNode("message/rfc822", {
+            newline: this.mail.newline,
+            disableUrlAccess: this.mail.disableUrlAccess,
+            disableFileAccess: this.mail.disableFileAccess
+          }).setRaw(this.mail.raw);
         } else if (this._useMixed) {
           this.message = this._createMixed();
         } else if (this._useAlternative) {
@@ -51707,7 +51946,7 @@ var require_mail_composer = __commonJS({
        * @returns {Object} An object of arrays (`related` and `attached`)
        */
       getAttachments(findRelated) {
-        let icalEvent, eventObject;
+        let eventObject;
         const attachments = [].concat(this.mail.attachments || []).map((attachment, i2) => {
           if (/^data:/i.test(attachment.path || attachment.href)) {
             attachment = this._processDataUrl(attachment);
@@ -51753,7 +51992,8 @@ var require_mail_composer = __commonJS({
           } else if (attachment.href) {
             data.content = {
               href: attachment.href,
-              httpHeaders: attachment.httpHeaders
+              httpHeaders: attachment.httpHeaders,
+              tls: attachment.tls
             };
           } else {
             data.content = attachment.content || "";
@@ -51767,14 +52007,7 @@ var require_mail_composer = __commonJS({
           return data;
         });
         if (this.mail.icalEvent) {
-          if (typeof this.mail.icalEvent === "object" && (this.mail.icalEvent.content || this.mail.icalEvent.path || this.mail.icalEvent.href || this.mail.icalEvent.raw)) {
-            icalEvent = this.mail.icalEvent;
-          } else {
-            icalEvent = {
-              content: this.mail.icalEvent
-            };
-          }
-          eventObject = Object.assign({}, icalEvent);
+          eventObject = Object.assign({}, this._getIcalEvent());
           eventObject.contentType = "application/ics";
           if (!eventObject.headers) {
             eventObject.headers = {};
@@ -51795,13 +52028,60 @@ var require_mail_composer = __commonJS({
         };
       }
       /**
+       * Returns the icalEvent value with `path`/`href`/data uri input normalized into
+       * a `content` entry, the same way as for regular attachments. The same event is
+       * included twice (as a text/calendar alternative and as an application/ics
+       * attachment), so the shared content object is marked to be resolved just once
+       * and the buffered result is reused by the second node.
+       *
+       * @returns {Object} Normalized icalEvent data
+       */
+      _getIcalEvent() {
+        if (!this._icalEvent) {
+          let icalEvent;
+          if (typeof this.mail.icalEvent === "object" && (this.mail.icalEvent.content || this.mail.icalEvent.path || this.mail.icalEvent.href || this.mail.icalEvent.raw)) {
+            icalEvent = Object.assign({}, this.mail.icalEvent);
+          } else {
+            icalEvent = {
+              content: this.mail.icalEvent
+            };
+          }
+          if (/^data:/i.test(icalEvent.path || icalEvent.href)) {
+            icalEvent = this._processDataUrl(icalEvent);
+          }
+          if (/^https?:\/\//i.test(icalEvent.path)) {
+            icalEvent.href = icalEvent.path;
+            icalEvent.path = void 0;
+          }
+          if (!icalEvent.raw) {
+            if (icalEvent.path) {
+              icalEvent.content = {
+                path: icalEvent.path
+              };
+              icalEvent.path = void 0;
+            } else if (icalEvent.href) {
+              icalEvent.content = {
+                href: icalEvent.href,
+                httpHeaders: icalEvent.httpHeaders
+              };
+              icalEvent.href = void 0;
+            }
+          }
+          if (icalEvent.content && typeof icalEvent.content === "object") {
+            icalEvent.content._resolve = true;
+          }
+          this._icalEvent = icalEvent;
+        }
+        return this._icalEvent;
+      }
+      /**
        * List alternatives. Resulting objects can be used as input for MimeNode nodes
        *
        * @returns {Array} An array of alternative elements. Includes the `text` and `html` values as well
        */
       getAlternatives() {
         const alternatives = [];
-        let text, html, watchHtml, amp, icalEvent, eventObject;
+        let text, html, watchHtml, amp, eventObject;
         if (this.mail.text) {
           if (typeof this.mail.text === "object" && (this.mail.text.content || this.mail.text.path || this.mail.text.href || this.mail.text.raw)) {
             text = this.mail.text;
@@ -51833,17 +52113,7 @@ var require_mail_composer = __commonJS({
           amp.contentType = "text/x-amp-html; charset=utf-8";
         }
         if (this.mail.icalEvent) {
-          if (typeof this.mail.icalEvent === "object" && (this.mail.icalEvent.content || this.mail.icalEvent.path || this.mail.icalEvent.href || this.mail.icalEvent.raw)) {
-            icalEvent = this.mail.icalEvent;
-          } else {
-            icalEvent = {
-              content: this.mail.icalEvent
-            };
-          }
-          eventObject = Object.assign({}, icalEvent);
-          if (eventObject.content && typeof eventObject.content === "object") {
-            eventObject.content._resolve = true;
-          }
+          eventObject = Object.assign({}, this._getIcalEvent());
           eventObject.filename = false;
           eventObject.contentType = "text/calendar; charset=utf-8; method=" + (eventObject.method || "PUBLISH").toString().trim().toUpperCase();
           if (!eventObject.headers) {
@@ -52232,14 +52502,14 @@ var require_relaxed_body = __commonJS({
   "node_modules/nodemailer/lib/dkim/relaxed-body.js"(exports2, module2) {
     "use strict";
     var { Transform } = require("stream");
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var RelaxedBody = class extends Transform {
       constructor(options) {
         super();
         options = options || {};
         this.chunkBuffer = [];
         this.chunkBufferLen = 0;
-        this.bodyHash = crypto2.createHash(options.hashAlgo || "sha1");
+        this.bodyHash = crypto3.createHash(options.hashAlgo || "sha256");
         this.remainder = "";
         this.byteLength = 0;
         this.debug = options.debug;
@@ -52342,7 +52612,7 @@ var require_sign2 = __commonJS({
     "use strict";
     var punycode = require_punycode();
     var mimeFuncs = require_mime_funcs();
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     module2.exports = (headers, hashAlgo, bodyHash, options) => {
       options = options || {};
       const defaultFieldNames = "From:Sender:Reply-To:Subject:Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive";
@@ -52350,7 +52620,7 @@ var require_sign2 = __commonJS({
       const canonicalizedHeaderData = relaxedHeaders(headers, fieldNames, options.skipFields);
       const dkimHeader = generateDKIMHeader(options.domainName, options.keySelector, canonicalizedHeaderData.fieldNames, hashAlgo, bodyHash);
       canonicalizedHeaderData.headers += "dkim-signature:" + relaxedHeaderLine(dkimHeader);
-      const signer = crypto2.createSign(("rsa-" + hashAlgo).toUpperCase());
+      const signer = crypto3.createSign(("rsa-" + hashAlgo).toUpperCase());
       signer.update(canonicalizedHeaderData.headers);
       let signature;
       try {
@@ -52362,15 +52632,16 @@ var require_sign2 = __commonJS({
     };
     module2.exports.relaxedHeaders = relaxedHeaders;
     function generateDKIMHeader(domainName, keySelector, fieldNames, hashAlgo, bodyHash) {
+      const cleanTagValue = (value) => (value || "").toString().replace(/[\x00-\x1f\x7f;=]/g, "");
       const dkim = [
         "v=1",
         "a=rsa-" + hashAlgo,
         "c=relaxed/relaxed",
-        "d=" + punycode.toASCII(domainName),
+        "d=" + punycode.toASCII(cleanTagValue(domainName)),
         "q=dns/txt",
-        "s=" + keySelector,
+        "s=" + cleanTagValue(keySelector),
         "bh=" + bodyHash,
-        "h=" + fieldNames
+        "h=" + cleanTagValue(fieldNames)
       ].join("; ");
       return mimeFuncs.foldLines("DKIM-Signature: " + dkim, 76) + ";\r\n b=";
     }
@@ -52419,7 +52690,7 @@ var require_dkim = __commonJS({
     var { PassThrough: PassThrough3 } = require("stream");
     var fs4 = require("fs");
     var path3 = require("path");
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var DKIM_ALGO = "sha256";
     var MAX_MESSAGE_SIZE = 2 * 1024 * 1024;
     var DKIMSigner = class {
@@ -52432,7 +52703,7 @@ var require_dkim = __commonJS({
         this.chunks = [];
         this.chunklen = 0;
         this.readPos = 0;
-        this.cachePath = this.cacheDir ? path3.join(this.cacheDir, "message." + Date.now() + "-" + crypto2.randomBytes(14).toString("hex")) : false;
+        this.cachePath = this.cacheDir ? path3.join(this.cacheDir, "message." + Date.now() + "-" + crypto3.randomBytes(14).toString("hex")) : false;
         this.cache = false;
         this.headers = false;
         this.bodyHash = false;
@@ -52610,17 +52881,29 @@ var require_http_proxy_client = __commonJS({
     "use strict";
     var net = require("net");
     var tls = require("tls");
-    var urllib = require("url");
+    var urllib = require_url();
     var errors = require_errors();
-    function httpProxyClient(proxyUrl, destinationPort, destinationHost, callback) {
+    var MAX_RESPONSE_HEADER_BYTES = 64 * 1024;
+    function httpProxyClient(proxyUrl, destinationPort, destinationHost, tlsOptions, callback) {
+      if (typeof tlsOptions === "function") {
+        callback = tlsOptions;
+        tlsOptions = {};
+      }
+      tlsOptions = tlsOptions || {};
+      destinationPort = Number(destinationPort) || 0;
+      if (!destinationPort || /[\r\n]/.test(destinationHost)) {
+        const err = new Error("Invalid proxy destination");
+        err.code = errors.EPROXY;
+        return setImmediate(() => callback(err));
+      }
       const proxy = urllib.parse(proxyUrl);
-      const options = {
+      const connectOptions = {
         host: proxy.hostname,
         port: Number(proxy.port) ? Number(proxy.port) : proxy.protocol === "https:" ? 443 : 80
       };
       let connect;
       if (proxy.protocol === "https:") {
-        options.rejectUnauthorized = false;
+        connectOptions.rejectUnauthorized = tlsOptions.rejectUnauthorized !== false;
         connect = tls.connect.bind(tls);
       } else {
         connect = net.connect.bind(net);
@@ -52643,7 +52926,7 @@ var require_http_proxy_client = __commonJS({
         err.code = "ETIMEDOUT";
         tempSocketErr(err);
       };
-      socket = connect(options, () => {
+      socket = connect(connectOptions, () => {
         if (finished2) {
           return;
         }
@@ -52690,6 +52973,12 @@ var require_http_proxy_client = __commonJS({
             socket.removeListener("timeout", timeoutErr);
             socket.setTimeout(0);
             return callback(null, socket);
+          }
+          if (headers.length > MAX_RESPONSE_HEADER_BYTES) {
+            socket.removeListener("data", onSocketData);
+            const err = new Error("Proxy response headers too large");
+            err.code = errors.EPROXY;
+            return tempSocketErr(err);
           }
         };
         socket.on("data", onSocketData);
@@ -52821,7 +53110,7 @@ var require_mail_message = __commonJS({
         setImmediate(() => resolveNext());
       }
       normalize(callback) {
-        const envelope = this.data.envelope || this.message.getEnvelope();
+        const envelope = this.message.getEnvelope();
         const messageId = this.message.messageId();
         this.resolveAll((err, data) => {
           if (err) {
@@ -52931,19 +53220,13 @@ var require_mail_message = __commonJS({
                 };
               }
               if (value2 && value2.url) {
-                if (key.toLowerCase().trim() === "id") {
-                  let comment2 = (value2.comment || "").toString().replace(/\r?\n|\r/g, " ");
-                  if (mimeFuncs.isPlainText(comment2)) {
-                    comment2 = '"' + comment2 + '"';
-                  } else {
-                    comment2 = mimeFuncs.encodeWord(comment2);
-                  }
-                  return (value2.comment ? comment2 + " " : "") + this._formatListUrl(value2.url).replace(/^<[^:]+\/{,2}/, "");
-                }
                 let comment = (value2.comment || "").toString().replace(/\r?\n|\r/g, " ");
-                if (!mimeFuncs.isPlainText(comment)) {
-                  comment = mimeFuncs.encodeWord(comment);
+                const needsEncoding = !mimeFuncs.isPlainText(comment) || /\x7f/.test(comment);
+                if (key.toLowerCase().trim() === "id") {
+                  comment = needsEncoding ? mimeFuncs.encodeWord(comment) : mimeFuncs.quoteString(comment);
+                  return (value2.comment ? comment + " " : "") + this._formatListUrl(value2.url).replace(/^<[^:]+:\/{0,2}/, "<");
                 }
+                comment = needsEncoding ? mimeFuncs.encodeWord(comment) : comment.replace(/[()\\]/g, "\\$&");
                 return this._formatListUrl(value2.url) + (value2.comment ? " (" + comment + ")" : "");
               }
               return "";
@@ -52952,7 +53235,7 @@ var require_mail_message = __commonJS({
         }));
       }
       _formatListUrl(url) {
-        url = url.replace(/[\s<]+|[\s>]+/g, "");
+        url = url.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "").replace(/[\s<]+|[\s>]+/g, "");
         if (/^(https?|mailto|ftp):/.test(url)) {
           return "<" + url + ">";
         }
@@ -52978,12 +53261,12 @@ var require_mailer = __commonJS({
     var httpProxyClient = require_http_proxy_client();
     var errors = require_errors();
     var util = require("util");
-    var urllib = require("url");
+    var urllib = require_url();
     var packageData = require_package3();
     var MailMessage = require_mail_message();
     var net = require("net");
     var dns = require("dns");
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var Mail = class extends EventEmitter {
       constructor(transporter, options, defaults) {
         super();
@@ -53236,7 +53519,7 @@ var require_mailer = __commonJS({
             // Connect using a HTTP CONNECT method
             case "http":
             case "https":
-              httpProxyClient(proxy.href, options.port, options.host, (err2, socket) => {
+              httpProxyClient(proxy.href, options.port, options.host, this.options.tls || {}, (err2, socket) => {
                 if (err2) {
                   return callback(err2);
                 }
@@ -53326,7 +53609,7 @@ var require_mailer = __commonJS({
             html = (html || "").toString().replace(
               /(<img\b[^<>]{0,1024} src\s{0,20}=[\s"']{0,20})(data:([^;]+);[^"'>\s]+)/gi,
               (match, prefix, dataUri, mimeType) => {
-                const cid = crypto2.randomBytes(10).toString("hex") + "@localhost";
+                const cid = crypto3.randomBytes(10).toString("hex") + "@localhost";
                 if (!mail.data.attachments) {
                   mail.data.attachments = [];
                 }
@@ -53453,7 +53736,7 @@ var require_smtp_connection = __commonJS({
     var net = require("net");
     var tls = require("tls");
     var os2 = require("os");
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var DataStream = require_data_stream2();
     var { PassThrough: PassThrough3 } = require("stream");
     var shared = require_shared3();
@@ -53473,7 +53756,7 @@ var require_smtp_connection = __commonJS({
     var SMTPConnection = class extends EventEmitter {
       constructor(options) {
         super(options);
-        this.id = crypto2.randomBytes(8).toString("base64").replace(/\W/g, "");
+        this.id = crypto3.randomBytes(8).toString("base64").replace(/\W/g, "");
         this.stage = "init";
         this.options = options || {};
         this.secureConnection = !!this.options.secure;
@@ -53577,6 +53860,15 @@ var require_smtp_connection = __commonJS({
             try {
               this._socket.connect(this.port, this.host, () => {
                 this._socket.setKeepAlive(true);
+                if (this.secureConnection && !this.alreadySecured) {
+                  return this._upgradeConnection((err) => {
+                    if (err) {
+                      this._onError(new Error("Error initiating TLS - " + (err.message || err)), "ETLS", false, "CONN");
+                      return;
+                    }
+                    this._onConnect();
+                  });
+                }
                 this._onConnect();
               });
               this._setupConnectionHandlers();
@@ -53637,6 +53929,9 @@ var require_smtp_connection = __commonJS({
        * @param {Boolean} secure Whether to use TLS
        */
       _connectToHost(opts, secure) {
+        if (this._destroyed || this._closing) {
+          return;
+        }
         this._connectionAttemptId++;
         const currentAttemptId = this._connectionAttemptId;
         const connectFn = secure ? tls.connect : net.connect;
@@ -53690,6 +53985,7 @@ var require_smtp_connection = __commonJS({
         if (this._socket) {
           try {
             this._socket.removeListener("error", this._onConnectionSocketError);
+            this._socket.on("error", TEARDOWN_NOOP);
             this._socket.destroy();
           } catch (_E) {
           }
@@ -53953,6 +54249,10 @@ var require_smtp_connection = __commonJS({
        * @param {Function} callback Callback to return once connection is reset
        */
       reset(callback) {
+        const isDestroyedMessage = this._isDestroyedMessage("reset");
+        if (isDestroyedMessage) {
+          return callback(this._formatError(isDestroyedMessage, "ECONNECTION", false, "API"));
+        }
         this._sendCommand("RSET");
         this._responseActions.push((str) => {
           if (str.charAt(0) !== "2") {
@@ -53993,6 +54293,7 @@ var require_smtp_connection = __commonJS({
         this._socket.removeListener("close", this._onSocketClose);
         this._socket.removeListener("end", this._onSocketEnd);
         this._socket.removeListener("error", this._onConnectionSocketError);
+        this._socket.removeListener("error", this._onSocketError);
         this._socket.on("error", this._onSocketError);
         this._socket.on("data", this._onSocketData);
         this._socket.once("close", this._onSocketClose);
@@ -54017,7 +54318,7 @@ var require_smtp_connection = __commonJS({
         if (this._destroyed || !chunk || !chunk.length) {
           return;
         }
-        let data = (chunk || "").toString("binary");
+        let data = chunk.toString("binary");
         let lines = (this._remainder + data).split(/\r?\n/);
         let lastline;
         this._remainder = lines.pop();
@@ -54144,6 +54445,7 @@ var require_smtp_connection = __commonJS({
           return;
         }
         this._destroyed = true;
+        this.destroyed = true;
         this.emit("end");
       }
       /**
@@ -54153,6 +54455,8 @@ var require_smtp_connection = __commonJS({
        *        has been secured
        */
       _upgradeConnection(callback) {
+        this._remainder = "";
+        this._responseQueue = [];
         this._socket.removeListener("data", this._onSocketData);
         this._socket.removeListener("timeout", this._onSocketTimeout);
         const socketPlain = this._socket;
@@ -54170,6 +54474,7 @@ var require_smtp_connection = __commonJS({
           socketPlain.removeListener("close", this._onSocketClose);
           socketPlain.removeListener("end", this._onSocketEnd);
           socketPlain.removeListener("error", this._onSocketError);
+          socketPlain.removeListener("error", this._onConnectionSocketError);
         };
         this.upgrading = true;
         try {
@@ -54193,15 +54498,19 @@ var require_smtp_connection = __commonJS({
       }
       /**
        * Processes queued responses from the server
-       *
-       * @param {Boolean} force If true, ignores _processing flag
        */
       _processResponse() {
         if (!this._responseQueue.length) {
           return false;
         }
-        let str = this.lastServerResponse = decodeServerResponse((this._responseQueue.shift() || "").toString());
+        const raw = (this._responseQueue.shift() || "").toString();
+        if (!raw.trim()) {
+          setImmediate(() => this._processResponse());
+          return;
+        }
+        let str = this.lastServerResponse = decodeServerResponse(raw);
         if (/^\d+-/.test(str.split("\n").pop())) {
+          this._responseQueue.unshift(raw);
           return;
         }
         if (this.options.debug || this.options.transactionLog) {
@@ -54211,9 +54520,6 @@ var require_smtp_connection = __commonJS({
             },
             str.replace(/\r?\n$/, "")
           );
-        }
-        if (!str.trim()) {
-          setImmediate(() => this._processResponse());
         }
         const action = this._responseActions.shift();
         if (typeof action === "function") {
@@ -54289,6 +54595,18 @@ var require_smtp_connection = __commonJS({
             return callback(this._formatError("Invalid DSN " + err.message, "EENVELOPE", false, "API"));
           }
         }
+        if (this._envelope.requireTLSExtensionEnabled) {
+          if (!this.secure) {
+            return callback(
+              this._formatError("REQUIRETLS can only be used over TLS connections (RFC 8689)", "EREQUIRETLS", false, "MAIL FROM")
+            );
+          }
+          if (!this._supportedExtensions.includes("REQUIRETLS")) {
+            return callback(
+              this._formatError("Server does not support REQUIRETLS extension (RFC 8689)", "EREQUIRETLS", false, "MAIL FROM")
+            );
+          }
+        }
         this._responseActions.push((str) => {
           this._actionMAIL(str, callback);
         });
@@ -54315,16 +54633,6 @@ var require_smtp_connection = __commonJS({
           }
         }
         if (this._envelope.requireTLSExtensionEnabled) {
-          if (!this.secure) {
-            return callback(
-              this._formatError("REQUIRETLS can only be used over TLS connections (RFC 8689)", "EREQUIRETLS", false, "MAIL FROM")
-            );
-          }
-          if (!this._supportedExtensions.includes("REQUIRETLS")) {
-            return callback(
-              this._formatError("Server does not support REQUIRETLS extension (RFC 8689)", "EREQUIRETLS", false, "MAIL FROM")
-            );
-          }
           args.push("REQUIRETLS");
         }
         this._sendCommand("MAIL FROM:<" + this._envelope.from + ">" + (args.length ? " " + args.join(" ") : ""));
@@ -54633,7 +54941,7 @@ var require_smtp_connection = __commonJS({
           );
         }
         const base64decoded = Buffer.from(challengeMatch[1], "base64").toString("ascii");
-        const hmacMD5 = crypto2.createHmac("md5", this._auth.credentials.pass);
+        const hmacMD5 = crypto3.createHmac("md5", this._auth.credentials.pass);
         hmacMD5.update(base64decoded);
         const prepended = this._auth.credentials.user + " " + hmacMD5.digest("hex");
         this._responseActions.push((str2) => {
@@ -54926,7 +55234,7 @@ var require_xoauth2 = __commonJS({
     "use strict";
     var { Stream: Stream4 } = require("stream");
     var nmfetch = require_fetch();
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var shared = require_shared3();
     var errors = require_errors();
     var XOAuth2 = class extends Stream4 {
@@ -55272,7 +55580,7 @@ var require_xoauth2 = __commonJS({
        */
       jwtSignRS256(payload) {
         payload = ['{"alg":"RS256","typ":"JWT"}', JSON.stringify(payload)].map((val) => this.toBase64URL(val)).join(".");
-        const signature = crypto2.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
+        const signature = crypto3.createSign("RSA-SHA256").update(payload).sign(this.options.privateKey);
         return payload + "." + this.toBase64URL(signature);
       }
     };
@@ -56002,6 +56310,18 @@ var require_services = __commonJS({
         host: "smtp.tipimail.com",
         port: 587
       },
+      TurboSMTP: {
+        description: "TurboSMTP",
+        host: "pro.turbo-smtp.com",
+        port: 465,
+        secure: true
+      },
+      "TurboSMTP-EU": {
+        description: "TurboSMTP (EU region)",
+        host: "pro.eu.turbo-smtp.com",
+        port: 465,
+        secure: true
+      },
       Tutanota: {
         description: "Tutanota (Tuta Mail)",
         domains: ["tutanota.com", "tuta.com", "tutanota.de", "tuta.io"],
@@ -56676,12 +56996,15 @@ var require_smtp_transport = __commonJS({
       }
       getAuth(authOpts) {
         if (!authOpts) {
+          if (this.auth && this.auth.oauth2 && this.mailer) {
+            this.auth.oauth2.provisionCallback = this.mailer.get("oauth2_provision_cb") || this.auth.oauth2.provisionCallback;
+          }
           return this.auth;
         }
         const authData = Object.assign(
           {},
           this.options.auth && typeof this.options.auth === "object" ? this.options.auth : {},
-          authOpts && typeof authOpts === "object" ? authOpts : {}
+          typeof authOpts === "object" ? authOpts : {}
         );
         if (Object.keys(authData).length === 0) {
           return false;
@@ -56990,6 +57313,8 @@ var require_sendmail_transport = __commonJS({
     var packageData = require_package3();
     var shared = require_shared3();
     var errors = require_errors();
+    var LeWindows = require_le_windows();
+    var LeUnix = require_le_unix();
     var SendmailTransport = class {
       constructor(options) {
         options = options || {};
@@ -57012,6 +57337,7 @@ var require_sendmail_transport = __commonJS({
             this.args = options.args;
           }
         }
+        this.winbreak = ["win", "windows", "dos", "\r\n"].includes((options.newline || "").toString().toLowerCase());
       }
       /**
        * <p>Compiles a mailcomposer message and forwards it to handler that sends it.</p>
@@ -57021,10 +57347,10 @@ var require_sendmail_transport = __commonJS({
        */
       send(mail, done) {
         mail.message.keepBcc = true;
-        const envelope = mail.data.envelope || mail.message.getEnvelope();
+        const envelope = mail.message.getEnvelope();
         const messageId = mail.message.messageId();
         let returned;
-        const hasInvalidAddresses = [].concat(envelope.from || []).concat(envelope.to || []).some((addr) => /^-/.test(addr));
+        const hasInvalidAddresses = [].concat(envelope.from || []).concat(envelope.to || []).some((addr) => /^"?-/.test(addr));
         if (hasInvalidAddresses) {
           const err = new Error("Can not send mail. Invalid envelope addresses.");
           err.code = errors.ESENDMAIL;
@@ -57124,7 +57450,12 @@ var require_sendmail_transport = __commonJS({
             recipients.join(", ")
           );
           const sourceStream = mail.message.createReadStream();
-          sourceStream.once("error", (err) => {
+          let stream = sourceStream;
+          if (this.options.newline) {
+            stream = sourceStream.pipe(this.winbreak ? new LeWindows() : new LeUnix());
+            sourceStream.once("error", (err) => stream.emit("error", err));
+          }
+          stream.once("error", (err) => {
             this.logger.error(
               {
                 err,
@@ -57138,7 +57469,7 @@ var require_sendmail_transport = __commonJS({
             sendmail.kill("SIGINT");
             callback(err);
           });
-          sourceStream.pipe(sendmail.stdin);
+          stream.pipe(sendmail.stdin);
         } else {
           const err = new Error("sendmail was not found");
           err.code = errors.ESENDMAIL;
@@ -57156,6 +57487,8 @@ var require_stream_transport = __commonJS({
     "use strict";
     var packageData = require_package3();
     var shared = require_shared3();
+    var LeWindows = require_le_windows();
+    var LeUnix = require_le_unix();
     var StreamTransport = class {
       constructor(options) {
         options = options || {};
@@ -57175,7 +57508,7 @@ var require_stream_transport = __commonJS({
        */
       send(mail, done) {
         mail.message.keepBcc = true;
-        const envelope = mail.data.envelope || mail.message.getEnvelope();
+        const envelope = mail.message.getEnvelope();
         const messageId = mail.message.messageId();
         const recipients = [].concat(envelope.to || []);
         if (recipients.length > 3) {
@@ -57195,6 +57528,11 @@ var require_stream_transport = __commonJS({
           let stream;
           try {
             stream = mail.message.createReadStream();
+            if (this.options.newline) {
+              const sourceStream = stream;
+              stream = sourceStream.pipe(this.winbreak ? new LeWindows() : new LeUnix());
+              sourceStream.once("error", (err) => stream.emit("error", err));
+            }
           } catch (E) {
             this.logger.error(
               {
@@ -57288,7 +57626,7 @@ var require_json_transport = __commonJS({
        */
       send(mail, done) {
         mail.message.keepBcc = true;
-        const envelope = mail.data.envelope || mail.message.getEnvelope();
+        const envelope = mail.message.getEnvelope();
         const messageId = mail.message.messageId();
         const recipients = [].concat(envelope.to || []);
         if (recipients.length > 3) {
@@ -57340,8 +57678,15 @@ var require_ses_transport = __commonJS({
     var EventEmitter = require("events");
     var packageData = require_package3();
     var shared = require_shared3();
+    var errors = require_errors();
     var LeWindows = require_le_windows();
     var MimeNode = require_mime_node();
+    function tagSesError(err) {
+      if (err && typeof err === "object" && !err.code) {
+        err.code = errors.ESES;
+      }
+      return err;
+    }
     var SESTransport = class extends EventEmitter {
       constructor(options) {
         super();
@@ -57356,7 +57701,10 @@ var require_ses_transport = __commonJS({
       }
       getRegion(cb) {
         if (this.ses.sesClient.config && typeof this.ses.sesClient.config.region === "function") {
-          return this.ses.sesClient.config.region().then((region) => cb(null, region)).catch((err) => cb(err));
+          return this.ses.sesClient.config.region().then(
+            (region) => cb(null, region),
+            (err) => cb(err)
+          );
         }
         return cb(null, false);
       }
@@ -57372,7 +57720,7 @@ var require_ses_transport = __commonJS({
           const mimeNode = new MimeNode("text/plain");
           fromHeader = mimeNode._convertAddresses(mimeNode._parseAddresses(fromHeader.value));
         }
-        const envelope = mail.data.envelope || mail.message.getEnvelope();
+        const envelope = mail.message.getEnvelope();
         const messageId = mail.message.messageId();
         const recipients = [].concat(envelope.to || []);
         if (recipients.length > 3) {
@@ -57446,22 +57794,12 @@ var require_ses_transport = __commonJS({
               if (err2 || !region) {
                 region = "us-east-1";
               }
-              const command = new this.ses.SendEmailCommand(sesMessage);
-              const sendPromise = this.ses.sesClient.send(command);
-              sendPromise.then((data) => {
-                if (region === "us-east-1") {
-                  region = "email";
-                }
-                callback(null, {
-                  envelope: {
-                    from: envelope.from,
-                    to: envelope.to
-                  },
-                  messageId: "<" + data.MessageId + (!/@/.test(data.MessageId) ? "@" + region + ".amazonses.com" : "") + ">",
-                  response: data.MessageId,
-                  raw
-                });
-              }).catch((err3) => {
+              let sendPromise;
+              try {
+                const command = new this.ses.SendEmailCommand(sesMessage);
+                sendPromise = this.ses.sesClient.send(command);
+              } catch (err3) {
+                tagSesError(err3);
                 this.logger.error(
                   {
                     err: err3,
@@ -57471,7 +57809,35 @@ var require_ses_transport = __commonJS({
                   messageId,
                   err3.message
                 );
-                callback(err3);
+                setImmediate(() => callback(err3));
+                return;
+              }
+              sendPromise.then((data) => {
+                if (region === "us-east-1") {
+                  region = "email";
+                }
+                const info = {
+                  envelope: {
+                    from: envelope.from,
+                    to: envelope.to
+                  },
+                  messageId: "<" + data.MessageId + (!/@/.test(data.MessageId) ? "@" + region + ".amazonses.com" : "") + ">",
+                  response: data.MessageId,
+                  raw
+                };
+                setImmediate(() => callback(null, info));
+              }).catch((err3) => {
+                tagSesError(err3);
+                this.logger.error(
+                  {
+                    err: err3,
+                    tnx: "send"
+                  },
+                  "Send error for %s: %s",
+                  messageId,
+                  err3.message
+                );
+                setImmediate(() => callback(err3));
               });
             });
           })
@@ -57491,7 +57857,7 @@ var require_ses_transport = __commonJS({
         }
         const cb = (err) => {
           if (err && !["InvalidParameterValue", "MessageRejected"].includes(err.code || err.Code || err.name)) {
-            return callback(err);
+            return callback(tagSesError(err));
           }
           return callback(null, true);
         };
@@ -57506,13 +57872,16 @@ var require_ses_transport = __commonJS({
             ToAddresses: ["invalid@invalid"]
           }
         };
-        this.getRegion((err, region) => {
-          if (err || !region) {
-            region = "us-east-1";
+        this.getRegion(() => {
+          let sendPromise;
+          try {
+            const command = new this.ses.SendEmailCommand(sesMessage);
+            sendPromise = this.ses.sesClient.send(command);
+          } catch (err) {
+            setImmediate(() => cb(err));
+            return;
           }
-          const command = new this.ses.SendEmailCommand(sesMessage);
-          const sendPromise = this.ses.sesClient.send(command);
-          sendPromise.then((data) => cb(null, data)).catch((err2) => cb(err2));
+          sendPromise.then(() => setImmediate(() => cb(null))).catch((err) => setImmediate(() => cb(err)));
         });
         return promise;
       }
@@ -57643,11 +58012,16 @@ var require_nodemailer = __commonJS({
         return false;
       }
       const infoProps = /* @__PURE__ */ new Map();
-      info.response.replace(/\[([^\]]+)\]$/, (m2, props) => {
-        props.replace(/\b([A-Z0-9]+)=([^\s]+)/g, (m3, key, value) => {
-          infoProps.set(key, value);
-        });
-      });
+      const response = info.response.toString();
+      if (response.length > 2 && response.charAt(response.length - 1) === "]") {
+        const open2 = response.indexOf("[", response.lastIndexOf("]", response.length - 2) + 1);
+        if (open2 >= 0 && open2 < response.length - 2) {
+          const props = response.substring(open2 + 1, response.length - 1);
+          props.replace(/\b([A-Z0-9]+)=([^\s]+)/g, (m2, key, value) => {
+            infoProps.set(key, value);
+          });
+        }
+      }
       if (infoProps.has("STATUS") && infoProps.has("MSGID")) {
         return (testAccount.web || ETHEREAL_WEB) + "/message/" + infoProps.get("MSGID");
       }
@@ -73780,13 +74154,13 @@ var FileSearchStores = class extends BaseModule {
   }
 };
 var uuid4Internal = function() {
-  const { crypto: crypto2 } = globalThis;
-  if (crypto2 === null || crypto2 === void 0 ? void 0 : crypto2.randomUUID) {
-    uuid4Internal = crypto2.randomUUID.bind(crypto2);
-    return crypto2.randomUUID();
+  const { crypto: crypto3 } = globalThis;
+  if (crypto3 === null || crypto3 === void 0 ? void 0 : crypto3.randomUUID) {
+    uuid4Internal = crypto3.randomUUID.bind(crypto3);
+    return crypto3.randomUUID();
   }
   const u8 = new Uint8Array(1);
-  const randomByte = crypto2 ? () => crypto2.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
+  const randomByte = crypto3 ? () => crypto3.getRandomValues(u8)[0] : () => Math.random() * 255 & 255;
   return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (+c ^ randomByte() & 15 >> +c / 4).toString(16));
 };
 var uuid4 = () => uuid4Internal();
@@ -77839,9 +78213,50 @@ var import_dotenv = __toESM(require_main());
 var import_nodemailer = __toESM(require_nodemailer());
 var import_os = __toESM(require("os"));
 var import_compression = __toESM(require_compression());
+var import_crypto = __toESM(require("crypto"));
 import_dotenv.default.config();
 var app = (0, import_express.default)();
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://maps.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' https://api.razorpay.com https://generativelanguage.googleapis.com; frame-src https://checkout.razorpay.com https://maps.google.com https://www.google.com;"
+  );
+  next();
+});
+var authAttemptTracker = /* @__PURE__ */ new Map();
+function rateLimitAuthMiddleware(req, res, next) {
+  const clientIp = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").toString().split(",")[0].trim();
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1e3;
+  const maxAttempts = 20;
+  const record = authAttemptTracker.get(clientIp);
+  if (!record || now > record.resetTime) {
+    authAttemptTracker.set(clientIp, { count: 1, resetTime: now + windowMs });
+    return next();
+  }
+  if (record.count >= maxAttempts) {
+    return res.status(429).json({ error: "Too many authentication attempts. Please try again in 15 minutes." });
+  }
+  record.count += 1;
+  next();
+}
 var PORT = parseInt(process.env.PORT || "3000", 10);
+app.set("trust proxy", 1);
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of authAttemptTracker.entries()) {
+    if (now > record.resetTime) authAttemptTracker.delete(ip);
+  }
+}, 5 * 60 * 1e3);
+function escapeHtml(str) {
+  return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 app.use((0, import_compression.default)({
   level: 6,
   // Easing CPU overhead on hostinger node server
@@ -77866,8 +78281,9 @@ app.use((req, res, next) => {
 });
 var cacheMaxAge = 31536e3;
 var shortCacheMaxAge = 86400;
-app.use(import_express.default.json({ limit: "25mb" }));
-app.use(import_express.default.urlencoded({ limit: "25mb", extended: true }));
+app.use(import_express.default.json({ limit: "2mb" }));
+app.use(import_express.default.urlencoded({ limit: "2mb", extended: true }));
+app.use(["/api/invitations/generate", "/api/invitations/:slug/update"], import_express.default.json({ limit: "25mb" }));
 var DATA_DIR = (() => {
   if (process.env.NODE_ENV === "production") {
     return import_path.default.join(import_os.default.homedir(), "getshaadilink_data");
@@ -78102,7 +78518,7 @@ app.get("/api/reviews", (req, res) => {
     res.status(500).json({ error: "Failed to fetch reviews." });
   }
 });
-app.post("/api/reviews/submit", (req, res) => {
+app.post("/api/reviews/submit", rateLimitAuthMiddleware, (req, res) => {
   const { name, location, stars, text } = req.body;
   if (!name || !text || !stars) {
     res.status(400).json({ error: "Please fill in all required fields." });
@@ -78148,8 +78564,7 @@ app.get("/api/invitations/:slug", (req, res) => {
     const isPaid = !!parsed.razorpayPaymentId || parsed.isDemoMode;
     const passcode = (req.query.passcode || req.headers["x-passcode"] || "").toString().trim();
     const isOwner = passcode && parsed.editPassword && passcode === parsed.editPassword.trim();
-    const isAdmin = req.query.admin === "true";
-    if (!isPaid && !isOwner && !isAdmin) {
+    if (!isPaid && !isOwner) {
       res.json({
         restricted: true,
         slug: parsed.slug,
@@ -78160,7 +78575,7 @@ app.get("/api/invitations/:slug", (req, res) => {
       });
       return;
     }
-    if (req.query.admin !== "true" && !isOwner) {
+    if (!isOwner) {
       parsed.views = (parsed.views || 0) + 1;
       const todayStr = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
       parsed.dailyViews = parsed.dailyViews || {};
@@ -78192,7 +78607,7 @@ app.get("/api/invitations/:slug", (req, res) => {
       parsed.trafficSources[source] = (parsed.trafficSources[source] || 0) + 1;
       import_fs2.default.writeFileSync(filePath, JSON.stringify(parsed, null, 2), "utf-8");
     }
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
       delete parsed.editPassword;
       delete parsed.ownerEmail;
     }
@@ -78202,7 +78617,7 @@ app.get("/api/invitations/:slug", (req, res) => {
     res.status(500).json({ error: "Failed to read invitation" });
   }
 });
-app.post("/api/invitations/:slug/auth", (req, res) => {
+app.post("/api/invitations/:slug/auth", rateLimitAuthMiddleware, (req, res) => {
   const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
   const { password } = req.body;
   const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
@@ -78424,7 +78839,23 @@ Instructions:
       }
     }
     const oldPaid = !!data.razorpayPaymentId;
-    const newPaidId = data.razorpayPaymentId || fields.razorpayPaymentId || null;
+    let verifiedNewPaymentId = null;
+    if (!oldPaid && fields.razorpayPaymentId) {
+      const { razorpayOrderId, razorpaySignature } = fields;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+      if (razorpayOrderId && razorpaySignature && keySecret) {
+        const expectedSig = import_crypto.default.createHmac("sha256", keySecret).update(`${razorpayOrderId}|${fields.razorpayPaymentId}`).digest("hex");
+        if (expectedSig === razorpaySignature) {
+          verifiedNewPaymentId = fields.razorpayPaymentId;
+        } else {
+          res.status(400).json({ error: "Payment verification failed. Invalid signature." });
+          return;
+        }
+      } else {
+        verifiedNewPaymentId = null;
+      }
+    }
+    const newPaidId = data.razorpayPaymentId || verifiedNewPaymentId || null;
     const newPaid = !!newPaidId;
     let paidAt = data.paidAt || null;
     if (newPaid && !oldPaid) {
@@ -78531,7 +78962,7 @@ app.post("/api/invitations/:slug/add-note", (req, res) => {
     res.status(500).json({ error: "Failed to register blessing." });
   }
 });
-app.post("/api/contact/submit", (req, res) => {
+app.post("/api/contact/submit", rateLimitAuthMiddleware, async (req, res) => {
   const { name, email, subject, message } = req.body;
   if (!name || !email || !subject || !message) {
     res.status(400).json({ error: "Please fill out all fields in the contact form." });
@@ -78603,7 +79034,11 @@ var requireAdminAuth = (req, res, next) => {
     return;
   }
   const token = authHeader.split(" ")[1];
-  const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+  if (!expectedPassword) {
+    res.status(500).json({ error: "Server misconfiguration: admin credentials not set." });
+    return;
+  }
   if (token !== expectedPassword) {
     res.status(403).json({ error: "Access denied. Invalid authentication token." });
     return;
@@ -78741,10 +79176,14 @@ app.get("/api/agency/:agencyId/stats", (req, res) => {
     res.status(500).json({ error: "Failed to generate agency stats report" });
   }
 });
-app.post("/api/admin/login", (req, res) => {
+app.post("/api/admin/login", rateLimitAuthMiddleware, (req, res) => {
   const { username, password } = req.body;
-  const expectedUsername = process.env.ADMIN_USERNAME || "VinayMathad";
-  const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
+  const expectedUsername = process.env.ADMIN_USERNAME;
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+  if (!expectedUsername || !expectedPassword) {
+    res.status(500).json({ error: "Server misconfiguration: admin credentials not set." });
+    return;
+  }
   if (username === expectedUsername && password === expectedPassword) {
     res.json({ success: true, token: expectedPassword });
   } else {
@@ -79253,7 +79692,7 @@ async function sendConfirmationEmail(invitation, appUrl) {
     console.error(`[Email] Failed to send confirmation to ${invitation.ownerEmail}:`, err);
   }
 }
-app.post("/api/invitations/generate", async (req, res) => {
+app.post("/api/invitations/generate", rateLimitAuthMiddleware, async (req, res) => {
   try {
     const {
       bride,
@@ -79290,6 +79729,11 @@ app.post("/api/invitations/generate", async (req, res) => {
     const formattedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
     if (!formattedSlug) {
       res.status(400).json({ error: "A valid URL path is required" });
+      return;
+    }
+    const checkPath = import_path.default.join(INVITATIONS_DIR, `${formattedSlug}.json`);
+    if (import_fs2.default.existsSync(checkPath)) {
+      res.status(409).json({ error: "This URL path is already taken. Please choose a different one." });
       return;
     }
     if (!bride || !groom || !wdate || !city || !vname || !vaddr) {
@@ -79537,9 +79981,9 @@ async function startServer() {
           try {
             const rawData = import_fs2.default.readFileSync(filePath, "utf-8");
             const data = JSON.parse(rawData);
-            const title = `${data.bride} & ${data.groom}'s Wedding Invitation | GetShaadiLink`;
-            const description = `Join us to celebrate our wedding at ${data.vname}, ${data.city} on ${data.niceDate}. Click to view details and RSVP.`;
-            const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
+            const title = `${escapeHtml(data.bride)} & ${escapeHtml(data.groom)}'s Wedding Invitation | GetShaadiLink`;
+            const description = `Join us to celebrate our wedding at ${escapeHtml(data.vname)}, ${escapeHtml(data.city)} on ${escapeHtml(data.niceDate)}. Click to view details and RSVP.`;
+            const ogImage = data.photos && data.photos.length > 0 ? escapeHtml(data.photos[0]) : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
             html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
             html = html.replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${description}" />`);
             const metaTags = `

@@ -241,10 +241,11 @@ export default function OpeningThemes({
     );
   };
 
-  // Renders the standard countdown block below names
-  const renderCountdown = (textColor: string) => {
+
+  // Memoized countdown display to avoid re-rendering the whole parent on every 1s tick
+  const CountdownDisplay = React.memo(({ timeLeft }: { timeLeft: { days: number; hours: number; minutes: number; seconds: number } }) => {
     return (
-      <div className="flex gap-4 justify-center my-3.5 select-none" style={{ color: textColor }}>
+      <div className="flex gap-4 justify-center my-3.5 select-none">
         <div className="flex flex-col items-center">
           <span className="text-2xl sm:text-3xl font-cormorant font-bold leading-none">{String(timeLeft.days).padStart(3, "0")}</span>
           <span className="text-[7.5px] uppercase tracking-widest font-marcellus font-bold opacity-70 mt-1">{t("days")}</span>
@@ -263,7 +264,17 @@ export default function OpeningThemes({
         </div>
       </div>
     );
+  });
+
+  // Renders the standard countdown block below names (using memoized component)
+  const renderCountdown = (textColor: string) => {
+    return (
+      <div style={{ color: textColor }}>
+        <CountdownDisplay timeLeft={timeLeft} />
+      </div>
+    );
   };
+
 
   // Overarching Envelope Wrapper Layout
   const renderEnvelopeFrame = (

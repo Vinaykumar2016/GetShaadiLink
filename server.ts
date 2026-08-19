@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import os from "os";
 import compression from "compression";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -17,9 +18,20 @@ app.disable("x-powered-by");
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "SAMEORIGIN");
-  res.setHeader("X-XSS-Protection", "1; mode=block");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com https://maps.googleapis.com; " +
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+    "font-src 'self' https://fonts.gstatic.com; " +
+    "img-src 'self' data: blob: https:; " +
+    "media-src 'self' blob:; " +
+    "connect-src 'self' https://api.razorpay.com https://generativelanguage.googleapis.com; " +
+    "frame-src https://checkout.razorpay.com https://maps.google.com https://www.google.com;"
+  );
   next();
 });
 
@@ -45,6 +57,27 @@ function rateLimitAuthMiddleware(req: any, res: any, next: any) {
   next();
 }
 const PORT = parseInt(process.env.PORT || "3000", 10);
+
+// Trust first proxy (Hostinger/Cloudflare) so X-Forwarded-For IP extraction is reliable
+app.set("trust proxy", 1);
+
+// Purge stale rate-limit entries every 5 minutes to prevent memory leak
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, record] of authAttemptTracker.entries()) {
+    if (now > record.resetTime) authAttemptTracker.delete(ip);
+  }
+}, 5 * 60 * 1000);
+
+// HTML entity escaper — prevents XSS when injecting user data into HTML
+function escapeHtml(str: string): string {
+  return (str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 // Enable Gzip compression to minimize asset transfer sizes with balanced CPU usage
 app.use(compression({
@@ -77,8 +110,11 @@ const cacheMaxAge = 31536000; // 1 Year in seconds for immutable assets
 const shortCacheMaxAge = 86400; // 1 day for HTML/Data assets
 
 // Increase request sizes for base64 photo uploads
-app.use(express.json({ limit: "25mb" }));
-app.use(express.urlencoded({ limit: "25mb", extended: true }));
+// Default body parser — 2MB limit for standard routes
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
+// 25MB payload limit for photo-upload routes
+app.use(["/api/invitations/generate", "/api/invitations/:slug/update"], express.json({ limit: "25mb" }));
 
 // Data storage directories
 // Persistent data storage directory outside the git deployment folder on production.
@@ -345,7 +381,7 @@ app.get("/api/reviews", (req, res) => {
 });
 
 // API: Public — submit a new review (goes to pending)
-app.post("/api/reviews/submit", (req, res) => {
+app.post("/api/reviews/submit", rateLimitAuthMiddleware, (req, res) => {
   const { name, location, stars, text } = req.body;
   if (!name || !text || !stars) {
     res.status(400).json({ error: "Please fill in all required fields." });
@@ -399,10 +435,10 @@ app.get("/api/invitations/:slug", (req, res) => {
     // Retrieve passcode from query, headers, or body
     const passcode = (req.query.passcode || req.headers["x-passcode"] || "").toString().trim();
     const isOwner = passcode && parsed.editPassword && passcode === parsed.editPassword.trim();
-    const isAdmin = req.query.admin === "true";
 
-    // If unpaid and not owner/admin, return restricted info
-    if (!isPaid && !isOwner && !isAdmin) {
+    // Admin bypass via query param removed — security hardening
+    // If unpaid and not owner, return restricted info
+    if (!isPaid && !isOwner) {
       res.json({
         restricted: true,
         slug: parsed.slug,
@@ -415,7 +451,7 @@ app.get("/api/invitations/:slug", (req, res) => {
     }
     
     // Increment view count unless requested by dashboard/admin/owner preview
-    if (req.query.admin !== "true" && !isOwner) {
+    if (!isOwner) {
       parsed.views = (parsed.views || 0) + 1;
       
       // Update dailyViews
@@ -454,7 +490,7 @@ app.get("/api/invitations/:slug", (req, res) => {
     }
 
     // Strip passcode and email from public response for security
-    if (!isOwner && !isAdmin) {
+    if (!isOwner) {
       delete parsed.editPassword;
       delete parsed.ownerEmail;
     }
@@ -748,7 +784,29 @@ Instructions:
     }
 
     const oldPaid = !!data.razorpayPaymentId;
-    const newPaidId = data.razorpayPaymentId || fields.razorpayPaymentId || null;
+    
+    // Razorpay HMAC signature verification — prevents fake payment activation
+    let verifiedNewPaymentId: string | null = null;
+    if (!oldPaid && fields.razorpayPaymentId) {
+      const { razorpayOrderId, razorpaySignature } = fields;
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+      if (razorpayOrderId && razorpaySignature && keySecret) {
+        const expectedSig = crypto
+          .createHmac("sha256", keySecret)
+          .update(`${razorpayOrderId}|${fields.razorpayPaymentId}`)
+          .digest("hex");
+        if (expectedSig === razorpaySignature) {
+          verifiedNewPaymentId = fields.razorpayPaymentId;
+        } else {
+          res.status(400).json({ error: "Payment verification failed. Invalid signature." });
+          return;
+        }
+      } else {
+        verifiedNewPaymentId = null;
+      }
+    }
+    
+    const newPaidId = data.razorpayPaymentId || verifiedNewPaymentId || null;
     const newPaid = !!newPaidId;
     let paidAt = data.paidAt || null;
     if (newPaid && !oldPaid) {
@@ -875,7 +933,7 @@ app.post("/api/invitations/:slug/add-note", (req, res) => {
 });
 
 // API: Submit a support/contact query
-app.post("/api/contact/submit", (req, res) => {
+app.post("/api/contact/submit", rateLimitAuthMiddleware, async (req, res) => {
   const { name, email, subject, message } = req.body;
   if (!name || !email || !subject || !message) {
     res.status(400).json({ error: "Please fill out all fields in the contact form." });
@@ -958,7 +1016,11 @@ const requireAdminAuth = (req: express.Request, res: express.Response, next: exp
     return;
   }
   const token = authHeader.split(" ")[1];
-  const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+  if (!expectedPassword) {
+    res.status(500).json({ error: "Server misconfiguration: admin credentials not set." });
+    return;
+  }
   if (token !== expectedPassword) {
     res.status(403).json({ error: "Access denied. Invalid authentication token." });
     return;
@@ -1140,8 +1202,13 @@ app.get("/api/agency/:agencyId/stats", (req, res) => {
 // API: Admin Login
 app.post("/api/admin/login", rateLimitAuthMiddleware, (req, res) => {
   const { username, password } = req.body;
-  const expectedUsername = process.env.ADMIN_USERNAME || "VinayMathad";
-  const expectedPassword = process.env.ADMIN_PASSWORD || "Vinay@admin";
+  const expectedUsername = process.env.ADMIN_USERNAME;
+  const expectedPassword = process.env.ADMIN_PASSWORD;
+
+  if (!expectedUsername || !expectedPassword) {
+    res.status(500).json({ error: "Server misconfiguration: admin credentials not set." });
+    return;
+  }
 
   if (username === expectedUsername && password === expectedPassword) {
     res.json({ success: true, token: expectedPassword });
@@ -1714,7 +1781,7 @@ async function sendConfirmationEmail(invitation: any, appUrl: string) {
 }
 
 // API: Generate invitation using Gemini and persist it
-app.post("/api/invitations/generate", async (req, res) => {
+app.post("/api/invitations/generate", rateLimitAuthMiddleware, async (req, res) => {
   try {
     const {
       bride, groom, wdate, city, vname, vaddr, lang, story, storyText,
@@ -1726,6 +1793,13 @@ app.post("/api/invitations/generate", async (req, res) => {
     const formattedSlug = slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
     if (!formattedSlug) {
       res.status(400).json({ error: "A valid URL path is required" });
+      return;
+    }
+
+    // Prevent overwriting an existing invitation with the same slug
+    const checkPath = path.join(INVITATIONS_DIR, `${formattedSlug}.json`);
+    if (fs.existsSync(checkPath)) {
+      res.status(409).json({ error: "This URL path is already taken. Please choose a different one." });
       return;
     }
 
@@ -2009,9 +2083,9 @@ async function startServer() {
             const rawData = fs.readFileSync(filePath, "utf-8");
             const data = JSON.parse(rawData);
             
-            const title = `${data.bride} & ${data.groom}'s Wedding Invitation | GetShaadiLink`;
-            const description = `Join us to celebrate our wedding at ${data.vname}, ${data.city} on ${data.niceDate}. Click to view details and RSVP.`;
-            const ogImage = data.photos && data.photos.length > 0 ? data.photos[0] : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
+            const title = `${escapeHtml(data.bride)} & ${escapeHtml(data.groom)}'s Wedding Invitation | GetShaadiLink`;
+            const description = `Join us to celebrate our wedding at ${escapeHtml(data.vname)}, ${escapeHtml(data.city)} on ${escapeHtml(data.niceDate)}. Click to view details and RSVP.`;
+            const ogImage = data.photos && data.photos.length > 0 ? escapeHtml(data.photos[0]) : `${req.protocol}://${req.get("host")}/samples/couple1.jpg`;
             
             html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);
             html = html.replace(/<meta name="description" content=".*?" \/>/, `<meta name="description" content="${description}" />`);
