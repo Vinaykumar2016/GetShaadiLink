@@ -139,25 +139,34 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
     setToken(null);
   };
 
-  const handleDeleteInvitation = async (slug: string) => {
-    if (!confirm(`Are you sure you want to permanently delete invitation: /${slug}? This action cannot be undone.`)) {
-      return;
-    }
+  const [deleteConfirmSlug, setDeleteConfirmSlug] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteInvitation = (slug: string) => {
+    playClickSound();
+    setDeleteConfirmSlug(slug);
+  };
+
+  const confirmAndDeleteInvitation = async () => {
+    if (!deleteConfirmSlug) return;
+    setIsDeleting(true);
     playClickSound();
     try {
-      const res = await fetch(`/api/admin/invitations/${slug}`, {
+      const res = await fetch(`/api/admin/invitations/${deleteConfirmSlug}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
-        setInvitations(prev => prev.filter(inv => inv.slug !== slug));
-        // Refresh stats
+        setInvitations(prev => prev.filter(inv => inv.slug !== deleteConfirmSlug));
+        setDeleteConfirmSlug(null);
         if (token) fetchAllData(token);
       } else {
-        alert("Failed to delete invitation.");
+        alert("Failed to delete invitation from server.");
       }
     } catch (err) {
       alert("Error occurred while deleting.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -1147,6 +1156,40 @@ export default function AdminDashboard({ onClose }: AdminDashboardProps) {
               }}
               onCancelEdit={() => setEditingInvitation(null)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmSlug && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#161136] border border-rose-500/30 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl space-y-4">
+            <div className="w-14 h-14 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-2xl">
+              ⚠️
+            </div>
+            <h3 className="text-xl font-bold font-marcellus text-white">Permanently Delete Invitation?</h3>
+            <p className="text-sm text-stone-300 leading-relaxed">
+              Are you sure you want to delete <span className="text-amber-400 font-mono font-semibold">/{deleteConfirmSlug}</span>?
+            </p>
+            <div className="p-3 bg-stone-900/60 rounded-xl text-xs text-stone-400 border border-white/5">
+              This will permanently erase the card data on the server and send a <code className="text-rose-400 font-mono">404 noindex</code> header to Google to remove it from Search results.
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => { playClickSound(); setDeleteConfirmSlug(null); }}
+                disabled={isDeleting}
+                className="flex-1 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 font-medium text-sm transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAndDeleteInvitation}
+                disabled={isDeleting}
+                className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete Card"}
+              </button>
+            </div>
           </div>
         </div>
       )}

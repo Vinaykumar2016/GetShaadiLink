@@ -80001,6 +80001,14 @@ async function startServer() {
           } catch (err) {
             console.error("Error injecting metadata:", err);
           }
+        } else {
+          res.status(404);
+          res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+          const noIndexTags = `
+            <title>404 \u2014 Invitation Not Found | GetShaadiLink</title>
+            <meta name="robots" content="noindex, nofollow, noarchive" />
+          `;
+          html = html.replace("</head>", `${noIndexTags}</head>`);
         }
       } else {
         const homeHost = req.get("host") || "getshaadilink.in";

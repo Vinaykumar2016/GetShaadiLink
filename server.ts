@@ -2106,6 +2106,15 @@ async function startServer() {
           } catch (err) {
             console.error("Error injecting metadata:", err);
           }
+        } else {
+          // Slug was deleted or does not exist — respond with 404 + noindex tags for search engines
+          res.status(404);
+          res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+          const noIndexTags = `
+            <title>404 — Invitation Not Found | GetShaadiLink</title>
+            <meta name="robots" content="noindex, nofollow, noarchive" />
+          `;
+          html = html.replace("</head>", `${noIndexTags}</head>`);
         }
       } else {
         // SEO: Inject enhanced home page meta tags + JSON-LD structured data
