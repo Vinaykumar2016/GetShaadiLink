@@ -1000,11 +1000,13 @@ export default function App() {
       )}
 
       {/* Top navigation bar */}
-      <nav className="border-b border-amber-500/15 shadow-[0_4px_30px_rgba(0,0,0,0.5)] bg-[#060414]/85 sticky top-0 z-50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
-          <div onClick={() => { playClickSound(); window.location.href = "/"; }} className="cursor-pointer flex items-center gap-2 select-none">
-            <Heart className="w-4.5 h-4.5 text-amber-400 fill-amber-400/20 animate-pulse" />
-            <span className="font-marcellus font-bold text-white tracking-[3px] text-base uppercase">ShaadiLink</span>
+      <nav className="border-b border-amber-500/15 shadow-[0_4px_30px_rgba(0,0,0,0.5)] bg-[#060414]/90 sticky top-0 z-50 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+          <div onClick={() => { playClickSound(); window.location.href = "/"; }} className="cursor-pointer flex items-center gap-2.5 select-none group">
+            <img src="/logo_transparent.png" alt="GetShaadiLink Logo" className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
+            <span className="font-marcellus font-bold text-white tracking-[2.5px] text-base sm:text-lg uppercase flex items-center">
+              Get<span className="text-amber-400">Shaadi</span>Link
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -1890,9 +1892,12 @@ export default function App() {
 
       {/* Footer */}
       <footer className="border-t border-white/10 bg-[#060414]/90 py-16 text-center select-none text-stone-400 relative z-20">
-        <p className="font-marcellus font-bold text-amber-400 tracking-[4px] text-lg uppercase mb-1">
-          ShaadiLink
-        </p>
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <img src="/logo_transparent.png" alt="GetShaadiLink Logo" className="h-10 w-auto object-contain" />
+          <span className="font-marcellus font-bold text-white tracking-[3px] text-xl uppercase">
+            Get<span className="text-amber-400">Shaadi</span>Link
+          </span>
+        </div>
         <p className="text-[10px] text-stone-500 mt-1 tracking-widest font-semibold font-marcellus">Premium Interactive Digital Wedding Invitations</p>
 
         {/* Instagram Follow */}
