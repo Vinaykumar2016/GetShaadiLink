@@ -382,6 +382,14 @@ export default function BuilderForm({ onSuccess, initialData, onCancelEdit, pres
         console.warn("Failed to save passcode to localStorage:", e);
       }
 
+      try {
+        if ((window as any).fbq) {
+          (window as any).fbq("track", "Lead", { content_name: payload.slug, currency: "INR", value: 999 });
+        }
+      } catch (fbErr) {
+        console.warn("Meta Pixel tracking notice:", fbErr);
+      }
+
       onSuccess(payload.slug);
     };
 
