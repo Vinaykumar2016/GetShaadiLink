@@ -301,7 +301,7 @@ export default function OpeningThemes({
       >
         {/* Full-bleed background photo layer with slow Ken Burns zoom */}
         <motion.div
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 z-0 bg-cover bg-top sm:bg-center bg-no-repeat"
           style={{ backgroundImage: `url(${activeCoverPhoto})` }}
           animate={{ scale: [1, 1.08, 1] }}
           transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}

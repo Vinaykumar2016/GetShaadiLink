@@ -13,6 +13,7 @@ interface PhotoCarouselProps {
 
 function PhotoCarousel({ photos, themeAccent, themeType }: PhotoCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const touchStart = useRef<number | null>(null);
   const touchEnd = useRef<number | null>(null);
@@ -130,83 +131,107 @@ function PhotoCarousel({ photos, themeAccent, themeType }: PhotoCarouselProps) {
   };
 
   return (
-    <motion.div
-      initial={{ scale: 0.82, opacity: 0 }}
-      whileInView={{ scale: 1, opacity: 1 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.9, ease: "easeOut" }}
-      className="relative w-full max-w-md mx-auto aspect-square p-4 bg-gradient-to-b from-[#F4EFE6] to-white rounded-[32px] border border-brand-rust/15 shadow-paper select-none group"
-    >
-      {renderThemeFrame()}
+    <>
+      <motion.div
+        initial={{ scale: 0.82, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.9, ease: "easeOut" }}
+        className="relative w-full max-w-md mx-auto aspect-[3/4] p-3 sm:p-4 bg-gradient-to-b from-[#F4EFE6] to-white rounded-[32px] border border-brand-rust/15 shadow-paper select-none group"
+      >
+        {renderThemeFrame()}
 
-      {/* Inner Carousel Content */}
-      <div className="relative w-full h-full overflow-hidden rounded-[20px] bg-brand-gold-light border border-brand-gold/20 shadow-inner">
-        <div 
-          className="w-full h-full flex transition-transform duration-700 ease-out"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-        >
-          {photos.map((ph, index) => (
-            <div key={index} className="w-full h-full shrink-0 relative overflow-hidden bg-[#FAF6F0]">
-              {/* Rotating Gold Mandala placeholder behind the photo */}
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#FAF6F0] to-[#E8D8CC] z-0">
-                <svg viewBox="0 0 100 100" className="w-24 h-24 fill-none stroke-[#FFE082]/70 stroke-[0.8] animate-spin-slow">
-                  <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
-                  <path d="M50,10 A40,40 0 0,0 10,50 A40,40 0 0,0 50,90 A40,40 0 0,0 90,50 Z" />
-                  <circle cx="50" cy="50" r="15" />
-                  <path d="M35,50 L65,50 M50,35 L50,65" />
-                </svg>
-              </div>
+        {/* Inner Carousel Content */}
+        <div className="relative w-full h-full overflow-hidden rounded-[20px] bg-brand-gold-light border border-brand-gold/20 shadow-inner">
+          <div 
+            className="w-full h-full flex transition-transform duration-700 ease-out"
+            style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          >
+            {photos.map((ph, index) => (
+              <div key={index} className="w-full h-full shrink-0 relative overflow-hidden bg-[#FAF6F0]">
+                {/* Rotating Gold Mandala placeholder behind the photo */}
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#FAF6F0] to-[#E8D8CC] z-0">
+                  <svg viewBox="0 0 100 100" className="w-24 h-24 fill-none stroke-[#FFE082]/70 stroke-[0.8] animate-spin-slow">
+                    <circle cx="50" cy="50" r="40" strokeDasharray="3,3" />
+                    <path d="M50,10 A40,40 0 0,0 10,50 A40,40 0 0,0 50,90 A40,40 0 0,0 90,50 Z" />
+                    <circle cx="50" cy="50" r="15" />
+                    <path d="M35,50 L65,50 M50,35 L50,65" />
+                  </svg>
+                </div>
 
-              {/* Photo fades in smoothly */}
-              <motion.img 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.6, ease: "easeInOut" }}
-                src={ph} 
-                alt={`Couple Moment ${index + 1}`} 
-                className="w-full h-full object-cover relative z-10" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none z-15" />
-            </div>
-          ))}
-        </div>
-
-        {photos.length > 1 && (
-          <>
-            {/* Arrows */}
-            <button 
-              onClick={prevSlide}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white/70 hover:bg-white border border-brand-rust/10 text-brand-rust transition-all active:scale-90 cursor-pointer z-20"
-              aria-label="Previous slide"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button 
-              onClick={nextSlide}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white/70 hover:bg-white border border-brand-rust/10 text-brand-rust transition-all active:scale-90 cursor-pointer z-20"
-              aria-label="Next slide"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-
-            {/* Dots */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-              {photos.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => { playClickSound(); setCurrentIndex(i); }}
-                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                    currentIndex === i ? "w-4 bg-brand-rust" : "w-1.5 bg-brand-rust/30"
-                  }`}
-                  aria-label={`Go to slide ${i + 1}`}
+                {/* Photo fades in smoothly */}
+                <motion.img 
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.6, ease: "easeInOut" }}
+                  src={ph} 
+                  alt={`Couple Moment ${index + 1}`} 
+                  onClick={() => { playClickSound(); setLightboxImage(ph); }}
+                  className="w-full h-full object-cover object-top sm:object-center relative z-10 cursor-zoom-in" 
                 />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </motion.div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none z-15" />
+              </div>
+            ))}
+          </div>
+
+          {photos.length > 1 && (
+            <>
+              {/* Arrows */}
+              <button 
+                onClick={prevSlide}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white/70 hover:bg-white border border-brand-rust/10 text-brand-rust transition-all active:scale-90 cursor-pointer z-20"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button 
+                onClick={nextSlide}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center bg-white/70 hover:bg-white border border-brand-rust/10 text-brand-rust transition-all active:scale-90 cursor-pointer z-20"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+
+              {/* Dots */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+                {photos.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { playClickSound(); setCurrentIndex(i); }}
+                    className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                      currentIndex === i ? "w-4 bg-brand-rust" : "w-1.5 bg-brand-rust/30"
+                    }`}
+                    aria-label={`Go to slide ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
+
+      {/* Full-Screen Lightbox Modal for Uncropped Full Resolution Viewing */}
+      {lightboxImage && (
+        <div 
+          className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-5 right-5 text-white/80 hover:text-white text-2xl font-bold p-2 z-50 cursor-pointer"
+            aria-label="Close full photo view"
+          >
+            ✕
+          </button>
+          <img 
+            src={lightboxImage} 
+            alt="Full resolution couple photograph" 
+            className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl border border-white/20"
+          />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1491,16 +1516,16 @@ function PopoutPhotoFrame({ photo, themeType, themeAccent }: { photo: string; th
   return (
     <div 
       ref={containerRef}
-      className="relative w-full max-w-md mx-auto aspect-[4/5] bg-gradient-to-b from-[#FDFBF7] to-[#F5EFEB] rounded-[40px] border border-[#8A3A1A]/10 shadow-paper overflow-hidden flex flex-col items-center justify-center p-8 my-10"
+      className="relative w-full max-w-md mx-auto aspect-[3/4] bg-gradient-to-b from-[#FDFBF7] to-[#F5EFEB] rounded-[40px] border border-[#8A3A1A]/10 shadow-paper overflow-hidden flex flex-col items-center justify-between p-4 sm:p-6 my-10"
     >
-      <span className="text-[9px] font-marcellus tracking-[4px] text-brand-rust/50 uppercase font-bold mb-4 block">
+      <span className="text-[9px] font-marcellus tracking-[4px] text-brand-rust/50 uppercase font-bold mb-2.5 block shrink-0">
         Our Sacred Moment
       </span>
 
       {/* Frame Base */}
       <motion.div 
         style={{ scale: frameScale }}
-        className="relative w-full h-[75%] rounded-[32px] bg-[#EFEBE4] shadow-inner overflow-visible flex items-center justify-center border border-stone-200/50"
+        className="relative w-full flex-1 rounded-[32px] bg-[#EFEBE4] shadow-inner overflow-visible flex items-center justify-center border border-stone-200/50 min-h-[320px]"
       >
         {renderPopoutFrameDecor()}
 
@@ -1512,21 +1537,21 @@ function PopoutPhotoFrame({ photo, themeType, themeAccent }: { photo: string; th
             boxShadow: photoShadow,
             willChange: "transform",
           }}
-          className="w-[85%] h-[85%] rounded-[24px] overflow-hidden border-4 border-white relative z-30"
+          className="w-[92%] h-[92%] rounded-[24px] overflow-hidden border-4 border-white relative z-30 flex items-center justify-center bg-stone-900"
         >
           <img 
             src={photo} 
             alt="Couple Sacred Moment" 
-            className="w-full h-full object-cover transform scale-105 hover:scale-110 transition-transform duration-700" 
+            className="w-full h-full object-cover object-top sm:object-center transform scale-105 hover:scale-110 transition-transform duration-700" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute bottom-3 inset-x-3 text-center">
-            <span className="font-cursive text-white text-2xl drop-shadow-md">Made for Each Other</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute bottom-2.5 inset-x-3 text-center">
+            <span className="font-cursive text-white text-xl sm:text-2xl drop-shadow-md">Made for Each Other</span>
           </div>
         </motion.div>
       </motion.div>
 
-      <span className="text-[8px] font-marcellus tracking-[3px] text-brand-rust/40 uppercase font-bold mt-4 animate-pulse">
+      <span className="text-[8px] font-marcellus tracking-[3px] text-brand-rust/40 uppercase font-bold mt-2.5 animate-pulse shrink-0">
         Scroll to pop photo out of frame
       </span>
     </div>
