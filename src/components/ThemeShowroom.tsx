@@ -873,7 +873,7 @@ export default function ThemeShowroom({ onSelectTheme, onLaunchDemo }: ThemeShow
             <div className="flex flex-col gap-2 mt-6 pt-4 border-t border-white/10">
               <button
                 onClick={() => handleBuildClick(t.id)}
-                className="w-full py-3 rounded-xl font-cinzel font-bold text-[10px] tracking-wider uppercase text-stone-950 bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-98"
+                className="w-full py-3 rounded-xl font-cinzel font-bold text-[10px] tracking-wider uppercase text-stone-950 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-98"
               >
                 <Wand2 className="w-3.5 h-3.5" />
                 <span>Customize Free ✦</span>
