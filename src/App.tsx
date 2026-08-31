@@ -1001,15 +1001,15 @@ export default function App() {
 
       {/* Top navigation bar */}
       <nav className="border-b border-amber-500/15 shadow-[0_4px_30px_rgba(0,0,0,0.5)] bg-[#060414]/90 sticky top-0 z-50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div onClick={() => { playClickSound(); window.location.href = "/"; }} className="cursor-pointer flex items-center gap-2.5 select-none group">
-            <img src="/logo_transparent.png" alt="GetShaadiLink Logo" className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105" />
-            <span className="font-marcellus font-bold text-white tracking-[2.5px] text-base sm:text-lg uppercase flex items-center">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+          <div onClick={() => { playClickSound(); window.location.href = "/"; }} className="cursor-pointer flex items-center gap-1.5 sm:gap-2.5 select-none group shrink">
+            <img src="/logo_transparent.png" alt="GetShaadiLink Logo" className="h-7 sm:h-9 w-auto object-contain transition-transform group-hover:scale-105 shrink-0" />
+            <span className="font-marcellus font-bold text-white tracking-[1.5px] sm:tracking-[2.5px] text-xs sm:text-base uppercase flex items-center whitespace-nowrap">
               Get<span className="text-amber-400">Shaadi</span>Link
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center shrink-0">
             <button
               onClick={() => {
                 playClickSound();
@@ -1017,14 +1017,10 @@ export default function App() {
                 setLoginError("");
                 setDashboardUserCards([]);
               }}
-              className="text-[10px] font-bold tracking-widest uppercase font-marcellus text-amber-300 hover:bg-white/5 px-4 py-2 rounded-full border border-amber-300/30 cursor-pointer active:scale-95 transition-all"
+              className="text-[9px] sm:text-[10px] font-bold tracking-wider sm:tracking-widest uppercase font-marcellus text-amber-300 hover:bg-white/5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full border border-amber-300/30 cursor-pointer active:scale-95 transition-all whitespace-nowrap"
             >
               🔑 Manage Card
             </button>
-            <span className="text-[7.5px] sm:text-[9px] tracking-wider sm:tracking-widest font-marcellus text-amber-400 bg-amber-400/10 border border-amber-400/20 px-2 sm:px-3.5 py-1.5 sm:py-2 rounded-full select-none font-bold">
-              <span className="inline md:hidden">Free Preview</span>
-              <span className="hidden md:inline">FREE TO BUILD &amp; PREVIEW</span>
-            </span>
           </div>
         </div>
       </nav>
