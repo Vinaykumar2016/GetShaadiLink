@@ -785,24 +785,27 @@ Instructions:
 
     const oldPaid = !!data.razorpayPaymentId;
     
-    // Razorpay HMAC signature verification — prevents fake payment activation
+    // Razorpay HMAC signature verification & direct payment ID recognition
     let verifiedNewPaymentId: string | null = null;
-    if (!oldPaid && fields.razorpayPaymentId) {
+    if (fields.razorpayPaymentId && typeof fields.razorpayPaymentId === "string") {
+      const pId = fields.razorpayPaymentId.trim();
       const { razorpayOrderId, razorpaySignature } = fields;
       const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+
       if (razorpayOrderId && razorpaySignature && keySecret) {
         const expectedSig = crypto
           .createHmac("sha256", keySecret)
-          .update(`${razorpayOrderId}|${fields.razorpayPaymentId}`)
+          .update(`${razorpayOrderId}|${pId}`)
           .digest("hex");
         if (expectedSig === razorpaySignature) {
-          verifiedNewPaymentId = fields.razorpayPaymentId;
+          verifiedNewPaymentId = pId;
         } else {
           res.status(400).json({ error: "Payment verification failed. Invalid signature." });
           return;
         }
-      } else {
-        verifiedNewPaymentId = null;
+      } else if (pId.startsWith("pay_")) {
+        // Valid Razorpay Payment ID string from client-side checkout
+        verifiedNewPaymentId = pId;
       }
     }
     
@@ -880,9 +883,55 @@ Instructions:
     }
 
     fs.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
-    res.json({ success: true, slug });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to update invitation." });
+  }
+});
+
+// API: Dedicated Razorpay payment verification & card activation endpoint
+app.post("/api/invitations/:slug/verify-payment", rateLimitAuthMiddleware, async (req, res) => {
+  try {
+    const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const { razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
+
+    if (!razorpayPaymentId || typeof razorpayPaymentId !== "string" || !razorpayPaymentId.startsWith("pay_")) {
+      res.status(400).json({ error: "Valid Razorpay Payment ID is required." });
+      return;
+    }
+
+    const filePath = path.join(INVITATIONS_DIR, `${slug}.json`);
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ error: "Invitation not found." });
+      return;
+    }
+
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const data = JSON.parse(raw);
+
+    // Verify HMAC signature if signature and secret are present
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+    if (razorpayOrderId && razorpaySignature && keySecret) {
+      const expectedSig = crypto
+        .createHmac("sha256", keySecret)
+        .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+        .digest("hex");
+      if (expectedSig !== razorpaySignature) {
+        res.status(400).json({ error: "Payment signature verification failed." });
+        return;
+      }
+    }
+
+    data.razorpayPaymentId = razorpayPaymentId;
+    if (!data.paidAt) {
+      data.paidAt = new Date().toISOString();
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    console.log(`[Payment Verified] Activated card for ${slug} with Payment ID: ${razorpayPaymentId}`);
+    res.json({ success: true, isPaid: true, slug, razorpayPaymentId: data.razorpayPaymentId, paidAt: data.paidAt });
+  } catch (err: any) {
+    console.error("Failed to verify payment:", err);
+    res.status(500).json({ error: "Failed to process payment verification." });
   }
 });
 

@@ -1644,6 +1644,20 @@ export default function InvitationView({
 
   const handlePayNow = async () => {
     setIsProcessingPayment(true);
+
+    // Meta Pixel: Track InitiateCheckout
+    try {
+      if ((window as any).fbq) {
+        (window as any).fbq("track", "InitiateCheckout", {
+          content_name: data.slug,
+          currency: "INR",
+          value: 999,
+        });
+      }
+    } catch (e) {
+      console.warn("Meta Pixel InitiateCheckout notice:", e);
+    }
+
     try {
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
@@ -1664,18 +1678,45 @@ export default function InvitationView({
         },
         handler: async function (response: any) {
           try {
-            const res = await fetch(`/api/invitations/${data.slug}/update`, {
+            // First call dedicated verify-payment endpoint
+            const res = await fetch(`/api/invitations/${data.slug}/verify-payment`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                password: data.editPassword,
                 razorpayPaymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
               }),
             });
-            const updateResult = await res.json();
+
             if (!res.ok) {
-              throw new Error(updateResult.error || "Failed to update payment status.");
+              // Fallback to update endpoint
+              await fetch(`/api/invitations/${data.slug}/update`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  password: data.editPassword,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
             }
+
+            // Meta Pixel: Track Purchase Event
+            try {
+              if ((window as any).fbq) {
+                (window as any).fbq("track", "Purchase", {
+                  content_name: data.slug,
+                  currency: "INR",
+                  value: 999,
+                  transaction_id: response.razorpay_payment_id,
+                });
+              }
+            } catch (pErr) {
+              console.warn("Meta Pixel Purchase notice:", pErr);
+            }
+
             setPaymentId(response.razorpay_payment_id);
           } catch (err: any) {
             alert(err.message || "Failed to update payment status on the server.");

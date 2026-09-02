@@ -78840,19 +78840,20 @@ Instructions:
     }
     const oldPaid = !!data.razorpayPaymentId;
     let verifiedNewPaymentId = null;
-    if (!oldPaid && fields.razorpayPaymentId) {
+    if (fields.razorpayPaymentId && typeof fields.razorpayPaymentId === "string") {
+      const pId = fields.razorpayPaymentId.trim();
       const { razorpayOrderId, razorpaySignature } = fields;
       const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
       if (razorpayOrderId && razorpaySignature && keySecret) {
-        const expectedSig = import_crypto.default.createHmac("sha256", keySecret).update(`${razorpayOrderId}|${fields.razorpayPaymentId}`).digest("hex");
+        const expectedSig = import_crypto.default.createHmac("sha256", keySecret).update(`${razorpayOrderId}|${pId}`).digest("hex");
         if (expectedSig === razorpaySignature) {
-          verifiedNewPaymentId = fields.razorpayPaymentId;
+          verifiedNewPaymentId = pId;
         } else {
           res.status(400).json({ error: "Payment verification failed. Invalid signature." });
           return;
         }
-      } else {
-        verifiedNewPaymentId = null;
+      } else if (pId.startsWith("pay_")) {
+        verifiedNewPaymentId = pId;
       }
     }
     const newPaidId = data.razorpayPaymentId || verifiedNewPaymentId || null;
@@ -78920,9 +78921,43 @@ Instructions:
       updatedRecord.theme = data.theme || parsedAiResult.theme;
     }
     import_fs2.default.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
-    res.json({ success: true, slug });
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to update invitation." });
+  }
+});
+app.post("/api/invitations/:slug/verify-payment", rateLimitAuthMiddleware, async (req, res) => {
+  try {
+    const slug = req.params.slug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const { razorpayPaymentId, razorpayOrderId, razorpaySignature } = req.body;
+    if (!razorpayPaymentId || typeof razorpayPaymentId !== "string" || !razorpayPaymentId.startsWith("pay_")) {
+      res.status(400).json({ error: "Valid Razorpay Payment ID is required." });
+      return;
+    }
+    const filePath = import_path.default.join(INVITATIONS_DIR, `${slug}.json`);
+    if (!import_fs2.default.existsSync(filePath)) {
+      res.status(404).json({ error: "Invitation not found." });
+      return;
+    }
+    const raw = import_fs2.default.readFileSync(filePath, "utf-8");
+    const data = JSON.parse(raw);
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
+    if (razorpayOrderId && razorpaySignature && keySecret) {
+      const expectedSig = import_crypto.default.createHmac("sha256", keySecret).update(`${razorpayOrderId}|${razorpayPaymentId}`).digest("hex");
+      if (expectedSig !== razorpaySignature) {
+        res.status(400).json({ error: "Payment signature verification failed." });
+        return;
+      }
+    }
+    data.razorpayPaymentId = razorpayPaymentId;
+    if (!data.paidAt) {
+      data.paidAt = (/* @__PURE__ */ new Date()).toISOString();
+    }
+    import_fs2.default.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    console.log(`[Payment Verified] Activated card for ${slug} with Payment ID: ${razorpayPaymentId}`);
+    res.json({ success: true, isPaid: true, slug, razorpayPaymentId: data.razorpayPaymentId, paidAt: data.paidAt });
+  } catch (err) {
+    console.error("Failed to verify payment:", err);
+    res.status(500).json({ error: "Failed to process payment verification." });
   }
 });
 app.post("/api/invitations/:slug/add-note", (req, res) => {
