@@ -883,6 +883,13 @@ Instructions:
     }
 
     fs.writeFileSync(filePath, JSON.stringify(updatedRecord, null, 2), "utf-8");
+
+    if (newPaid && !oldPaid) {
+      const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+      sendPaymentReceiptEmail(updatedRecord, appUrl).catch((e) => console.error("[Email Receipt] Update route dispatch error:", e));
+    }
+
+    res.json({ success: true, slug });
   } catch (err: any) {
     res.status(500).json({ error: err.message || "Failed to update invitation." });
   }
@@ -928,6 +935,13 @@ app.post("/api/invitations/:slug/verify-payment", rateLimitAuthMiddleware, async
 
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
     console.log(`[Payment Verified] Activated card for ${slug} with Payment ID: ${razorpayPaymentId}`);
+
+    // Asynchronously dispatch payment receipt email
+    const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+    sendPaymentReceiptEmail(data, appUrl).catch((emailErr) => {
+      console.error("[Email Receipt] Async dispatch error:", emailErr);
+    });
+
     res.json({ success: true, isPaid: true, slug, razorpayPaymentId: data.razorpayPaymentId, paidAt: data.paidAt });
   } catch (err: any) {
     console.error("Failed to verify payment:", err);
@@ -1451,7 +1465,11 @@ app.post("/api/admin/invitations/:slug/send-email", requireAdminAuth, async (req
     }
 
     const appUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
-    await sendConfirmationEmail(data, appUrl);
+    if (data.razorpayPaymentId) {
+      await sendPaymentReceiptEmail(data, appUrl);
+    } else {
+      await sendConfirmationEmail(data, appUrl);
+    }
 
     res.json({ success: true, message: `Email sent to ${data.ownerEmail}` });
   } catch (err: any) {
@@ -1783,50 +1801,168 @@ function getEmailHtmlTemplate(invitation: any, liveLink: string, editLink: strin
 </html>`;
 }
 
-// Function to send confirmation email via Hostinger SMTP
-async function sendConfirmationEmail(invitation: any, appUrl: string) {
+// Helper to get payment receipt HTML email template
+function getPaymentReceiptHtmlTemplate(invitation: any, liveLink: string, editLink: string, passcode: string): string {
+  const currentYear = new Date().getFullYear();
+  const paymentId = invitation.razorpayPaymentId || "N/A";
+  const dateStr = invitation.paidAt
+    ? new Date(invitation.paidAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+    : new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Receipt & Premium Activated!</title>
+  <style>
+    body { background-color: #FAF6F0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+    .email-container { max-width: 600px; margin: 20px auto; background: #FFFFFF; border: 1px solid #E8DFD3; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(112, 66, 20, 0.05); }
+    .header-banner { background: linear-gradient(135deg, #10B981 0%, #047857 100%); padding: 35px 20px; text-align: center; border-bottom: 3px solid #6EE7B7; }
+    .header-banner h1 { color: #FFFFFF; margin: 0; font-size: 26px; font-weight: 300; letter-spacing: 2px; }
+    .header-banner p { color: #D1FAE5; margin: 5px 0 0 0; font-size: 14px; letter-spacing: 1px; }
+    .content-body { padding: 35px 25px; color: #332211; line-height: 1.6; }
+    .receipt-box { background-color: #ECFDF5; border: 2px dashed #10B981; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .receipt-row { margin-bottom: 8px; font-size: 14px; }
+    .receipt-label { font-weight: 600; color: #065F46; }
+    .receipt-val { font-weight: 700; color: #047857; font-family: monospace; }
+    .passcode-badge { display: inline-block; background-color: #E8DFD3; color: #704214; font-family: monospace; font-size: 16px; padding: 4px 10px; border-radius: 4px; font-weight: bold; }
+    .btn-main { display: inline-block; background-color: #8A3A1A; color: #FFFFFF !important; text-decoration: none !important; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 15px; margin: 10px 5px; }
+    .btn-secondary { display: inline-block; background-color: #059669; color: #FFFFFF !important; text-decoration: none !important; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 15px; margin: 10px 5px; }
+    .footer { background-color: #FAF6F0; border-top: 1px solid #E8DFD3; padding: 25px; text-align: center; font-size: 12px; color: #8A735E; }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header-banner">
+      <h1>👑 Premium Card Activated!</h1>
+      <p>GETSHAADILINK OFFICIAL RECEIPT</p>
+    </div>
+    <div class="content-body">
+      <h2 style="color: #704214; margin-top: 0;">Congratulations, ${invitation.bride} &amp; ${invitation.groom}! 🎉</h2>
+      <p>Your payment of <strong>₹999</strong> has been verified successfully. Your premium digital wedding invitation is now <strong>100% Active with Lifetime Access</strong> and zero advertisements!</p>
+
+      <div class="receipt-box">
+        <div style="font-size: 15px; font-weight: bold; color: #065F46; margin-bottom: 12px; border-bottom: 1px solid #A7F3D0; padding-bottom: 6px;">
+          🧾 OFFICIAL PAYMENT RECEIPT
+        </div>
+        <div class="receipt-row"><span class="receipt-label">Amount Paid:</span> <span class="receipt-val">₹999 (INR)</span></div>
+        <div class="receipt-row"><span class="receipt-label">Payment Status:</span> <span class="receipt-val">✅ SUCCESSFUL</span></div>
+        <div class="receipt-row"><span class="receipt-label">Razorpay Payment ID:</span> <span class="receipt-val">${paymentId}</span></div>
+        <div class="receipt-row"><span class="receipt-label">Activation Date:</span> <span class="receipt-val">${dateStr}</span></div>
+      </div>
+
+      <div style="background:#FAF6F0; border-left: 4px solid #8A3A1A; padding: 15px; margin: 20px 0;">
+        <div style="font-size: 12px; text-transform: uppercase; color: #8A735E;">Your Live Web Address</div>
+        <div style="font-size: 16px; font-weight: bold; color: #8A3A1A; margin-top: 4px;"><a href="${liveLink}" target="_blank">${liveLink}</a></div>
+        <div style="font-size: 12px; text-transform: uppercase; color: #8A735E; margin-top: 12px;">Your Secret Edit Passcode</div>
+        <div style="margin-top: 4px;"><span class="passcode-badge">${passcode}</span></div>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${liveLink}" target="_blank" class="btn-main">👉 View Live Card</a>
+        <a href="${editLink}" target="_blank" class="btn-secondary">✏️ Manage &amp; Edit Card</a>
+      </div>
+
+      <p style="font-size: 13px; color: #666;">Need to make changes later? You have <strong>unlimited free edits forever</strong>. Simply log in with your email (<code>${invitation.ownerEmail || ""}</code>) and secret passcode (<code>${passcode}</code>).</p>
+    </div>
+
+    <div class="footer">
+      <p>Thank you for choosing GetShaadiLink for your special day! 💍</p>
+      <p>Questions? Contact support at <a href="mailto:support@getshaadilink.in">support@getshaadilink.in</a></p>
+      <p style="margin-top: 15px; font-size: 10px;">&copy; ${currentYear} GetShaadiLink. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// Multi-port SMTP transport helper
+async function sendMailHelper(mailOptions: any) {
   const smtpHost = process.env.SMTP_HOST || "smtp.hostinger.com";
-  const smtpPort = parseInt(process.env.SMTP_PORT || "465", 10);
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
 
   if (!smtpUser || !smtpPass) {
-    console.warn("[Email] Warning: SMTP credentials are not configured in environment variables. Email skipped.");
-    return;
+    console.warn("[Email] Warning: SMTP_USER or SMTP_PASS not set in environment.");
+    return null;
   }
 
+  // Primary: Port 465 (SSL)
+  const primaryTransporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: parseInt(process.env.SMTP_PORT || "465", 10),
+    secure: parseInt(process.env.SMTP_PORT || "465", 10) === 465,
+    auth: { user: smtpUser, pass: smtpPass },
+    tls: { rejectUnauthorized: false },
+  });
+
+  try {
+    const info = await primaryTransporter.sendMail(mailOptions);
+    console.log(`[Email] Sent via Primary Transport (Port 465): ${info.messageId}`);
+    return info;
+  } catch (err: any) {
+    console.warn(`[Email] Primary Transport (Port 465) failed: ${err.message}. Trying Fallback (Port 587)...`);
+    
+    // Fallback: Port 587 (TLS)
+    try {
+      const fallbackTransporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: 587,
+        secure: false,
+        auth: { user: smtpUser, pass: smtpPass },
+        tls: { rejectUnauthorized: false },
+      });
+      const info = await fallbackTransporter.sendMail(mailOptions);
+      console.log(`[Email] Sent via Fallback Transport (Port 587): ${info.messageId}`);
+      return info;
+    } catch (fallbackErr: any) {
+      console.error(`[Email] Both Primary & Fallback SMTP Transports failed:`, fallbackErr.message);
+      return null;
+    }
+  }
+}
+
+// Function to send confirmation email via SMTP
+async function sendConfirmationEmail(invitation: any, appUrl: string) {
   if (!invitation.ownerEmail) {
     console.log("[Email] Skipping confirmation email: No owner email specified.");
     return;
   }
-
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: {
-      user: smtpUser,
-      pass: smtpPass,
-    },
-  });
 
   const liveLink = `${appUrl}/${invitation.slug}`;
   const passcode = invitation.editPassword || "N/A";
   const editLink = `${appUrl}/${invitation.slug}?edit=true&passcode=${encodeURIComponent(passcode)}`;
 
   const mailOptions = {
-    from: `"GetShaadiLink Invitations" <${smtpUser}>`,
+    from: `"GetShaadiLink Invitations" <${process.env.SMTP_USER || "invitations@getshaadilink.in"}>`,
     to: invitation.ownerEmail,
     subject: `Your Digital Wedding Invitation is Live! 💍 (${invitation.bride} & ${invitation.groom})`,
     html: getEmailHtmlTemplate(invitation, liveLink, editLink, passcode),
   };
 
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`[Email] Confirmation sent successfully to ${invitation.ownerEmail}: ${info.messageId}`);
-  } catch (err) {
-    console.error(`[Email] Failed to send confirmation to ${invitation.ownerEmail}:`, err);
+  await sendMailHelper(mailOptions);
+}
+
+// Function to send payment receipt email via SMTP
+async function sendPaymentReceiptEmail(invitation: any, appUrl: string) {
+  if (!invitation.ownerEmail) {
+    console.log("[Email] Skipping payment receipt email: No owner email specified.");
+    return;
   }
+
+  const liveLink = `${appUrl}/${invitation.slug}`;
+  const passcode = invitation.editPassword || "N/A";
+  const editLink = `${appUrl}/${invitation.slug}?edit=true&passcode=${encodeURIComponent(passcode)}`;
+
+  const mailOptions = {
+    from: `"GetShaadiLink Payments" <${process.env.SMTP_USER || "invitations@getshaadilink.in"}>`,
+    to: invitation.ownerEmail,
+    subject: `🎉 Payment Receipt & Premium Activated! (${invitation.bride} & ${invitation.groom})`,
+    html: getPaymentReceiptHtmlTemplate(invitation, liveLink, editLink, passcode),
+  };
+
+  await sendMailHelper(mailOptions);
 }
 
 // API: Generate invitation using Gemini and persist it
