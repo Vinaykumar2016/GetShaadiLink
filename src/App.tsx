@@ -484,8 +484,9 @@ export default function App() {
       });
       const parsed = await res.json();
       if (!res.ok) throw new Error(parsed.error || "Submission failed");
-      setReviewSuccess(parsed.message || "Thank you! Your review is awaiting approval.");
+      setReviewSuccess(parsed.message || "Thank you! Your review is now live on our website.");
       setReviewForm({ name: "", location: "", stars: 5, text: "" });
+      fetchReviews();
     } catch (err: any) {
       alert("Error: " + err.message);
     } finally {

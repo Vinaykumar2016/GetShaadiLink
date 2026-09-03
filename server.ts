@@ -404,12 +404,12 @@ app.post("/api/reviews/submit", rateLimitAuthMiddleware, (req, res) => {
       location: (location || "").trim(),
       stars: starsNum,
       text: text.trim(),
-      status: "pending",
+      status: "approved",
       submittedAt: new Date().toISOString(),
     };
     reviews.push(newReview);
     writeReviews(reviews);
-    res.json({ success: true, message: "Thank you! Your review has been submitted and will appear after approval." });
+    res.json({ success: true, message: "Thank you! Your review has been submitted and is now live on our website." });
   } catch (err) {
     res.status(500).json({ error: "Failed to save review." });
   }
