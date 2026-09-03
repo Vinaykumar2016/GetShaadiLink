@@ -1457,91 +1457,97 @@ export default function App() {
             />
           </motion.section>
 
-          {/* ── TESTIMONIALS SECTION (DYNAMIC & INSTANT) ─────────────────── */}
+          {/* ── TESTIMONIALS CAROUSEL SECTION (SPACE-SAVING & COMPACT) ────────── */}
           <motion.section
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-14 z-10 select-none"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-10 z-10 select-none"
           >
-            <div className="text-center mb-10">
-              <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-2">
-                💬 REAL COUPLES, REAL LOVE
-              </span>
-              <h2 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
-                Couples Who Trusted ShaadiLink
-              </h2>
-              {stats.totalReviews > 0 && (
-                <p className="text-xs text-stone-400 mt-3 font-cormorant">
-                  {stats.totalReviews} verified {stats.totalReviews === 1 ? "review" : "reviews"} · {stats.rating.toFixed(1)} ★ average
-                </p>
-              )}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 text-center sm:text-left">
+              <div>
+                <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-1">
+                  💬 REAL COUPLES, REAL LOVE
+                </span>
+                <h2 className="font-marcellus text-2xl sm:text-3xl font-bold tracking-wider text-white">
+                  Couples Who Trusted ShaadiLink
+                </h2>
+                {stats.totalReviews > 0 && (
+                  <p className="text-xs text-stone-400 mt-1 font-cormorant">
+                    {stats.totalReviews} verified reviews · {stats.rating.toFixed(1)} ★ average rating
+                  </p>
+                )}
+              </div>
+
+              {/* 10% Bigger & Prominent Drop a Review CTA Button */}
+              <button
+                onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
+                className="py-4 px-9 rounded-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-bold text-xs uppercase tracking-widest font-marcellus cursor-pointer active:scale-95 transition-all shadow-xl shadow-amber-500/25 border-2 border-amber-300/40 hover:scale-105 shrink-0"
+              >
+                ✍️ Drop a Review
+              </button>
             </div>
 
-            {liveReviews.length === 0 ? (
-              <div className="flex flex-col items-center gap-6 py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-3xl">
-                  💬
-                </div>
-                <div>
-                  <p className="font-marcellus text-lg font-bold text-white">Drop a Review ✍️</p>
-                  <p className="text-xs text-stone-400 mt-1 max-w-xs font-cormorant">
-                    Have you used ShaadiLink for your wedding? Drop a review and share your experience with us!
-                  </p>
-                </div>
-                <button
-                  onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
-                  className="py-3 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all shadow-lg shadow-amber-500/20"
-                >
-                  ✍️ Drop a Review
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {liveReviews.map((t: any, idx: number) => (
-                    <motion.div
-                      key={t.id}
-                      initial={{ opacity: 0, y: 24 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: (idx % 6) * 0.1 }}
-                      className="testimonial-card p-6 bg-white/5 border border-white/10 rounded-[24px] flex flex-col gap-4 backdrop-blur-md transition-all duration-300 cursor-default hover:border-amber-400/25 hover:bg-white/[0.07]"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-sm font-bold text-amber-400 font-marcellus flex-shrink-0">
-                          {t.name.charAt(0).toUpperCase()}
+            {/* Horizontal Scrollable Carousel Track with Snap & Compact Card Dimensions */}
+            <div className="relative group">
+              <div 
+                id="reviews-scroll-container"
+                className="flex items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 pt-1 px-1 no-scrollbar cursor-grab active:cursor-grabbing snap-x snap-mandatory"
+              >
+                {liveReviews.map((t: any, idx: number) => (
+                  <div
+                    key={t.id || idx}
+                    className="w-[280px] sm:w-[320px] shrink-0 snap-start p-4 sm:p-5 bg-white/5 border border-white/10 hover:border-amber-400/30 rounded-[20px] flex flex-col justify-between backdrop-blur-md transition-all duration-300 hover:bg-white/[0.08]"
+                  >
+                    <div className="flex flex-col gap-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-amber-400/15 border border-amber-400/25 flex items-center justify-center text-xs font-bold text-amber-400 font-marcellus shrink-0">
+                            {t.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-amber-300 font-marcellus leading-tight">{t.name}</p>
+                            {t.location && <p className="text-[9px] text-stone-500 font-marcellus tracking-wider">{t.location}</p>}
+                          </div>
                         </div>
-                        <div className="flex gap-0.5 mt-1">
+                        <div className="flex gap-0.5">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < t.stars ? "fill-amber-400 text-amber-400" : "text-stone-600"}`} />
+                            <Star key={i} className={`w-2.5 h-2.5 ${i < t.stars ? "fill-amber-400 text-amber-400" : "text-stone-600"}`} />
                           ))}
                         </div>
                       </div>
-                      <Quote className="w-5 h-5 text-amber-400/25" />
-                      <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-cormorant italic flex-1">
+
+                      <p className="text-xs text-stone-300/90 leading-relaxed font-cormorant italic line-clamp-3">
                         "{t.text}"
                       </p>
-                      <div className="border-t border-white/8 pt-3">
-                        <p className="text-xs font-bold text-amber-300 font-marcellus">{t.name}</p>
-                        {t.location && <p className="text-[10px] text-stone-500 font-marcellus tracking-wider mt-0.5">{t.location}</p>}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-                {/* Write a review CTA */}
-                <div className="text-center mt-10">
-                  <button
-                    onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
-                    className="py-3 px-8 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 border border-amber-400/30 text-amber-300 font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all shadow-md"
-                  >
-                    ✍️ Drop a Review
-                  </button>
-                </div>
-              </>
-            )}
+              {/* Navigation Arrows for desktop scroll */}
+              <button
+                onClick={() => {
+                  playClickSound();
+                  document.getElementById("reviews-scroll-container")?.scrollBy({ left: -320, behavior: "smooth" });
+                }}
+                className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-900/90 border border-white/20 flex items-center justify-center text-amber-400 hover:text-white hover:bg-amber-500/20 active:scale-95 transition-all shadow-lg hidden sm:flex cursor-pointer"
+                aria-label="Previous review"
+              >
+                ←
+              </button>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  document.getElementById("reviews-scroll-container")?.scrollBy({ left: 320, behavior: "smooth" });
+                }}
+                className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-stone-900/90 border border-white/20 flex items-center justify-center text-amber-400 hover:text-white hover:bg-amber-500/20 active:scale-95 transition-all shadow-lg hidden sm:flex cursor-pointer"
+                aria-label="Next review"
+              >
+                →
+              </button>
+            </div>
           </motion.section>
 
           {/* SALES FEATURES PERSUASIVE GRID */}
