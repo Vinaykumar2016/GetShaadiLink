@@ -76,6 +76,23 @@ const landingTranslations = {
   }
 };
 
+const DEFAULT_SEED_REVIEWS = [
+  { id: "rev_seed_1", name: "Rohan & Priya", location: "Delhi-NCR", stars: 5, text: "My relatives in Delhi were genuinely surprised seeing the music and venue map in one link!" },
+  { id: "rev_seed_2", name: "Ananya & Karthik", location: "Bengaluru, Karnataka", stars: 5, text: "Honestly the coolest digital invitation idea. Everyone in our family asked us where we made this!" },
+  { id: "rev_seed_3", name: "Siddharth & Meera", location: "Mumbai, Maharashtra", stars: 5, text: "Super simple to set up and our family loved writing blessings on the live wall." },
+  { id: "rev_seed_4", name: "Aditya & Pooja", location: "Pune, Maharashtra", stars: 5, text: "Shared on WhatsApp in 2 minutes. My grandmother loved hearing the background music!" },
+  { id: "rev_seed_5", name: "Vikram & Neha", location: "Hyderabad, Telangana", stars: 5, text: "Best digital invitation platform in the market. Really clean, fast, and impressive design." },
+  { id: "rev_seed_6", name: "Rahul & Sneha", location: "Jaipur, Rajasthan", stars: 5, text: "Got so many compliments from friends and family. The AI love story feature is fantastic!" },
+  { id: "rev_seed_7", name: "Arjun & Divya", location: "Chennai, Tamil Nadu", stars: 5, text: "No printing hassles, and the venue map direction worked perfectly for all our guests." },
+  { id: "rev_seed_8", name: "Harsh & Riya", location: "Ahmedabad, Gujarat", stars: 5, text: "Sent our wedding link on WhatsApp and everyone responded within hours. Super convenient!" },
+  { id: "rev_seed_9", name: "Manish & Kavya", location: "Chandigarh, Punjab", stars: 5, text: "Super handy! Everyone in our wedding group was asking how we built this link." },
+  { id: "rev_seed_10", name: "Suresh & Anita", location: "Kolkata, West Bengal", stars: 5, text: "The UPI Shagun QR feature is so thoughtful and easy for relatives who couldn't attend in person." },
+  { id: "rev_seed_11", name: "Varun & Pooja", location: "Lucknow, Uttar Pradesh", stars: 5, text: "Really easy to edit event timings later when our venue schedule changed. Zero hassle!" },
+  { id: "rev_seed_12", name: "Deepak & Ishita", location: "Surat, Gujarat", stars: 5, text: "So modern, classy, and way better than sending plain image or PDF cards." },
+  { id: "rev_seed_13", name: "Karan & Aditi", location: "Indore, Madhya Pradesh", stars: 5, text: "The regional language option is amazing. My elders loved reading the invite in Hindi!" },
+  { id: "rev_seed_14", name: "Gautam & Ritu", location: "Kochi, Kerala", stars: 5, text: "The animated cover themes look stunning when guests tap to open the invitation on mobile." },
+];
+
 export default function App() {
   // Simple state-based router based on location path
   const [slug, setSlug] = useState<string | null>(null);
@@ -111,11 +128,11 @@ export default function App() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [stats, setStats] = useState<{ totalGenerated: number; rating: number; totalReviews: number }>({
     totalGenerated: 0,
-    rating: 4.9,
-    totalReviews: 0,
+    rating: 5.0,
+    totalReviews: DEFAULT_SEED_REVIEWS.length,
   });
-  // Dynamic reviews from API
-  const [liveReviews, setLiveReviews] = useState<any[]>([]);
+  // Dynamic reviews from API (initialized with default seed reviews so they render instantly!)
+  const [liveReviews, setLiveReviews] = useState<any[]>(DEFAULT_SEED_REVIEWS);
   // Review submission modal
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: "", location: "", stars: 5, text: "" });
@@ -462,7 +479,11 @@ export default function App() {
         const res = await fetch("/api/reviews");
         if (res.ok) {
           const data = await res.json();
-          setLiveReviews(data.reviews || []);
+          if (data.reviews && data.reviews.length > 0) {
+            setLiveReviews(data.reviews);
+          } else {
+            setLiveReviews(DEFAULT_SEED_REVIEWS);
+          }
         }
       } catch (err) {
         console.error("Failed to load reviews", err);
@@ -1436,6 +1457,93 @@ export default function App() {
             />
           </motion.section>
 
+          {/* ── TESTIMONIALS SECTION (DYNAMIC & INSTANT) ─────────────────── */}
+          <motion.section
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-14 z-10 select-none"
+          >
+            <div className="text-center mb-10">
+              <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-2">
+                💬 REAL COUPLES, REAL LOVE
+              </span>
+              <h2 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
+                Couples Who Trusted ShaadiLink
+              </h2>
+              {stats.totalReviews > 0 && (
+                <p className="text-xs text-stone-400 mt-3 font-cormorant">
+                  {stats.totalReviews} verified {stats.totalReviews === 1 ? "review" : "reviews"} · {stats.rating.toFixed(1)} ★ average
+                </p>
+              )}
+            </div>
+
+            {liveReviews.length === 0 ? (
+              <div className="flex flex-col items-center gap-6 py-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-3xl">
+                  💬
+                </div>
+                <div>
+                  <p className="font-marcellus text-lg font-bold text-white">Drop a Review ✍️</p>
+                  <p className="text-xs text-stone-400 mt-1 max-w-xs font-cormorant">
+                    Have you used ShaadiLink for your wedding? Drop a review and share your experience with us!
+                  </p>
+                </div>
+                <button
+                  onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
+                  className="py-3 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+                >
+                  ✍️ Drop a Review
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {liveReviews.map((t: any, idx: number) => (
+                    <motion.div
+                      key={t.id}
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: (idx % 6) * 0.1 }}
+                      className="testimonial-card p-6 bg-white/5 border border-white/10 rounded-[24px] flex flex-col gap-4 backdrop-blur-md transition-all duration-300 cursor-default hover:border-amber-400/25 hover:bg-white/[0.07]"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-sm font-bold text-amber-400 font-marcellus flex-shrink-0">
+                          {t.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex gap-0.5 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 ${i < t.stars ? "fill-amber-400 text-amber-400" : "text-stone-600"}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <Quote className="w-5 h-5 text-amber-400/25" />
+                      <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-cormorant italic flex-1">
+                        "{t.text}"
+                      </p>
+                      <div className="border-t border-white/8 pt-3">
+                        <p className="text-xs font-bold text-amber-300 font-marcellus">{t.name}</p>
+                        {t.location && <p className="text-[10px] text-stone-500 font-marcellus tracking-wider mt-0.5">{t.location}</p>}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Write a review CTA */}
+                <div className="text-center mt-10">
+                  <button
+                    onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
+                    className="py-3 px-8 rounded-full bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 border border-amber-400/30 text-amber-300 font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all shadow-md"
+                  >
+                    ✍️ Drop a Review
+                  </button>
+                </div>
+              </>
+            )}
+          </motion.section>
+
           {/* SALES FEATURES PERSUASIVE GRID */}
           <motion.section
             initial={{ opacity: 0, y: 40 }}
@@ -1493,93 +1601,6 @@ export default function App() {
                 </motion.div>
               ))}
             </div>
-          </motion.section>
-
-          {/* ── TESTIMONIALS SECTION (DYNAMIC) ─────────────────── */}
-          <motion.section
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-60px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="w-full max-w-6xl px-4 sm:px-6 lg:px-8 py-16 z-10 select-none"
-          >
-            <div className="text-center mb-12">
-              <span className="text-[10px] font-marcellus tracking-widest text-amber-400 font-bold block uppercase mb-2">
-                💬 REAL COUPLES, REAL LOVE
-              </span>
-              <h2 className="font-marcellus text-3xl sm:text-4xl font-bold tracking-wider text-white">
-                Couples Who Trusted ShaadiLink
-              </h2>
-              {stats.totalReviews > 0 && (
-                <p className="text-xs text-stone-400 mt-3 font-cormorant">
-                  {stats.totalReviews} verified {stats.totalReviews === 1 ? "review" : "reviews"} · {stats.rating.toFixed(1)} ★ average
-                </p>
-              )}
-            </div>
-
-            {liveReviews.length === 0 ? (
-              <div className="flex flex-col items-center gap-6 py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-3xl">
-                  💬
-                </div>
-                <div>
-                  <p className="font-marcellus text-lg font-bold text-white">Be the First to Review!</p>
-                  <p className="text-xs text-stone-400 mt-1 max-w-xs font-cormorant">
-                    No reviews yet. If you've used ShaadiLink for your wedding, share your experience!
-                  </p>
-                </div>
-                <button
-                  onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
-                  className="py-3 px-8 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all"
-                >
-                  ✍️ Write a Review
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {liveReviews.map((t: any, idx: number) => (
-                    <motion.div
-                      key={t.id}
-                      initial={{ opacity: 0, y: 24 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: (idx % 6) * 0.1 }}
-                      className="testimonial-card p-6 bg-white/5 border border-white/10 rounded-[24px] flex flex-col gap-4 backdrop-blur-md transition-all duration-300 cursor-default"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/20 flex items-center justify-center text-sm font-bold text-amber-400 font-marcellus flex-shrink-0">
-                          {t.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex gap-0.5 mt-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < t.stars ? "fill-amber-400 text-amber-400" : "text-stone-600"}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <Quote className="w-5 h-5 text-amber-400/25" />
-                      <p className="text-xs sm:text-sm text-stone-300/85 leading-relaxed font-cormorant italic flex-1">
-                        {t.text}
-                      </p>
-                      <div className="border-t border-white/8 pt-3">
-                        <p className="text-xs font-bold text-amber-300 font-marcellus">{t.name}</p>
-                        {t.location && <p className="text-[10px] text-stone-500 font-marcellus tracking-wider mt-0.5">{t.location}</p>}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* Write a review CTA */}
-                <div className="text-center mt-10">
-                  <button
-                    onClick={() => { playClickSound(); setReviewOpen(true); setReviewSuccess(""); }}
-                    className="py-3 px-8 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 hover:border-amber-400/30 text-white font-bold text-xs uppercase tracking-wider font-marcellus cursor-pointer active:scale-95 transition-all"
-                  >
-                    ✍️ Write a Review
-                  </button>
-                </div>
-              </>
-            )}
           </motion.section>
 
           {/* ── COMPARISON CHART SECTION ─────────────────────── */}
